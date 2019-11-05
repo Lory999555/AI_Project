@@ -35,7 +35,7 @@ public class GraphVizPrinter {
 	 * Add a Conf to the graph.
 	 * @param state The Conf to add. 
 	 */
-	public static void setConf(Conf c) {
+	public static void setState(Conf c) {
 		gv.addln(getId(c)+ " [label=\"" + c.toString().replaceAll("\n", "\\\\n") + "\", shape=box, fontname=Courier];");
 	}
 	
@@ -109,8 +109,8 @@ public class GraphVizPrinter {
 	private static String getId(Conf s) {
 		StringBuilder sb = new StringBuilder();
 		sb.append(s.identifier());
-		if (s.getParentConf() != null) {
-			sb.append(s.getParentConf().identifier());
+		if (s.getParentState() != null) {
+			sb.append(s.getParentState().identifier());
 		}
 		return sb.toString();
 	}
