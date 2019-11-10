@@ -17,7 +17,7 @@ public interface Conf {
 	 * @return A List of possible Actions we can take at this State.
 	 */
 	@SuppressWarnings("rawtypes")
-	public List<Action> getActions();
+	public List<Move> getActions();
 
 	/**
 	 * The estimated value of this State. Higher is better for the first player;

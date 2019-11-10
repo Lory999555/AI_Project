@@ -1,6 +1,6 @@
 package representation;
 
-public interface Action {
+public interface Move {
 
 	public boolean validOn(Conf input);
 

@@ -1,9 +1,9 @@
 package converter;
 
-import representation.Action;
+import representation.Move;
 
 public interface ConverterSignal {
 	
-	public String generatePacket(Action a);
+	public String generatePacket(Move a);
 
 }
