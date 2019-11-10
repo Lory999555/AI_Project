@@ -21,7 +21,7 @@ public interface Conf {
 
 	/**
 	 * The estimated value of this State. Higher is better for the first player;
-	 * lower for the second.
+	 * lower for the second. 
 	 * 
 	 * @return The estimated value of this State.
 	 */
