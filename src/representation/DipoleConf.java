@@ -147,7 +147,7 @@ public class DipoleConf implements Conf {
 	}
 
 	@Override
-	public List<Action> getActions() {
+	public List<Move> getActions() {
 		// TODO Auto-generated method stub
 		return null;
 	}
