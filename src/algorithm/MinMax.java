@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 import logger.GraphVizPrinter;
-import representation.Action;
+import representation.Move;
 import representation.Conf;
 import representation.Conf.Status;
 import representation.InvalidActionException;
@@ -38,6 +38,8 @@ public class MinMax implements AlgorithmInterface {
 	}
 
 	/**
+	 * 
+	 * 
 	 * Decide which state to go into. We manually MiniMax the first layer so we can
 	 * figure out which heuristic is from which Action. Also, we want to be able to
 	 * choose randomly between equally good options. "I'm the decider, and I decide
@@ -48,15 +50,15 @@ public class MinMax implements AlgorithmInterface {
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Override
-	public Action compute(Conf conf) {
+	public Move compute(Conf conf) {
 		if (DEBUG)
 			GraphVizPrinter.setState(conf);
 		// Choose randomly between equally good options
 		float value = maximize ? Float.NEGATIVE_INFINITY : Float.POSITIVE_INFINITY;
-		List<Action> bestActions = new ArrayList<Action>();
+		List<Move> bestActions = new ArrayList<Move>();
 		// Iterate!
 		int flag = maximize ? 1 : -1;
-		for (Action action : conf.getActions()) {
+		for (Move action : conf.getActions()) {
 			try {
 				// Algorithm!
 				Conf newState = action.applyTo(conf);
@@ -111,19 +113,19 @@ public class MinMax implements AlgorithmInterface {
 			GraphVizPrinter.setState(state);
 		// Is this state done?
 		if (state.getStatus() != Status.Ongoing)
-			return finalize(state, state.heuristic());
+			return finalize(state, state.heuristic()); //return state.heuristic() e basta?
 		// Have we reached the end of the line?
 		if (depth == this.depth)
 			return state.heuristic();
 		// If not, recurse further. Identify the best actions to take.
 		float value = maximize ? Float.NEGATIVE_INFINITY : Float.POSITIVE_INFINITY;
 		int flag = maximize ? 1 : -1;
-		List<Action> test = state.getActions();
-		for (Action action : test) {
+		List<Move> test = state.getActions();
+		for (Move action : test) {
 			// Check it. Is it better? If so, keep it.
 			try {
 				Conf childState = action.applyTo(state);
-				float newValue = this.miniMaxRecursor(childState, alpha, beta, depth + 1, !maximize);
+				float newValue = this.miniMaxRecursor(childState, alpha, beta, depth + 1, !maximize); //rendere iterativo
 				if (DEBUG)
 					GraphVizPrinter.setRelation(childState, newValue, state);
 				if (flag * newValue > flag * value)

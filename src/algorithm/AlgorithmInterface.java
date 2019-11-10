@@ -1,10 +1,10 @@
 package algorithm;
 
 import representation.Conf;
-import representation.Action;
+import representation.Move;
 
 public interface AlgorithmInterface {
 	
-	public Action compute(Conf conf);
+	public Move compute(Conf conf);
 
 }
