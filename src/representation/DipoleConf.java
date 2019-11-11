@@ -10,11 +10,22 @@ public class DipoleConf implements Conf {
 	 * private long p9=0; private long p10=0; private long p11=0; private long
 	 * p12=0;
 	 */
+	
+	private long moves;
+	
+	private long frontAttack;
+	private long backAttack;
+	private long merge;
+	private long death;
+	private long quietMove;
+	
 	private long pBlack;
 	private long pRed;
 	private long FLAG;
 	private long[] pieces = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-
+	
+	
+	//Configurazione inzio partita
 	public DipoleConf(String colour) {
 
 		this.pieces[11] = 0x1000000000000008L;
@@ -49,6 +60,10 @@ public class DipoleConf implements Conf {
 		return x;
 	}
 
+	private void allMove(){
+		
+	}
+	
 	// Ritorna la rosa di azione della pedina presa in considerazione
 	private long getRose(long square, int type, long mine, long opponent) {
 
@@ -67,6 +82,7 @@ public class DipoleConf implements Conf {
 			int type) {
 		long notFreeSquare = opponent;
 		long ret = 0;
+		long tmp =0;
 		int cont = addMove - 1;
 		while ((square & border) == 0 && cont < type) {
 			if (shift > 0) {
@@ -76,7 +92,8 @@ public class DipoleConf implements Conf {
 			}
 			notFreeSquare ^= pieces[cont] & (~mine);
 			cont += addMove;
-			ret |= square;
+			tmp =square^(square & notFreeSquare);
+			ret |= tmp;
 		}
 		ret ^= (ret & notFreeSquare);
 		return ret;
