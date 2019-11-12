@@ -1,5 +1,6 @@
 package representation;
 
+import java.util.LinkedList;
 import java.util.List;
 
 public class DipoleConf implements Conf {
@@ -15,7 +16,7 @@ public class DipoleConf implements Conf {
 	
 	private long frontAttack;
 	private long backAttack;
-	private long merge;
+	//private long merge;
 	private long death;
 	private long quietMove;
 	
@@ -23,6 +24,7 @@ public class DipoleConf implements Conf {
 	private long pRed;
 	private long FLAG;
 	private long[] pieces = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+	static long blackSquare= 0x55aa55aa55aa55aaL;
 	
 	
 	//Configurazione inzio partita
@@ -39,7 +41,7 @@ public class DipoleConf implements Conf {
 
 	}
 
-	// ruota la bitboard di 180 gradi
+	//ruota la bitboard di 180 gradi
 	public long flip180(long x) {
 
 		// flipping vertically
@@ -60,10 +62,95 @@ public class DipoleConf implements Conf {
 		return x;
 	}
 
-	private void allMove(){
+	
+	private long rankMask(int sq) {return  0xffL << (sq & 56);}
+
+	private long fileMask(int sq) {return 0x0101010101010101L << (sq & 7);}
+
+	private long diagonalMask(int sq) {
+	   long  maindia = 0x8040201008040201L;
+	   int diag =8*(sq & 7) - (sq & 56);
+	   int nort = -diag & ( diag >> 31);
+	   int sout =  diag & (-diag >> 31);
+	   return (maindia >>> sout) << nort;
+	}
+
+	private long antiDiagMask(int sq) {
+	   long maindia = 0x0102040810204080L;
+	   int diag =56- 8 * (sq & 7) - (sq & 56);
+	   int nort = -diag & ( diag >> 31);
+	   int sout =  diag & (-diag >> 31);
+	   return (maindia >>> sout) << nort;
+	}
+	
+	private long getRose2(int sq) {
+		return rankMask(sq) | fileMask(sq) | diagonalMask(sq) | antiDiagMask(sq);
+	}
+	
+	
+	//////la morte si può realizzare senza utilizzare una bitboard ma incrementando un contatore una volta che la linea arriva ai bordi. 
+	private long removeImpossibleMove(long rose,int sq, long opponent, long mine, int type,long [] pieces) {
+		long notFree = opponent;
+		long ovest = fileMask(sq);
+		long est = ovest;
+		long sud = rankMask(sq);
+		long nord = sud;
+		long tmp=0;
+		int cont=0;
+		while(cont < type) {
+			ovest <<= 1;
+			est >>>= 1;
+			sud >>>= 8;
+	   		nord <<= 8;   		
+	   		notFree ^= pieces[cont] & (~mine);
+	   		tmp |= notFree & ovest; 
+	   		tmp |= notFree & est; 
+	   		tmp |= notFree & sud; 
+	   		tmp |= notFree & nord; 
+	   		ovest ^= ovest & Board.b_l;
+	   		est ^= est & Board.b_r;
+	   		sud ^= sud & Board.b_d;
+	   		nord ^= nord & Board.b_u;
+	   		cont++;
+		}
+		while (cont <8) {
+			ovest <<= 1;			
+			est >>>= 1;		
+			sud >>>= 8;
+	   		nord <<= 8;	
+	   		tmp |= rose & ovest; 
+	   		tmp |= rose & est; 
+	   		tmp |= rose & sud; 
+	   		tmp |= rose & nord;
+	   		ovest ^= ovest & Board.b_l;
+	   		est ^= est & Board.b_r;
+	   		sud ^= sud & Board.b_d;
+	   		nord ^= nord & Board.b_u;
+	   		cont++;
+		}
+		return rose^tmp;
+	}
+	
+	private void allMoves(long x, long opponent, long mines, int type, long [] pieces) {
+		int sq= getSquare(x);
+		long rose = getRose2(sq);
+		rose = removeImpossibleMove(rose & blackSquare ^ x,sq, opponent, mines, type, pieces);
+		long backMask = x ^ (x-1);
+		backMask |= rankMask(sq);
+		backMask = backMask & rose;
+		backAttack = backMask & opponent;
+		long frontMask = backMask ^ rose;
+		frontAttack = frontMask & opponent;
+		quietMove = frontMask ^ frontAttack;
+		moves = backAttack | frontAttack | quietMove;
+		//backAttack = getBackAttack(rose, pBlack, sq, x);	
 		
 	}
 	
+	
+	
+	
+	/*
 	// Ritorna la rosa di azione della pedina presa in considerazione
 	private long getRose(long square, int type, long mine, long opponent) {
 
@@ -98,15 +185,23 @@ public class DipoleConf implements Conf {
 		ret ^= (ret & notFreeSquare);
 		return ret;
 	}
-
-	// Ritorna la posizione esatta del pedone sottoforma di stringa (ES A8) a
-	// partire da una bitboard
-	public String DeBruijn(int position) {
+	*/
+	
+	
+	
+	// ritorna il numero della casella in cui è posizionato il pedone
+	public int getSquare(long position) {
 
 		long b = position ^ (position - 1);
 		int fold = (int) (b ^ (b >>> 32));
+		return Board.BIT_TABLE[(fold * 0x783a9b23) >>> 26];
+	}
+	
+	// Ritorna la posizione esatta del pedone sottoforma di stringa (ES A8) a
+	// partire da una bitboard
+	public String DeBruijn(long position) {
 
-		return Board.SQUARE_NAMES[Board.BIT_TABLE[(fold * 0x783a9b23) >>> 26]];
+		return Board.SQUARE_NAMES[getSquare(position)];
 
 	}
 
@@ -165,7 +260,27 @@ public class DipoleConf implements Conf {
 
 	@Override
 	public List<Move> getActions() {
-		// TODO Auto-generated method stub
+		long pawn;
+		long mines;
+		List<Move> actions = new LinkedList<Move>();
+		if(FLAG == -1) {
+			mines = pRed;
+			while(mines != 0) {
+				pawn = mines & -mines;
+				mines ^= pawn;
+				int cont=0;
+				while(cont < 12) {
+					if((pawn & pieces[cont]) != 0) {
+						break;
+					}
+					cont ++;
+				}
+				allMoves(pawn, pBlack, pRed, cont, pieces);
+				
+			};  
+		} else {
+			
+		}
 		return null;
 	}
 
