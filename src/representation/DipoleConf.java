@@ -1,6 +1,9 @@
 package representation;
 
+import java.util.LinkedList;
 import java.util.List;
+
+import representation.DipoleMove.typeMove;
 
 public class DipoleConf implements Conf {
 
@@ -15,55 +18,141 @@ public class DipoleConf implements Conf {
 	
 	private long frontAttack;
 	private long backAttack;
-	private long merge;
+	//private long merge;
 	private long death;
 	private long quietMove;
 	
 	private long pBlack;
 	private long pRed;
-	private long FLAG;
+	private boolean BLACK;
 	private long[] pieces = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+	static long blackSquare= 0x55aa55aa55aa55aaL;
 	
 	
 	//Configurazione inzio partita
-	public DipoleConf(String colour) {
+	public DipoleConf(String color) {
 
 		this.pieces[11] = 0x1000000000000008L;
-		this.pBlack = 0x8;
-		this.pRed = 0x1000000000000000L;
-		if (colour == "BLACK") {
-			this.FLAG = 1;
+		this.pRed = 0x8;
+		this.pBlack = 0x1000000000000000L;
+		if (color == "BLACK") {
+			this.BLACK = true;
 		} else {
-			this.FLAG = -1;
+			this.BLACK = false;
 		}
 
-	}
-
-	// ruota la bitboard di 180 gradi
+	} 
+ 
+	//ruota la bitboard di 180 gradi
 	public long flip180(long x) {
 
 		// flipping vertically
 		long k1 = 0x00FF00FF00FF00FFL;
 		long k2 = 0x0000FFFF0000FFFFL;
-		x = ((x >> 8) & k1) | ((x & k1) << 8);
-		x = ((x >> 16) & k2) | ((x & k2) << 16);
-		x = (x >> 32) | (x << 32);
+		x = ((x >>> 8) & k1) | ((x & k1) << 8);
+		x = ((x >>> 16) & k2) | ((x & k2) << 16);
+		x = (x >>> 32) | (x << 32);
 
 		// mirroring horizontally
 		long k3 = 0x5555555555555555L;
 		long k4 = 0x3333333333333333L;
 		long k5 = 0x0f0f0f0f0f0f0f0fL;
-		x = ((x >> 1) & k3) + 2 * (x & k3);
-		x = ((x >> 2) & k4) + 4 * (x & k4);
-		x = ((x >> 4) & k5) + 16 * (x & k5);
+		x = ((x >>> 1) & k3) + 2 * (x & k3);
+		x = ((x >>> 2) & k4) + 4 * (x & k4);
+		x = ((x >>> 4) & k5) + 16 * (x & k5);
 
 		return x;
 	}
 
-	private void allMove(){
+	
+	private long rankMask(int sq) {return  0xffL << (sq & 56);}
+
+	private long fileMask(int sq) {return 0x0101010101010101L << (sq & 7);}
+
+	private long diagonalMask(int sq) {
+	   long  maindia = 0x8040201008040201L;
+	   int diag =8*(sq & 7) - (sq & 56);
+	   int nort = -diag & ( diag >> 31);
+	   int sout =  diag & (-diag >> 31);
+	   return (maindia >>> sout) << nort;
+	}
+
+	private long antiDiagMask(int sq) {
+	   long maindia = 0x0102040810204080L;
+	   int diag =56- 8 * (sq & 7) - (sq & 56);
+	   int nort = -diag & ( diag >> 31);
+	   int sout =  diag & (-diag >> 31);
+	   return (maindia >>> sout) << nort;
+	}
+	
+	private long getRose2(int sq) {
+		return rankMask(sq) | fileMask(sq) | diagonalMask(sq) | antiDiagMask(sq);
+	}
+	
+	
+	//////la morte si può realizzare senza utilizzare una bitboard ma incrementando un contatore una volta che la linea arriva ai bordi. 
+	private long removeImpossibleMove(long rose,int sq, long opponent, long mine, int type,long [] pieces) {
+		long notFree = opponent;
+		long ovest = fileMask(sq);
+		long est = ovest;
+		long sud = rankMask(sq);
+		long nord = sud;
+		long tmp=0;
+		int cont=0;
+		while(cont < type) {
+			ovest <<= 1;
+			est >>>= 1;
+			sud >>>= 8;
+	   		nord <<= 8;   		
+	   		notFree ^= pieces[cont] & (~mine);
+	   		tmp |= notFree & ovest; 
+	   		tmp |= notFree & est; 
+	   		tmp |= notFree & sud; 
+	   		tmp |= notFree & nord; 
+	   		ovest ^= ovest & Board.b_l;
+	   		est ^= est & Board.b_r;
+	   		sud ^= sud & Board.b_d;
+	   		nord ^= nord & Board.b_u;
+	   		cont++;
+		}
+		while (cont <8) {
+			ovest <<= 1;			
+			est >>>= 1;		
+			sud >>>= 8;
+	   		nord <<= 8;	
+	   		tmp |= rose & ovest; 
+	   		tmp |= rose & est; 
+	   		tmp |= rose & sud; 
+	   		tmp |= rose & nord;
+	   		ovest ^= ovest & Board.b_l;
+	   		est ^= est & Board.b_r;
+	   		sud ^= sud & Board.b_d;
+	   		nord ^= nord & Board.b_u;
+	   		cont++;
+		}
+		return rose^(rose & tmp);
+	}
+	
+	private void allMoves(long x, long opponent, long mines, int type, long [] pieces) {
+		int sq= getSquare(x);
+		long rose = getRose2(sq);
+		rose = removeImpossibleMove(rose & blackSquare ^ x,sq, opponent, mines, type, pieces);
+		long backMask = x ^ (x-1);
+		backMask |= rankMask(sq);
+		backMask = backMask & rose;
+		backAttack = backMask & opponent;
+		long frontMask = backMask ^ rose;
+		frontAttack = frontMask & opponent;
+		quietMove = frontMask ^ frontAttack;
+		moves = backAttack | frontAttack | quietMove;
+		//backAttack = getBackAttack(rose, pBlack, sq, x);	
 		
 	}
 	
+	
+	
+	
+	/*
 	// Ritorna la rosa di azione della pedina presa in considerazione
 	private long getRose(long square, int type, long mine, long opponent) {
 
@@ -98,15 +187,23 @@ public class DipoleConf implements Conf {
 		ret ^= (ret & notFreeSquare);
 		return ret;
 	}
-
-	// Ritorna la posizione esatta del pedone sottoforma di stringa (ES A8) a
-	// partire da una bitboard
-	public String DeBruijn(int position) {
+	*/
+	
+	
+	
+	// ritorna il numero della casella in cui è posizionato il pedone
+	public int getSquare(long position) {
 
 		long b = position ^ (position - 1);
 		int fold = (int) (b ^ (b >>> 32));
+		return Board.BIT_TABLE[(fold * 0x783a9b23) >>> 26];
+	}
+	
+	// Ritorna la posizione esatta del pedone sottoforma di stringa (ES A8) a
+	// partire da una bitboard
+	public String DeBruijn(long position) {
 
-		return Board.SQUARE_NAMES[Board.BIT_TABLE[(fold * 0x783a9b23) >>> 26]];
+		return Board.SQUARE_NAMES[getSquare(position)];
 
 	}
 
@@ -165,8 +262,86 @@ public class DipoleConf implements Conf {
 
 	@Override
 	public List<Move> getActions() {
-		// TODO Auto-generated method stub
-		return null;
+		long pawn;
+		long mines;
+		List<Move> actions = new LinkedList<Move>();
+		if(!BLACK) {
+			mines = pRed;
+			while(mines != 0) {
+				pawn = mines & -mines;
+				mines ^= pawn;
+				int selectType=0;
+				while(selectType < 12) {
+					if((pawn & pieces[selectType]) != 0) {
+						break;
+					}
+					selectType ++;
+				}
+				allMoves(pawn, pBlack, pRed, selectType, pieces);
+				long temp;
+				while(backAttack!=0) {
+					temp = backAttack & -backAttack;
+					backAttack ^= temp;
+					actions.add(new DipoleMove(pawn,temp,selectType,BLACK,typeMove.BACKATTACK));
+				}
+				while(frontAttack!=0) {
+					temp = frontAttack & -frontAttack;
+					frontAttack ^= temp;
+					actions.add(new DipoleMove(pawn,temp,selectType,BLACK,typeMove.FRONTATTACK));
+				}
+				while(quietMove!=0) {
+					temp = quietMove & -quietMove;
+					quietMove ^= temp;
+					actions.add(new DipoleMove(pawn,temp,selectType,BLACK,typeMove.QUIETMOVE));
+				}	
+			}
+			return actions;
+		} else {
+		  long [] pieces180 = new long [12];
+		  long pBlack180;
+		  long pRed180;
+		  int cont = 0;
+		  while(cont < 12) {
+			  pieces180[cont] = flip180(pieces[cont]);
+			  cont ++;
+		  }
+		  pBlack180 = flip180(pBlack);
+		  pRed180 = flip180(pRed);
+		  mines = pRed;
+			while(mines != 0) {
+				pawn = mines & -mines;
+				mines ^= pawn;
+				int selectType=0;
+				while(selectType < 12) {
+					if((pawn & pieces[selectType]) != 0) {
+						break;
+					}
+					selectType ++;
+				}
+				allMoves(pawn, pBlack, pRed, selectType, pieces);
+				backAttack = flip180(backAttack);
+				frontAttack = flip180(frontAttack);
+				quietMove = flip180(quietMove);
+				pawn = flip180(pawn);
+				long temp;
+				while(backAttack!=0) {
+					temp = backAttack & -backAttack;
+					backAttack ^= temp;
+					actions.add(new DipoleMove(pawn,temp,selectType,BLACK,typeMove.BACKATTACK));
+				}
+				while(frontAttack!=0) {
+					temp = frontAttack & -frontAttack;
+					frontAttack ^= temp;
+					actions.add(new DipoleMove(pawn,temp,selectType,BLACK,typeMove.FRONTATTACK));
+				}
+				while(quietMove!=0) {
+					temp = quietMove & -quietMove;
+					quietMove ^= temp;
+					actions.add(new DipoleMove(pawn,temp,selectType,BLACK,typeMove.QUIETMOVE));
+				}	
+			}
+			return actions;
+		}
 	}
 
 	@Override
