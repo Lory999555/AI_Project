@@ -7,6 +7,11 @@ public interface Conf {
 	public enum Status {
 		PlayerOneWon, PlayerTwoWon, Draw, Ongoing
 	}
+	/**
+	 * return all representation of configuration
+	 * @return a list of bitboard that represent the actual configuration.
+	 */
+	public long[] getConf();
 
 	/**
 	 * Get the Actions we can take at this State of the game. Ordering should

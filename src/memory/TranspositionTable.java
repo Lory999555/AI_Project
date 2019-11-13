@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 
+import representation.Conf;
 import ut.veikotiit.checkers.bitboard.BitBoard;
 import ut.veikotiit.checkers.bitboard.BitUtil;
 
@@ -14,29 +15,21 @@ public class TranspositionTable {
   private final static int BLACK_PIECE = 2;
   private final static int BLACK_KING = 3;
 
-  private final static long[] randomBitstrings = new long[200];
+  private final Map<Conf, CachedValue> map = new HashMap<>();
 
-  static {
-    Random random = new Random(58139);
-    for (int i = 0; i < 200; i++) {
-      randomBitstrings[i] = random.nextLong();
-    }
+  public void put(Conf conf_hash, CachedValue cachedValue) {
+    map.put(conf_hash, cachedValue);
   }
 
-  private final Map<Long, CachedValue> map = new HashMap<>();
-
-  public void put(BitBoard board, CachedValue cachedValue) {
-    map.put(calculateHash(board), cachedValue);
-  }
-
-  public CachedValue get(BitBoard bitBoard) {
-    return map.get(calculateHash(bitBoard));
+  public CachedValue get(Conf conf_hash) {
+    return map.get(conf_hash);
   }
 
   public void clear() {
     map.clear();
   }
 
+  /*
   private long calculateHash(BitBoard bitBoard) {
     long hash = 0;
     for (int bit : BitUtil.longToBits(bitBoard.getWhiteRegularPieces())) {
@@ -53,4 +46,5 @@ public class TranspositionTable {
     }
     return hash;
   }
+  */
 }

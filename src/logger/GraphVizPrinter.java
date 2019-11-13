@@ -33,7 +33,7 @@ public class GraphVizPrinter {
 	
 	/**
 	 * Add a Conf to the graph.
-	 * @param state The Conf to add. 
+	 * @param conf The Conf to add. 
 	 */
 	public static void setState(Conf c) {
 		gv.addln(getId(c)+ " [label=\"" + c.toString().replaceAll("\n", "\\\\n") + "\", shape=box, fontname=Courier];");
@@ -41,7 +41,7 @@ public class GraphVizPrinter {
 	
 	/**
 	 * Add a Conf to the graph.
-	 * @param state The Conf to add. 
+	 * @param conf The Conf to add. 
 	 */
 	public static void setCached(Conf s) {
 		gv.addln(getId(s) + " [style=filled,fillcolor=green];");

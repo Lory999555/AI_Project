@@ -12,6 +12,14 @@ public interface Move {
 	 * @throws InvalidActionException Some Actions can't be applied to some States.
 	 */
 	public Conf applyTo(Conf input) throws InvalidActionException;
+	
+	/**
+	 * 
+	 * 
+	 * 
+	 * @return
+	 */
+	public int getValue();
 
 	/**
 	 * For traces, we need to be able to print out a String representation of this
