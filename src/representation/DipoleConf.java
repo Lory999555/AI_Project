@@ -374,4 +374,10 @@ public class DipoleConf implements Conf {
 		return null;
 	}
 
+	@Override
+	public long[] getConf() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }
