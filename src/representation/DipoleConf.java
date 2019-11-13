@@ -3,6 +3,8 @@ package representation;
 import java.util.LinkedList;
 import java.util.List;
 
+import representation.DipoleMove.typeMove;
+
 public class DipoleConf implements Conf {
 
 	/*
@@ -22,42 +24,42 @@ public class DipoleConf implements Conf {
 	
 	private long pBlack;
 	private long pRed;
-	private long FLAG;
+	private boolean BLACK;
 	private long[] pieces = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 	static long blackSquare= 0x55aa55aa55aa55aaL;
 	
 	
 	//Configurazione inzio partita
-	public DipoleConf(String colour) {
+	public DipoleConf(String color) {
 
 		this.pieces[11] = 0x1000000000000008L;
-		this.pBlack = 0x8;
-		this.pRed = 0x1000000000000000L;
-		if (colour == "BLACK") {
-			this.FLAG = 1;
+		this.pRed = 0x8;
+		this.pBlack = 0x1000000000000000L;
+		if (color == "BLACK") {
+			this.BLACK = true;
 		} else {
-			this.FLAG = -1;
+			this.BLACK = false;
 		}
 
-	}
-
+	} 
+ 
 	//ruota la bitboard di 180 gradi
 	public long flip180(long x) {
 
 		// flipping vertically
 		long k1 = 0x00FF00FF00FF00FFL;
 		long k2 = 0x0000FFFF0000FFFFL;
-		x = ((x >> 8) & k1) | ((x & k1) << 8);
-		x = ((x >> 16) & k2) | ((x & k2) << 16);
-		x = (x >> 32) | (x << 32);
+		x = ((x >>> 8) & k1) | ((x & k1) << 8);
+		x = ((x >>> 16) & k2) | ((x & k2) << 16);
+		x = (x >>> 32) | (x << 32);
 
 		// mirroring horizontally
 		long k3 = 0x5555555555555555L;
 		long k4 = 0x3333333333333333L;
 		long k5 = 0x0f0f0f0f0f0f0f0fL;
-		x = ((x >> 1) & k3) + 2 * (x & k3);
-		x = ((x >> 2) & k4) + 4 * (x & k4);
-		x = ((x >> 4) & k5) + 16 * (x & k5);
+		x = ((x >>> 1) & k3) + 2 * (x & k3);
+		x = ((x >>> 2) & k4) + 4 * (x & k4);
+		x = ((x >>> 4) & k5) + 16 * (x & k5);
 
 		return x;
 	}
@@ -128,7 +130,7 @@ public class DipoleConf implements Conf {
 	   		nord ^= nord & Board.b_u;
 	   		cont++;
 		}
-		return rose^tmp;
+		return rose^(rose & tmp);
 	}
 	
 	private void allMoves(long x, long opponent, long mines, int type, long [] pieces) {
@@ -263,25 +265,83 @@ public class DipoleConf implements Conf {
 		long pawn;
 		long mines;
 		List<Move> actions = new LinkedList<Move>();
-		if(FLAG == -1) {
+		if(!BLACK) {
 			mines = pRed;
 			while(mines != 0) {
 				pawn = mines & -mines;
 				mines ^= pawn;
-				int cont=0;
-				while(cont < 12) {
-					if((pawn & pieces[cont]) != 0) {
+				int selectType=0;
+				while(selectType < 12) {
+					if((pawn & pieces[selectType]) != 0) {
 						break;
 					}
-					cont ++;
+					selectType ++;
 				}
-				allMoves(pawn, pBlack, pRed, cont, pieces);
-				
-			};  
+				allMoves(pawn, pBlack, pRed, selectType, pieces);
+				long temp;
+				while(backAttack!=0) {
+					temp = backAttack & -backAttack;
+					backAttack ^= temp;
+					actions.add(new DipoleMove(pawn,temp,selectType,BLACK,typeMove.BACKATTACK));
+				}
+				while(frontAttack!=0) {
+					temp = frontAttack & -frontAttack;
+					frontAttack ^= temp;
+					actions.add(new DipoleMove(pawn,temp,selectType,BLACK,typeMove.FRONTATTACK));
+				}
+				while(quietMove!=0) {
+					temp = quietMove & -quietMove;
+					quietMove ^= temp;
+					actions.add(new DipoleMove(pawn,temp,selectType,BLACK,typeMove.QUIETMOVE));
+				}	
+			}
+			return actions;
 		} else {
-			
+		  long [] pieces180 = new long [12];
+		  long pBlack180;
+		  long pRed180;
+		  int cont = 0;
+		  while(cont < 12) {
+			  pieces180[cont] = flip180(pieces[cont]);
+			  cont ++;
+		  }
+		  pBlack180 = flip180(pBlack);
+		  pRed180 = flip180(pRed);
+		  mines = pRed;
+			while(mines != 0) {
+				pawn = mines & -mines;
+				mines ^= pawn;
+				int selectType=0;
+				while(selectType < 12) {
+					if((pawn & pieces[selectType]) != 0) {
+						break;
+					}
+					selectType ++;
+				}
+				allMoves(pawn, pBlack, pRed, selectType, pieces);
+				backAttack = flip180(backAttack);
+				frontAttack = flip180(frontAttack);
+				quietMove = flip180(quietMove);
+				pawn = flip180(pawn);
+				long temp;
+				while(backAttack!=0) {
+					temp = backAttack & -backAttack;
+					backAttack ^= temp;
+					actions.add(new DipoleMove(pawn,temp,selectType,BLACK,typeMove.BACKATTACK));
+				}
+				while(frontAttack!=0) {
+					temp = frontAttack & -frontAttack;
+					frontAttack ^= temp;
+					actions.add(new DipoleMove(pawn,temp,selectType,BLACK,typeMove.FRONTATTACK));
+				}
+				while(quietMove!=0) {
+					temp = quietMove & -quietMove;
+					quietMove ^= temp;
+					actions.add(new DipoleMove(pawn,temp,selectType,BLACK,typeMove.QUIETMOVE));
+				}	
+			}
+			return actions;
 		}
-		return null;
 	}
 
 	@Override

@@ -1,10 +1,19 @@
 package core;
 
+
+
 import java.util.Date;
+import java.util.LinkedList;
+import java.util.List;
+
+import representation.DipoleConf;
+import representation.Move;
 
 public class Main {
 
 	public static void main(String[] args) {
+		
+		/*
 	
 		//long a = 263172;
 		
@@ -29,17 +38,13 @@ public class Main {
 		long after=new Date().getTime() - now;
 		System.out.println(after);
 		
+		*/
 		
-
-
-	}
-	
-	public static long flipVertical(long x) {
-		   long k1 = 0x00FF00FF00FF00FFL;
-		   long k2 = 0x0000FFFF0000FFFFL;
-		   x = ((x >>>  8) & k1) | ((x & k1) <<  8);
-		   x = ((x >>> 16) & k2) | ((x & k2) << 16);
-		   x = ( x >>> 32)       | ( x       << 32);
-		   return x;
+		DipoleConf prova = new DipoleConf("BLACK");
+		List<Move> mosse = prova.getActions();
+		for (int i=0;i< mosse.size();i++) {
+			System.out.println(mosse.get(i).toString());
 		}
+		
+	}
 }
