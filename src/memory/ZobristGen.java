@@ -27,7 +27,7 @@ public class ZobristGen {
 	 */
 	public long zobristHash(long[] ls) {	//rivederlo
 		long key = 0;
-		for (int i = 0; i < 14; ++i) {
+		for (int i = 0; i < ls.length; ++i) {
 			key ^= zobristTable[i][(int) ls[i]];
 		}
 		return key;

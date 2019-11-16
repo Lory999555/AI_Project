@@ -7,6 +7,13 @@ import java.util.List;
 
 import representation.DipoleConf;
 import representation.Move;
+<<<<<<< HEAD
+=======
+
+import algorithm.*;
+import heuristic.*;
+import representation.*;
+>>>>>>> branch 'master' of https://github.com/Lory999555/AI-Project
 
 public class Main {
 
@@ -26,6 +33,7 @@ public class Main {
 		 * // long after= System.currentTimeMillis()-now; long after = new
 		 * Date().getTime() - now; System.out.println(after);
 		 **/
+<<<<<<< HEAD
 		//LAVORAMU();
 		long now = System.currentTimeMillis();
 		DipoleConf prova = new DipoleConf("RED");
@@ -34,6 +42,26 @@ public class Main {
 			System.out.println(mosse.get(i).toString());
 		}
 		System.out.println(System.currentTimeMillis()-now);
+=======
+		long now = System.currentTimeMillis();
+		DipoleConf prova = new DipoleConf(true);
+		List<Move> mosse = prova.getActions();
+		for (int i=0;i< mosse.size();i++) {
+			System.out.println(mosse.get(i).toString());
+		}
+		System.out.println(System.currentTimeMillis()-now);
+		LAVORAMU();
+		
+		HeuristicInterface hi = new BBEvaluator();
+		
+		AlgorithmInterface ai = new MTDFAgent(hi);
+		
+		Conf root = new DipoleConf(false);
+		
+		Move choise = ai.compute(root);
+		System.out.println(choise);
+		
+>>>>>>> branch 'master' of https://github.com/Lory999555/AI-Project
 	}
 
 	public static long flipVertical(long x) {
@@ -53,4 +81,6 @@ public class Main {
 		long tiempu = now.getTime() - date.getTime();
 		System.out.println("Giorni PERSI : " + tiempu/(1000*60*60*24) +"\nVERGOGNA!!!");
 	}
+	
+	
 }

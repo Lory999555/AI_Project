@@ -1,50 +1,19 @@
 package memory;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Random;
+import java.util.LinkedHashMap;
 
-import representation.Conf;
-import ut.veikotiit.checkers.bitboard.BitBoard;
-import ut.veikotiit.checkers.bitboard.BitUtil;
+@SuppressWarnings("serial")
+public class TranspositionTable<K, V> extends LinkedHashMap<K, V> {
 
-public class TranspositionTable {
+	private int MAX_ENTRIES;
 
-  private final static int WHITE_PIECE = 0;
-  private final static int WHITE_KING = 1;
-  private final static int BLACK_PIECE = 2;
-  private final static int BLACK_KING = 3;
+	public TranspositionTable(int maxEntries) {
+		super(maxEntries, 0.75f, true);
+		this.MAX_ENTRIES = maxEntries;
+	}
 
-  private final Map<Conf, CachedValue> map = new HashMap<>();
-
-  public void put(Conf conf_hash, CachedValue cachedValue) {
-    map.put(conf_hash, cachedValue);
-  }
-
-  public CachedValue get(Conf conf_hash) {
-    return map.get(conf_hash);
-  }
-
-  public void clear() {
-    map.clear();
-  }
-
-  /*
-  private long calculateHash(BitBoard bitBoard) {
-    long hash = 0;
-    for (int bit : BitUtil.longToBits(bitBoard.getWhiteRegularPieces())) {
-      hash ^= randomBitstrings[50 * WHITE_PIECE + bit];
-    }
-    for (int bit : BitUtil.longToBits(bitBoard.getWhiteKings())) {
-      hash ^= randomBitstrings[50 * WHITE_KING + bit];
-    }
-    for (int bit : BitUtil.longToBits(bitBoard.getBlackRegularPieces())) {
-      hash ^= randomBitstrings[50 * BLACK_PIECE + bit];
-    }
-    for (int bit : BitUtil.longToBits(bitBoard.getBlackKings())) {
-      hash ^= randomBitstrings[50 * BLACK_KING + bit];
-    }
-    return hash;
-  }
-  */
+	@Override
+	protected boolean removeEldestEntry(java.util.Map.Entry<K, V> eldest) {
+		return size() > MAX_ENTRIES;
+	}
 }
