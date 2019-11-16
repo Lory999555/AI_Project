@@ -7,13 +7,11 @@ import java.util.List;
 
 import representation.DipoleConf;
 import representation.Move;
-<<<<<<< HEAD
-=======
 
 import algorithm.*;
 import heuristic.*;
 import representation.*;
->>>>>>> branch 'master' of https://github.com/Lory999555/AI-Project
+
 
 public class Main {
 

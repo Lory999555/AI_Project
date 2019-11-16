@@ -100,15 +100,6 @@ public class DipoleConf implements Conf {
 		long est = ovest;
 		long sud = rankMask(sq);
 		long nord = sud;
-<<<<<<< HEAD
-		long tmp=0;
-		int cont=0;
-		while(cont < type) {
-			ovest ^= ovest & Board.b_l;
-	   		est ^= est & Board.b_r;
-	   		sud ^= sud & Board.b_d;
-	   		nord ^= nord & Board.b_u;
-=======
 		long tmp = 0;
 		int cont = 0;
 		while (cont < type) {
@@ -116,19 +107,9 @@ public class DipoleConf implements Conf {
 			est ^= est & Board.b_r;
 			sud ^= sud & Board.b_d;
 			nord ^= nord & Board.b_u;
->>>>>>> branch 'master' of https://github.com/Lory999555/AI-Project
 			ovest <<= 1;
 			est >>>= 1;
 			sud >>>= 8;
-<<<<<<< HEAD
-	   		nord <<= 8;   		
-	   		notFree ^= pieces[cont] & (~mine);
-	   		tmp |= notFree & ovest; 
-	   		tmp |= notFree & est; 
-	   		tmp |= notFree & sud; 
-	   		tmp |= notFree & nord; 
-	   		cont++;
-=======
 			nord <<= 8;
 			notFree ^= pieces[cont] & (~mine);
 			tmp |= notFree & ovest;
@@ -136,17 +117,7 @@ public class DipoleConf implements Conf {
 			tmp |= notFree & sud;
 			tmp |= notFree & nord;
 			cont++;
->>>>>>> branch 'master' of https://github.com/Lory999555/AI-Project
 		}
-<<<<<<< HEAD
-		while (cont <8) {
-			ovest ^= ovest & Board.b_l;
-	   		est ^= est & Board.b_r;
-	   		sud ^= sud & Board.b_d;
-	   		nord ^= nord & Board.b_u;
-			ovest <<= 1;			
-			est >>>= 1;		
-=======
 		while (cont < 8) {
 			ovest ^= ovest & Board.b_l;
 			est ^= est & Board.b_r;
@@ -154,23 +125,12 @@ public class DipoleConf implements Conf {
 			nord ^= nord & Board.b_u;
 			ovest <<= 1;
 			est >>>= 1;
->>>>>>> branch 'master' of https://github.com/Lory999555/AI-Project
-			sud >>>= 8;
-<<<<<<< HEAD
 	   		nord <<= 8;	
 	   		tmp |= rose & ovest; 
 	   		tmp |= rose & est; 
 	   		tmp |= rose & sud; 
 	   		tmp |= rose & nord;
 	   		cont++;
-=======
-			nord <<= 8;
-			tmp |= rose & ovest;
-			tmp |= rose & est;
-			tmp |= rose & sud;
-			tmp |= rose & nord;
-			cont++;
->>>>>>> branch 'master' of https://github.com/Lory999555/AI-Project
 		}
 		return rose ^ (rose & tmp);
 	}
@@ -214,12 +174,7 @@ public class DipoleConf implements Conf {
 		frontAttack = frontMask & opponent;
 		quietMove = frontMask ^ frontAttack;
 		moves = backAttack | frontAttack | quietMove;
-<<<<<<< HEAD
-		//backAttack = getBackAttack(rose, pBlack, sq, x);	r
-		
-=======
-		// backAttack = getBackAttack(rose, pBlack, sq, x);
->>>>>>> branch 'master' of https://github.com/Lory999555/AI-Project
+		//backAttack = getBackAttack(rose, pBlack, sq, x);	
 	}
 	
 	private void allMoves2(long x, long opponent, long mines, int type, long[] pieces, long[][] possibleMove) {
@@ -467,9 +422,11 @@ public class DipoleConf implements Conf {
 		return 0;
 	}
 
+	
+	// aggiornare lo stato mettendo le mosse massime (60 mosse);
 	@Override
 	public Status getStatus() {
-<<<<<<< HEAD
+
 		if (pBlack!=0){
 			if(pRed!=0){
 				return Status.Ongoing;
@@ -478,9 +435,7 @@ public class DipoleConf implements Conf {
 			}
 		}
 		return Status.RedWon;
-=======
-		return status;
->>>>>>> branch 'master' of https://github.com/Lory999555/AI-Project
+
 	}
 
 	@Override
