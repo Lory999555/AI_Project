@@ -5,7 +5,7 @@ import java.util.List;
 public interface Conf {
 
 	public enum Status {
-		PlayerOneWon, PlayerTwoWon, Draw, Ongoing
+		BlackWon, RedWon, Draw, Ongoing
 	}
 	/**
 	 * return all representation of configuration

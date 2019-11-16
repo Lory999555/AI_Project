@@ -100,6 +100,10 @@ public class DipoleConf implements Conf {
 		long tmp=0;
 		int cont=0;
 		while(cont < type) {
+			ovest ^= ovest & Board.b_l;
+	   		est ^= est & Board.b_r;
+	   		sud ^= sud & Board.b_d;
+	   		nord ^= nord & Board.b_u;
 			ovest <<= 1;
 			est >>>= 1;
 			sud >>>= 8;
@@ -109,13 +113,13 @@ public class DipoleConf implements Conf {
 	   		tmp |= notFree & est; 
 	   		tmp |= notFree & sud; 
 	   		tmp |= notFree & nord; 
-	   		ovest ^= ovest & Board.b_l;
-	   		est ^= est & Board.b_r;
-	   		sud ^= sud & Board.b_d;
-	   		nord ^= nord & Board.b_u;
 	   		cont++;
 		}
 		while (cont <8) {
+			ovest ^= ovest & Board.b_l;
+	   		est ^= est & Board.b_r;
+	   		sud ^= sud & Board.b_d;
+	   		nord ^= nord & Board.b_u;
 			ovest <<= 1;			
 			est >>>= 1;		
 			sud >>>= 8;
@@ -124,10 +128,6 @@ public class DipoleConf implements Conf {
 	   		tmp |= rose & est; 
 	   		tmp |= rose & sud; 
 	   		tmp |= rose & nord;
-	   		ovest ^= ovest & Board.b_l;
-	   		est ^= est & Board.b_r;
-	   		sud ^= sud & Board.b_d;
-	   		nord ^= nord & Board.b_u;
 	   		cont++;
 		}
 		return rose^(rose & tmp);
@@ -145,7 +145,7 @@ public class DipoleConf implements Conf {
 		frontAttack = frontMask & opponent;
 		quietMove = frontMask ^ frontAttack;
 		moves = backAttack | frontAttack | quietMove;
-		//backAttack = getBackAttack(rose, pBlack, sq, x);	
+		//backAttack = getBackAttack(rose, pBlack, sq, x);	r
 		
 	}
 	
@@ -352,8 +352,14 @@ public class DipoleConf implements Conf {
 
 	@Override
 	public Status getStatus() {
-		// TODO Auto-generated method stub
-		return null;
+		if (pBlack!=0){
+			if(pRed!=0){
+				return Status.Ongoing;
+			}else {
+				return Status.BlackWon;
+			}
+		}
+		return Status.RedWon;
 	}
 
 	@Override
