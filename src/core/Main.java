@@ -2,6 +2,10 @@ package core;
 
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
+
+import representation.DipoleConf;
+import representation.Move;
 
 import algorithm.*;
 import heuristic.*;
@@ -25,6 +29,13 @@ public class Main {
 		 * // long after= System.currentTimeMillis()-now; long after = new
 		 * Date().getTime() - now; System.out.println(after);
 		 **/
+		long now = System.currentTimeMillis();
+		DipoleConf prova = new DipoleConf(true);
+		List<Move> mosse = prova.getActions();
+		for (int i=0;i< mosse.size();i++) {
+			System.out.println(mosse.get(i).toString());
+		}
+		System.out.println(System.currentTimeMillis()-now);
 		LAVORAMU();
 		
 		HeuristicInterface hi = new BBEvaluator();
@@ -55,4 +66,6 @@ public class Main {
 		long tiempu = now.getTime() - date.getTime();
 		System.out.println("Giorni PERSI : " + tiempu/(1000*60*60*24) +"\nVERGOGNA!!!");
 	}
+	
+	
 }

@@ -11,11 +11,11 @@ public class DipoleMove implements Move {
 	private typeMove tP;
 	
 	
-	public DipoleMove(long fromSq, long toSq, int type, boolean Black, typeMove tp) {
+	public DipoleMove(long fromSq, long toSq, int type, boolean black, typeMove tp) {
 		this.fromSq = fromSq;
 		this.toSq = toSq;
 		this.type = type;
-		this.BLACK = this.BLACK;
+		this.BLACK = black;
 		this.tP = tp;
 	}
 	
