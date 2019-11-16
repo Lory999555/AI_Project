@@ -25,21 +25,21 @@ public class DipoleConf implements Conf {
 	private Status status;
 	private long pBlack;
 	private long pRed;
-	private boolean BLACK;
+	private boolean black;
 	private long[] pieces = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 	
 	static long blackSquare = 0x55aa55aa55aa55aaL;
 
 	// Configurazione inzio partita
-	public DipoleConf(boolean BLACK) {
+	public DipoleConf(boolean black) {
 
-//		this.pieces[11] = 0x1000000000000008L;
-//		this.pRed = 0x8;
-//		this.pBlack = 0x1000000000000000L;
-		this.pieces[11] = 0x20000810200400L;
-		this.pRed = 0x0L;
-		this.pBlack = 0x20000810200400L;
-		this.BLACK=BLACK;
+		this.pieces[11] = 0x1000000000000008L;
+		this.pRed = 0x8L;
+		this.pBlack = 0x1000000000000000L;
+//		this.pieces[11] = 0x20000810200400L;
+//		this.pRed = 0x0L;
+//		this.pBlack = 0x20000810200400L;
+		this.black=black;
 
 	}
 
@@ -336,7 +336,7 @@ public class DipoleConf implements Conf {
 		long pawn;
 		long mines;
 		List<Move> actions = new LinkedList<Move>();
-		if (!BLACK) {
+		if (!black) {
 			mines = pRed;
 			while (mines != 0) {
 				pawn = mines & -mines;
@@ -354,17 +354,17 @@ public class DipoleConf implements Conf {
 				while (backAttack != 0) {
 					temp = backAttack & -backAttack;
 					backAttack ^= temp;
-					actions.add(new DipoleMove(pawn, temp, selectType, BLACK, typeMove.BACKATTACK));
+					actions.add(new DipoleMove(pawn, temp, selectType, black, typeMove.BACKATTACK));
 				}
 				while (frontAttack != 0) {
 					temp = frontAttack & -frontAttack;
 					frontAttack ^= temp;
-					actions.add(new DipoleMove(pawn, temp, selectType, BLACK, typeMove.FRONTATTACK));
+					actions.add(new DipoleMove(pawn, temp, selectType, black, typeMove.FRONTATTACK));
 				}
 				while (quietMove != 0) {
 					temp = quietMove & -quietMove;
 					quietMove ^= temp;
-					actions.add(new DipoleMove(pawn, temp, selectType, BLACK, typeMove.QUIETMOVE));
+					actions.add(new DipoleMove(pawn, temp, selectType, black, typeMove.QUIETMOVE));
 				}
 			}
 			return actions;
@@ -379,7 +379,7 @@ public class DipoleConf implements Conf {
 			}
 			pBlack180 = flip180(pBlack);
 			pRed180 = flip180(pRed);
-			mines = pBlack;
+			mines = pBlack180;
 			while (mines != 0) {
 				pawn = mines & -mines;
 				mines ^= pawn;
@@ -390,7 +390,7 @@ public class DipoleConf implements Conf {
 					}
 					selectType++;
 				}
-				allMoves2(pawn, pRed, pBlack, selectType, pieces, Board.movingBook);
+				allMoves2(pawn, pRed180, pBlack180, selectType, pieces, Board.movingBook);
 				//allMoves(pawn, pRed, pBlack, selectType, pieces);
 				backAttack = flip180(backAttack);
 				frontAttack = flip180(frontAttack);
@@ -400,17 +400,17 @@ public class DipoleConf implements Conf {
 				while (backAttack != 0) {
 					temp = backAttack & -backAttack;
 					backAttack ^= temp;
-					actions.add(new DipoleMove(pawn, temp, selectType, BLACK, typeMove.BACKATTACK));
+					actions.add(new DipoleMove(pawn, temp, selectType, black, typeMove.BACKATTACK));
 				}
 				while (frontAttack != 0) {
 					temp = frontAttack & -frontAttack;
 					frontAttack ^= temp;
-					actions.add(new DipoleMove(pawn, temp, selectType, BLACK, typeMove.FRONTATTACK));
+					actions.add(new DipoleMove(pawn, temp, selectType, black, typeMove.FRONTATTACK));
 				}
 				while (quietMove != 0) {
 					temp = quietMove & -quietMove;
 					quietMove ^= temp;
-					actions.add(new DipoleMove(pawn, temp, selectType, BLACK, typeMove.QUIETMOVE));
+					actions.add(new DipoleMove(pawn, temp, selectType, black, typeMove.QUIETMOVE));
 				}
 			}
 			return actions;

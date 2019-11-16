@@ -1,6 +1,7 @@
-package algorithm;
+package algorithms;
 import java.util.Map;
-import heuristic.HeuristicInterface;
+
+import heuristics.HeuristicInterface;
 import memory.TranspositionTable;
 import memory.ZobristGen;
 import representation.Move;
@@ -72,6 +73,8 @@ public class MTDFAgent implements AlgorithmInterface {
 	private long searchCutoff;
 	private ZobristGen zg;
 	private HeuristicInterface h;
+	private static int debug_max = 20;  //it used to iterate in debug mode
+	private static int debug = 0;  //it used to iterate in debug mode
 
 	/**
 	 * Constructs an instance of the AI agent for gameplay.
@@ -180,6 +183,7 @@ public class MTDFAgent implements AlgorithmInterface {
 		int depth = 1;
 		int guess = 0;
 		MoveValue best;
+		
 		// ChildMove state;
 
 		// The search must be initialised with an invalid "parent" move to avoid
@@ -188,7 +192,8 @@ public class MTDFAgent implements AlgorithmInterface {
 
 		this.searchCutoff = new Date().getTime() + MAX_RUN_TIME;
 		best = MTDF(root, guess, depth);
-		while ((depth < MAX_SEARCH_DEPTH) && (!timeUp())) {
+		while ((depth < MAX_SEARCH_DEPTH) && (!timeUp() || debug < debug_max)) {
+			debug++;
 			++depth;
 			best = MTDF(root, guess, depth);
 			guess = best.value;

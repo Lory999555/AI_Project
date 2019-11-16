@@ -1,4 +1,4 @@
-package heuristic;
+package heuristics;
 
 import representation.Conf;
 
