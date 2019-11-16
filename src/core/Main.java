@@ -3,6 +3,10 @@ package core;
 import java.util.Calendar;
 import java.util.Date;
 
+import algorithm.*;
+import heuristic.*;
+import representation.*;
+
 public class Main {
 
 	public static void main(String[] args) {
@@ -22,6 +26,16 @@ public class Main {
 		 * Date().getTime() - now; System.out.println(after);
 		 **/
 		LAVORAMU();
+		
+		HeuristicInterface hi = new BBEvaluator();
+		
+		AlgorithmInterface ai = new MTDFAgent(hi);
+		
+		Conf root = new DipoleConf(false);
+		
+		Move choise = ai.compute(root);
+		System.out.println(choise);
+		
 	}
 
 	public static long flipVertical(long x) {

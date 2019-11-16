@@ -1,10 +1,7 @@
 package algorithm;
-import java.util.HashMap;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Random;
-
+import java.util.Map;
 import heuristic.HeuristicInterface;
+import memory.TranspositionTable;
 import memory.ZobristGen;
 import representation.Move;
 import representation.Conf;
@@ -51,12 +48,12 @@ public class MTDFAgent implements AlgorithmInterface {
 	/**
 	 * Inner class to hold transposition table entries
 	 */
-	static class TransEntry {
+	static class NodeInfo {
 		public int depth;
 		public int upperbound;
 		public int lowerbound;
 
-		public TransEntry() {
+		public NodeInfo() {
 			this.depth = 0;
 			this.upperbound = 200;
 			this.lowerbound = -200;
@@ -68,8 +65,10 @@ public class MTDFAgent implements AlgorithmInterface {
 	}
 
 	private static int MAX_SEARCH_DEPTH = 100;
+	private static int MAX_RECORD = 5000;
 	private static long MAX_RUN_TIME = 1000; // maximum runtime in milliseconds
-	private HashMap<Long, TransEntry> transTable;
+	//private HashMap<Long, TransEntry> transTable;
+	private Map<Long, NodeInfo> transpositionTable;
 	private long searchCutoff;
 	private ZobristGen zg;
 	private HeuristicInterface h;
@@ -85,7 +84,8 @@ public class MTDFAgent implements AlgorithmInterface {
 		zg = new ZobristGen();
 
 		// init transposition table
-		transTable = new HashMap<Long, TransEntry>();
+		//transTable = new HashMap<Long, TransEntry>();
+		transpositionTable = new TranspositionTable<Long, MTDFAgent.NodeInfo>(MAX_RECORD);
 
 		// init heuristic function
 		this.h = h;
@@ -158,7 +158,7 @@ public class MTDFAgent implements AlgorithmInterface {
 
 	private boolean check(long hash) {
 
-		return transTable.containsKey(hash);
+		return transpositionTable.containsKey(hash);
 
 	}
 
@@ -241,7 +241,7 @@ public class MTDFAgent implements AlgorithmInterface {
 		int a, b, value = 0;
 		Move bestMove = null;
 		MoveValue searchResult;
-		TransEntry trans;
+		NodeInfo trans;
 		Conf tmp = null;
 		long hash = zg.zobristHash(conf.getConf());
 
@@ -252,7 +252,7 @@ public class MTDFAgent implements AlgorithmInterface {
 
 		// trans table lookup
 		if (check(hash)) { // potrebbe essere utile incapsulare il tutto in una classe e gestirla da li
-			trans = transTable.get(hash); // uitlizzando tecniche specifiche (LRU)
+			trans = transpositionTable.get(hash); // uitlizzando tecniche specifiche (LRU)
 			if (trans.depth >= depth) {
 				if (trans.lowerbound >= beta) {
 					return new MoveValue(prec, trans.lowerbound);
@@ -302,10 +302,10 @@ public class MTDFAgent implements AlgorithmInterface {
 		}
 
 		// store trans table values
-		if (transTable.containsKey(hash)) { // no getOrDefault in Java 1.5
-			trans = transTable.get(hash);
+		if (transpositionTable.containsKey(hash)) { // no getOrDefault in Java 1.5
+			trans = transpositionTable.get(hash);
 		} else {
-			trans = new TransEntry();
+			trans = new NodeInfo();
 		}
 
 		if (trans.depth <= depth) {
@@ -323,7 +323,7 @@ public class MTDFAgent implements AlgorithmInterface {
 				trans.upperbound = value;
 			}
 			trans.depth = depth;
-			transTable.put(hash, trans);
+			transpositionTable.put(hash, trans);
 		}
 
 		return new MoveValue(bestMove, value);

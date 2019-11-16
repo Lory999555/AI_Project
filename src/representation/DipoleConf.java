@@ -22,6 +22,7 @@ public class DipoleConf implements Conf {
 	private long death;
 	private long quietMove;
 	
+	private Status status;
 	private long pBlack;
 	private long pRed;
 	private boolean BLACK;
@@ -30,16 +31,18 @@ public class DipoleConf implements Conf {
 	
 	
 	//Configurazione inzio partita
-	public DipoleConf(String color) {
+	/**
+	 * 
+	 * @param if true the color is set Black
+	 */
+	public DipoleConf(Boolean color) {
 
 		this.pieces[11] = 0x1000000000000008L;
 		this.pRed = 0x8;
 		this.pBlack = 0x1000000000000000L;
-		if (color == "BLACK") {
-			this.BLACK = true;
-		} else {
-			this.BLACK = false;
-		}
+		this.BLACK = color;
+		this.status=Status.Ongoing;
+		
 
 	} 
  
@@ -352,8 +355,7 @@ public class DipoleConf implements Conf {
 
 	@Override
 	public Status getStatus() {
-		// TODO Auto-generated method stub
-		return null;
+		return status;
 	}
 
 	@Override
@@ -376,8 +378,7 @@ public class DipoleConf implements Conf {
 
 	@Override
 	public long[] getConf() {
-		// TODO Auto-generated method stub
-		return null;
+		return pieces.clone();
 	}
 
 }

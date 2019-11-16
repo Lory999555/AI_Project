@@ -3,6 +3,7 @@ package representation;
 public interface Move {
 
 	public boolean validOn(Conf input);
+	
 
 	/**
 	 * Actually apply this Action and return the resultant State
@@ -38,4 +39,4 @@ public interface Move {
 	 */
 	@Override
 	public boolean equals(Object obj);
-}
+	}
