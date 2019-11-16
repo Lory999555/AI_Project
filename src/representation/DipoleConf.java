@@ -125,13 +125,12 @@ public class DipoleConf implements Conf {
 			nord ^= nord & Board.b_u;
 			ovest <<= 1;
 			est >>>= 1;
-			sud >>>= 8;
-			nord <<= 8;
-			tmp |= rose & ovest;
-			tmp |= rose & est;
-			tmp |= rose & sud;
-			tmp |= rose & nord;
-			cont++;
+	   		nord <<= 8;	
+	   		tmp |= rose & ovest; 
+	   		tmp |= rose & est; 
+	   		tmp |= rose & sud; 
+	   		tmp |= rose & nord;
+	   		cont++;
 		}
 		return rose ^ (rose & tmp);
 	}
@@ -175,7 +174,7 @@ public class DipoleConf implements Conf {
 		frontAttack = frontMask & opponent;
 		quietMove = frontMask ^ frontAttack;
 		moves = backAttack | frontAttack | quietMove;
-		// backAttack = getBackAttack(rose, pBlack, sq, x);
+		//backAttack = getBackAttack(rose, pBlack, sq, x);	
 	}
 	
 	private void allMoves2(long x, long opponent, long mines, int type, long[] pieces, long[][] possibleMove) {
@@ -423,9 +422,20 @@ public class DipoleConf implements Conf {
 		return 0;
 	}
 
+	
+	// aggiornare lo stato mettendo le mosse massime (60 mosse);
 	@Override
 	public Status getStatus() {
-		return status;
+
+		if (pBlack!=0){
+			if(pRed!=0){
+				return Status.Ongoing;
+			}else {
+				return Status.BlackWon;
+			}
+		}
+		return Status.RedWon;
+
 	}
 
 	@Override
