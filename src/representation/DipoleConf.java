@@ -1,5 +1,6 @@
 package representation;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -18,7 +19,7 @@ public class DipoleConf implements Conf {
 
 	private long frontAttack;
 	private long backAttack;
-	// private long merge;
+	private long merge;
 	private long death;
 	private long quietMove;
 
@@ -34,9 +35,10 @@ public class DipoleConf implements Conf {
 //		this.pieces[11] = 0x1000000000000008L;
 //		this.pRed = 0x8;
 //		this.pBlack = 0x1000000000000000L;
-		this.pieces[11] = 0x20000810200400L;
-		this.pRed = 0x0L;
-		this.pBlack = 0x20000810200400L;
+		this.pieces[3] = 0x800000000L;
+		this.pieces[0] = 0x40000000000L;
+		this.pRed = 0x40000000000L;
+		this.pBlack = 0x800000000L;
 		this.BLACK=BLACK;
 
 	}
@@ -173,13 +175,11 @@ public class DipoleConf implements Conf {
 		frontAttack = frontMask & opponent;
 		quietMove = frontMask ^ frontAttack;
 		moves = backAttack | frontAttack | quietMove;
-		// backAttack = getBackAttack(rose, pBlack, sq, x);
 	}
 	
 	private void allMoves2(long x, long opponent, long mines, int type, long[] pieces, long[][] possibleMove) {
 		if(type>6) type=6;		
 		int sq = getSquare(x);
-		//System.out.println(sq);
 		long rose = possibleMove[type][sq];
 		rose = removeImpossibleMove2(rose ^ x, sq, opponent, mines, type, pieces);
 		long backMask = x ^ (x - 1);
@@ -377,20 +377,19 @@ public class DipoleConf implements Conf {
 			}
 			pBlack180 = flip180(pBlack);
 			pRed180 = flip180(pRed);
-			mines = pBlack;
+			mines = pBlack180;
 			while (mines != 0) {
 				pawn = mines & -mines;
 				mines ^= pawn;
 				int selectType = 0;
 				while (selectType < 12) {
-					if ((pawn & pieces[selectType]) != 0) {
+					if ((pawn & pieces180[selectType]) != 0) {
 						break;
 					}
 					selectType++;
 				}
-				allMoves2(pawn, pRed, pBlack, selectType, pieces, Board.movingBook);
+				allMoves2(pawn, pRed180, pBlack180, selectType, pieces180, Board.movingBook);
 				//allMoves(pawn, pRed, pBlack, selectType, pieces);
-				backAttack = flip180(backAttack);
 				frontAttack = flip180(frontAttack);
 				quietMove = flip180(quietMove);
 				pawn = flip180(pawn);
@@ -410,6 +409,95 @@ public class DipoleConf implements Conf {
 					quietMove ^= temp;
 					actions.add(new DipoleMove(pawn, temp, selectType, BLACK, typeMove.QUIETMOVE));
 				}
+			}
+			return actions;
+		}
+	}
+	
+	/**
+	 * Return encoding actions list
+	 * @return
+	 */
+	public List<Integer> getActions2(DipoleMove mossa) {
+		long pawn;
+		long mines;
+		List<Integer> actions = new ArrayList<Integer>();
+		if (!BLACK) {
+			mines = pRed;
+			while (mines != 0) {
+				pawn = mines & -mines;
+				mines ^= pawn;
+				int selectType = 0;
+				while (selectType < 12) {
+					if ((pawn & pieces[selectType]) != 0) {
+						break;
+					}
+					selectType++;
+				}
+				allMoves2(pawn, pBlack, pRed, selectType, pieces, Board.movingBook);
+				//allMoves(pawn, pBlack, pRed, selectType, pieces);
+				long temp;
+				while (backAttack != 0) {
+					temp = backAttack & -backAttack;
+					backAttack ^= temp;
+					actions.add(mossa.encodingMove(getSquare(pawn), getSquare(temp), selectType, BLACK, typeMove.BACKATTACK));
+				}
+				while (frontAttack != 0) {
+					temp = frontAttack & -frontAttack;
+					frontAttack ^= temp;
+					actions.add(mossa.encodingMove(getSquare(pawn), getSquare(temp), selectType, BLACK, typeMove.FRONTATTACK));	
+					}
+				while (quietMove != 0) {
+					temp = quietMove & -quietMove;
+					quietMove ^= temp;
+					actions.add(mossa.encodingMove(getSquare(pawn), getSquare(temp), selectType, BLACK, typeMove.QUIETMOVE));
+					}
+			}
+			return actions;
+		} else {
+			long[] pieces180 = new long[12];
+			long pBlack180;
+			long pRed180;
+			int cont = 0;
+			while (cont < 12) {
+				pieces180[cont] = flip180(pieces[cont]);
+				cont++;
+			}
+			pBlack180 = flip180(pBlack);
+			pRed180 = flip180(pRed);
+			mines = pBlack180;
+			while (mines != 0) {
+				pawn = mines & -mines;
+				mines ^= pawn;
+				int selectType = 0;
+				while (selectType < 12) {
+					if ((pawn & pieces180[selectType]) != 0) {
+						break;
+					}
+					selectType++;
+				}
+				allMoves2(pawn, pRed180, pBlack180, selectType, pieces180, Board.movingBook);
+				//allMoves(pawn, pRed, pBlack, selectType, pieces);
+				backAttack = flip180(backAttack);
+				frontAttack = flip180(frontAttack);
+				quietMove = flip180(quietMove);
+				pawn = flip180(pawn);
+				long temp;
+				while (backAttack != 0) {
+					temp = backAttack & -backAttack;
+					backAttack ^= temp;
+					actions.add(mossa.encodingMove(getSquare(pawn), getSquare(temp), selectType, BLACK, typeMove.BACKATTACK));
+					}
+				while (frontAttack != 0) {
+					temp = frontAttack & -frontAttack;
+					frontAttack ^= temp;
+					actions.add(mossa.encodingMove(getSquare(pawn), getSquare(temp), selectType, BLACK, typeMove.FRONTATTACK));
+					}
+				while (quietMove != 0) {
+					temp = quietMove & -quietMove;
+					quietMove ^= temp;
+					actions.add(mossa.encodingMove(getSquare(pawn), getSquare(temp), selectType, BLACK, typeMove.QUIETMOVE));
+					}
 			}
 			return actions;
 		}
@@ -449,6 +537,94 @@ public class DipoleConf implements Conf {
 	public long[] getConf() {
 		// TODO Auto-generated method stub
 		return null;
+	}
+	
+	public long getMoves() {
+		return moves;
+	}
+
+	public void setMoves(long moves) {
+		this.moves = moves;
+	}
+
+	public long getFrontAttack() {
+		return frontAttack;
+	}
+
+	public void setFrontAttack(long frontAttack) {
+		this.frontAttack = frontAttack;
+	}
+
+	public long getBackAttack() {
+		return backAttack;
+	}
+
+	public void setBackAttack(long backAttack) {
+		this.backAttack = backAttack;
+	}
+
+	public long getMerge() {
+		return merge;
+	}
+
+	public void setMerge(long merge) {
+		this.merge = merge;
+	}
+
+	public long getDeath() {
+		return death;
+	}
+
+	public void setDeath(long death) {
+		this.death = death;
+	}
+
+	public long getQuietMove() {
+		return quietMove;
+	}
+
+	public void setQuietMove(long quietMove) {
+		this.quietMove = quietMove;
+	}
+
+	public long getpBlack() {
+		return pBlack;
+	}
+
+	public void setpBlack(long pBlack) {
+		this.pBlack = pBlack;
+	}
+
+	public long getpRed() {
+		return pRed;
+	}
+
+	public void setpRed(long pRed) {
+		this.pRed = pRed;
+	}
+
+	public boolean isBLACK() {
+		return BLACK;
+	}
+
+	public void setBLACK(boolean bLACK) {
+		BLACK = bLACK;
+	}
+
+	public long[] getPieces() {
+		return pieces;
+	}
+
+	public void setPieces(long[] pieces) {
+		this.pieces = pieces;
+	}
+
+	public static long getBlackSquare() {
+		return blackSquare;
+	}
+
+	public static void setBlackSquare(long blackSquare) {
+		DipoleConf.blackSquare = blackSquare;
 	}
 
 }

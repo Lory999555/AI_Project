@@ -5,7 +5,9 @@ import java.util.Date;
 import java.util.List;
 
 import representation.DipoleConf;
+import representation.DipoleMove;
 import representation.Move;
+import representation.DipoleMove.typeMove;
 
 public class Main {
 
@@ -25,13 +27,16 @@ public class Main {
 		 * // long after= System.currentTimeMillis()-now; long after = new
 		 * Date().getTime() - now; System.out.println(after);
 		 **/
-		long now = System.currentTimeMillis();
+		long now = System.nanoTime();
 		DipoleConf prova = new DipoleConf(true);
-		List<Move> mosse = prova.getActions();
+		DipoleMove move = new DipoleMove();
+//		List<Move> mosse = prova.getActions();
+		List<Integer> mosse = prova.getActions2(move);
 		for (int i=0;i< mosse.size();i++) {
 			System.out.println(mosse.get(i).toString());
 		}
-		System.out.println(System.currentTimeMillis()-now);
+		
+		System.out.println(System.nanoTime()-now);
 		LAVORAMU();
 	}
 
@@ -50,7 +55,7 @@ public class Main {
 		//System.out.println(date.toString());
 		//System.out.println(now.toString());
 		long tiempu = now.getTime() - date.getTime();
-		System.out.println("Giorni PERSI : " + tiempu/(1000*60*60*24) +"\nVERGOGNA!!!");
+		System.out.println("Giorni PERSI : " + tiempu/(1000*60*60*24) +"\n https://gfycat.com/reasonabledismalkinglet-stinson-barney!!!");
 	}
 	
 	

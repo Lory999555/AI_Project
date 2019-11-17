@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Random;
 
-import heuristic.HeuristicInterface;
+import heuristics.HeuristicInterface;
 import memory.ZobristGen;
 import representation.Move;
 import representation.Conf;
