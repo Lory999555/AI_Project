@@ -248,7 +248,7 @@ public class MTDFAgent implements AlgorithmInterface {
 		MoveValue searchResult;
 		NodeInfo trans;
 		Conf tmp = null;
-		long hash = zg.zobristHash(conf.getConf());
+		long hash = zg.zobristHash(conf.getForHash());
 
 		// base case
 		if ((depth == 0) || conf.getStatus() != Conf.Status.Ongoing) {
@@ -277,8 +277,8 @@ public class MTDFAgent implements AlgorithmInterface {
 			// for (ChildMove child : children(move, Ply.MAX, false)) {
 			for (Move childm : conf.getActions()) {
 				try {
-					tmp=childm.applyTo(conf);
-				} catch (InvalidActionException e) {
+					tmp=childm.applyTo(conf);  // MI DA ERRORE PERCHè NON C'è L'APPLY TO
+				} catch (InvalidActionException | CloneNotSupportedException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
@@ -295,6 +295,12 @@ public class MTDFAgent implements AlgorithmInterface {
 			value = Integer.MAX_VALUE;
 			b = beta; // save original beta
 			for (Move childm : conf.getActions()) {
+				try {
+					tmp=childm.applyTo(conf);
+				} catch (InvalidActionException | CloneNotSupportedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 				searchResult = alphaBetaWithMemory(tmp,childm, alpha, b, depth - 1, Ply.MAX);
 				if (searchResult.value <= value) {
 					value = searchResult.value;

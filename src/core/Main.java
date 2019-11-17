@@ -30,20 +30,13 @@ public class Main {
 		 * // long after= System.currentTimeMillis()-now; long after = new
 		 * Date().getTime() - now; System.out.println(after);
 		 **/
-<<<<<<< HEAD
 		//LAVORAMU();
-		long now = System.currentTimeMillis();
-		DipoleConf prova = new DipoleConf("RED");
-		List<Move> mosse = prova.getActions();
-		for (int i=0;i< mosse.size();i++) {
-			System.out.println(mosse.get(i).toString());
-		}
-		System.out.println(System.currentTimeMillis()-now);
-=======
+
 		long now = System.currentTimeMillis();
 		DipoleConf prova = new DipoleConf(true);
+		//System.out.println(prova);
 		List<Move> mosse = prova.getActions();
-		System.out.println(mosse.size());
+		//System.out.println(mosse.size());
 //		for (int i=0;i< mosse.size();i++) {
 //			System.out.println(mosse.get(i).toString());
 //		}
@@ -59,7 +52,6 @@ public class Main {
 		Move choise = ai.compute(root);
 		System.out.println(choise);
 		
->>>>>>> branch 'master' of https://github.com/Lory999555/AI-Project
 	}
 
 	public static long flipVertical(long x) {

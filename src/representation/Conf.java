@@ -11,8 +11,11 @@ public interface Conf {
 	 * return all representation of configuration
 	 * @return a list of bitboard that represent the actual configuration.
 	 */
-	public long[] getConf();
-
+	
+	
+	public long[] getForHash();
+	
+	public boolean isBlack();
 	/**
 	 * Get the Actions we can take at this State of the game. Ordering should
 	 * reflect preferred traversal order. If no order preference exists, randomness

@@ -5,7 +5,7 @@ import java.util.List;
 
 import representation.DipoleMove.typeMove;
 
-public class DipoleConf implements Conf {
+public class DipoleConf implements Conf, Cloneable {
 
 	/*
 	 * private long p1=0; private long p2=0; private long p3=0; private long p4=0;
@@ -27,7 +27,7 @@ public class DipoleConf implements Conf {
 	private long pRed;
 	private boolean black;
 	private long[] pieces = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-	
+
 	static long blackSquare = 0x55aa55aa55aa55aaL;
 
 	// Configurazione inzio partita
@@ -39,7 +39,7 @@ public class DipoleConf implements Conf {
 //		this.pieces[11] = 0x20000810200400L;
 //		this.pRed = 0x0L;
 //		this.pBlack = 0x20000810200400L;
-		this.black=black;
+		this.black = black;
 
 	}
 
@@ -125,16 +125,16 @@ public class DipoleConf implements Conf {
 			nord ^= nord & Board.b_u;
 			ovest <<= 1;
 			est >>>= 1;
-	   		nord <<= 8;	
-	   		tmp |= rose & ovest; 
-	   		tmp |= rose & est; 
-	   		tmp |= rose & sud; 
-	   		tmp |= rose & nord;
-	   		cont++;
+			nord <<= 8;
+			tmp |= rose & ovest;
+			tmp |= rose & est;
+			tmp |= rose & sud;
+			tmp |= rose & nord;
+			cont++;
 		}
 		return rose ^ (rose & tmp);
 	}
-	
+
 	private long removeImpossibleMove2(long rose, int sq, long opponent, long mine, int type, long[] pieces) {
 		long notFree = opponent;
 		long ovest = fileMask(sq);
@@ -174,13 +174,14 @@ public class DipoleConf implements Conf {
 		frontAttack = frontMask & opponent;
 		quietMove = frontMask ^ frontAttack;
 		moves = backAttack | frontAttack | quietMove;
-		//backAttack = getBackAttack(rose, pBlack, sq, x);	
+		// backAttack = getBackAttack(rose, pBlack, sq, x);
 	}
-	
+
 	private void allMoves2(long x, long opponent, long mines, int type, long[] pieces, long[][] possibleMove) {
-		if(type>6) type=6;		
+		if (type > 6)
+			type = 6;
 		int sq = getSquare(x);
-		//System.out.println(sq);
+		// System.out.println(sq);
 		long rose = possibleMove[type][sq];
 		rose = removeImpossibleMove2(rose ^ x, sq, opponent, mines, type, pieces);
 		long backMask = x ^ (x - 1);
@@ -193,7 +194,7 @@ public class DipoleConf implements Conf {
 		moves = backAttack | frontAttack | quietMove;
 		// backAttack = getBackAttack(rose, pBlack, sq, x);
 	}
-	
+
 //	// precalcolo rosa dell'intera scacchiera
 //	public long[][] precalculations() {
 //		long rose[][]= new long [7][64];
@@ -236,8 +237,6 @@ public class DipoleConf implements Conf {
 //		return rose;
 //	}// precalculations
 
-	
-	
 //	 // Ritorna la rosa di azione della pedina presa in considerazione private
 //	 long getRose(long square, int type, long mine, long opponent) {
 //	 
@@ -259,7 +258,6 @@ public class DipoleConf implements Conf {
 //	 square >>>= -shift; } notFreeSquare ^= pieces[cont] & (~mine); cont +=
 //	 addMove; tmp =square^(square & notFreeSquare); ret |= tmp; } ret ^= (ret &
 //	 notFreeSquare); return ret; }
-
 
 	// ritorna il numero della casella in cui è posizionato il pedone
 	public int getSquare(long position) {
@@ -348,22 +346,27 @@ public class DipoleConf implements Conf {
 					selectType++;
 				}
 				allMoves2(pawn, pBlack, pRed, selectType, pieces, Board.movingBook);
-				//allMoves(pawn, pBlack, pRed, selectType, pieces);
+				// allMoves(pawn, pBlack, pRed, selectType, pieces);
 				long temp;
 				while (backAttack != 0) {
 					temp = backAttack & -backAttack;
 					backAttack ^= temp;
-					actions.add(new DipoleMove(pawn, temp, selectType, black, typeMove.BACKATTACK));
+					actions.add(new DipoleMove(pawn, temp, selectType, black, typeMove.BACKATTACK,
+							Math.abs(this.getSquare(pawn) - this.getSquare(temp)) / 8));
 				}
 				while (frontAttack != 0) {
 					temp = frontAttack & -frontAttack;
 					frontAttack ^= temp;
-					actions.add(new DipoleMove(pawn, temp, selectType, black, typeMove.FRONTATTACK));
+					actions.add(new DipoleMove(pawn, temp, selectType, black, typeMove.FRONTATTACK,
+							Math.abs(this.getSquare(pawn) - this.getSquare(temp)) / 8));
+
 				}
 				while (quietMove != 0) {
 					temp = quietMove & -quietMove;
 					quietMove ^= temp;
-					actions.add(new DipoleMove(pawn, temp, selectType, black, typeMove.QUIETMOVE));
+					actions.add(new DipoleMove(pawn, temp, selectType, black, typeMove.QUIETMOVE,
+							Math.abs(this.getSquare(pawn) - this.getSquare(temp)) / 8));
+
 				}
 			}
 			return actions;
@@ -384,13 +387,13 @@ public class DipoleConf implements Conf {
 				mines ^= pawn;
 				int selectType = 0;
 				while (selectType < 12) {
-					if ((pawn & pieces[selectType]) != 0) {
+					if ((pawn & pieces180[selectType]) != 0) {
 						break;
 					}
 					selectType++;
 				}
-				allMoves2(pawn, pRed180, pBlack180, selectType, pieces, Board.movingBook);
-				//allMoves(pawn, pRed, pBlack, selectType, pieces);
+				allMoves2(pawn, pRed180, pBlack180, selectType, pieces180, Board.movingBook);
+				// allMoves(pawn, pRed, pBlack, selectType, pieces);
 				backAttack = flip180(backAttack);
 				frontAttack = flip180(frontAttack);
 				quietMove = flip180(quietMove);
@@ -399,17 +402,24 @@ public class DipoleConf implements Conf {
 				while (backAttack != 0) {
 					temp = backAttack & -backAttack;
 					backAttack ^= temp;
-					actions.add(new DipoleMove(pawn, temp, selectType, black, typeMove.BACKATTACK));
+					// to square di pawn
+					// to square di from
+					// 1 meno la'ltro in modulo, il risultato lo divido per 8
+					actions.add(new DipoleMove(pawn, temp, selectType, black, typeMove.BACKATTACK,
+							Math.abs(this.getSquare(pawn) - this.getSquare(temp)) / 8));
 				}
 				while (frontAttack != 0) {
 					temp = frontAttack & -frontAttack;
 					frontAttack ^= temp;
-					actions.add(new DipoleMove(pawn, temp, selectType, black, typeMove.FRONTATTACK));
+					actions.add(new DipoleMove(pawn, temp, selectType, black, typeMove.FRONTATTACK,
+							Math.abs(this.getSquare(pawn) - this.getSquare(temp)) / 8));
+
 				}
 				while (quietMove != 0) {
 					temp = quietMove & -quietMove;
 					quietMove ^= temp;
-					actions.add(new DipoleMove(pawn, temp, selectType, black, typeMove.QUIETMOVE));
+					actions.add(new DipoleMove(pawn, temp, selectType, black, typeMove.QUIETMOVE,
+							Math.abs(this.getSquare(pawn) - this.getSquare(temp)) / 8));
 				}
 			}
 			return actions;
@@ -422,15 +432,14 @@ public class DipoleConf implements Conf {
 		return 0;
 	}
 
-	
 	// aggiornare lo stato mettendo le mosse massime (60 mosse);
 	@Override
 	public Status getStatus() {
 
-		if (pBlack!=0){
-			if(pRed!=0){
+		if (pBlack != 0) {
+			if (pRed != 0) {
 				return Status.Ongoing;
-			}else {
+			} else {
 				return Status.BlackWon;
 			}
 		}
@@ -456,9 +465,140 @@ public class DipoleConf implements Conf {
 		return null;
 	}
 
-	@Override
 	public long[] getConf() {
 		return pieces.clone();
 	}
 
+	public long getMoves() {
+		return moves;
+	}
+
+	public void setMoves(long moves) {
+		this.moves = moves;
+	}
+
+	public long getFrontAttack() {
+		return frontAttack;
+	}
+
+	public void setFrontAttack(long frontAttack) {
+		this.frontAttack = frontAttack;
+	}
+
+	public long getBackAttack() {
+		return backAttack;
+	}
+
+	public void setBackAttack(long backAttack) {
+		this.backAttack = backAttack;
+	}
+
+	public long getDeath() {
+		return death;
+	}
+
+	public void setDeath(long death) {
+		this.death = death;
+	}
+
+	public long getQuietMove() {
+		return quietMove;
+	}
+
+	public void setQuietMove(long quietMove) {
+		this.quietMove = quietMove;
+	}
+
+	public long getpBlack() {
+		return pBlack;
+	}
+
+	public void setpBlack(long pBlack) {
+		this.pBlack = pBlack;
+	}
+
+	public long getpRed() {
+		return pRed;
+	}
+
+	public void setpRed(long pRed) {
+		this.pRed = pRed;
+	}
+
+	public boolean isBlack() {
+		return black;
+	}
+
+	public void setBlack(boolean black) {
+		this.black = black;
+	}
+
+	public long[] getPieces() {
+		return pieces;
+	}
+
+	public long getBoard(int i) {
+		return this.pieces[i];
+	}
+
+	public void setBoard(int i, long v) {
+		this.pieces[i] = v;
+	}
+
+	public void setPieces(long[] pieces) {
+		this.pieces = pieces;
+	}
+
+	public static long getBlackSquare() {
+		return blackSquare;
+	}
+
+	public static void setBlackSquare(long blackSquare) {
+		DipoleConf.blackSquare = blackSquare;
+	}
+
+	public void setStatus(Status status) {
+		this.status = status;
+	}
+
+	/**
+	 * da testare per vedere se il tutto viene copiato bene e se non intralcia
+	 * qualche meccanismo
+	 * 
+	 * 
+	 */
+	public DipoleConf clone() throws CloneNotSupportedException {
+		DipoleConf tmp = (DipoleConf) super.clone();
+		this.pieces = tmp.pieces.clone();
+		return tmp;
+
+	}
+
+	public String toString() {
+		String tmp = Long.toBinaryString(pRed | pBlack);
+		StringBuilder sb = new StringBuilder();
+		int c = tmp.length()-1;
+		for (int i = 0; i < 8; i++) {
+			sb.append('\n');
+			for (int j = 0; j < 8; j++) {
+				if (c >= 0) {
+					sb.append(tmp.charAt(c));
+					sb.append(' ');
+					c--;
+				} else {
+					sb.append('0');
+					sb.append(' ');
+					c--;
+				}
+			}
+		}
+		return sb.reverse().toString();
+
+
+	}
+
+	@Override
+	public long[] getForHash() {
+		return this.getPieces();
+	}
 }
