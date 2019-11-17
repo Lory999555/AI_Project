@@ -1,4 +1,4 @@
-package algorithm;
+package algorithms;
 
 import java.util.List;
 import java.util.concurrent.TimeoutException;

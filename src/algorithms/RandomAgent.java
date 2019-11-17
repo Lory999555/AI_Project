@@ -1,4 +1,4 @@
-package algorithm;
+package algorithms;
 /**
  * Interface for A MancalaAgent.
  *From CITS3001 at the University of Western Australia.

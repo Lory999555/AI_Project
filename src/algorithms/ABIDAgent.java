@@ -1,15 +1,15 @@
-package algorithm;
+package algorithms;
 import java.util.HashMap;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Random;
 
 /**
- * Alpha-Beta Pruning search with memory for Mancala
+ * Iteritive deepening Alpha-Beta Pruning search with memory for Mancala
  * 
  * OOP version for passing results
  */
-public class ABWMAgent implements MancalaAgent {
+public class ABIDAgent implements MancalaAgent {
 
   static enum Ply {MAX, MIN};
 
@@ -45,11 +45,15 @@ public class ABWMAgent implements MancalaAgent {
     }
   }
 
+  private static int nSeeds = 3 * 12;
+  private static int MAX_SEARCH_DEPTH = 100;
+  private static long MAX_RUN_TIME = 100; //maximum runtime in milliseconds
   private HashMap<Long, TransEntry> transTable;
   private long[][] zobristTable;
-  private int nSeeds = 3 * 12;
+  private long searchStartTime;
 
-  public ABWMAgent() {
+
+  public ABIDAgent() {
     //init zobrist table
     Random prng = new Random();
     zobristTable = new long[14][nSeeds + 1];
@@ -61,6 +65,10 @@ public class ABWMAgent implements MancalaAgent {
 
     //init transposition table
     transTable = new HashMap<Long, TransEntry>();
+  }
+
+  private boolean timeUp() {
+    return((System.currentTimeMillis() - searchStartTime) >= MAX_RUN_TIME);
   }
 
   private long zobristHash(int[] state) {
@@ -299,9 +307,16 @@ public class ABWMAgent implements MancalaAgent {
   public int move(int[] board) {
     int alpha = Integer.MIN_VALUE;
     int beta = Integer.MAX_VALUE;
-    int depth = 12;
+    int depth = 1;
     ChildMove state = new ChildMove(-1, board);
-    MoveScore best = alphaBetaWithMemory(state, alpha, beta, depth, Ply.MAX);
+    MoveScore best;
+
+    this.searchStartTime = System.currentTimeMillis();
+    best = alphaBetaWithMemory(state, alpha, beta, depth, Ply.MAX);
+    while ((depth < MAX_SEARCH_DEPTH) && (!timeUp())) {
+      ++depth;
+      best = alphaBetaWithMemory(state, alpha, beta, depth, Ply.MAX);
+    }
     return best.move;
   }
 
@@ -310,7 +325,7 @@ public class ABWMAgent implements MancalaAgent {
    * @return a hardcoded string, the name of the agent.
    */
   public String name() {
-    return "Alpha-Beta Memory Agent";
+    return "Deepening Alpha-Beta Agent";
   }
 
   /**

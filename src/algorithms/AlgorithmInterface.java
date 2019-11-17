@@ -1,4 +1,4 @@
-package algorithm;
+package algorithms;
 
 import representation.Conf;
 import representation.Move;

@@ -1,14 +1,13 @@
-package algorithm;
-import java.util.HashMap;
+package algorithms;
 import java.util.ArrayList;
 import java.util.Arrays;
 
 /**
- * Basic Minimax search for Mancala
+ * Basic Alpha-Beta Pruning search for Mancala
  * 
  * OOP version for passing results
  */
-public class MMAgent implements AlgorithmInterface {
+public class ABAgent implements MancalaAgent {
 
   static enum Ply {MAX, MIN};
 
@@ -86,7 +85,7 @@ public class MMAgent implements AlgorithmInterface {
     return score;
   }
 
-  private MoveScore minimax(ChildMove move, int depth, Ply step) {
+  private MoveScore alphaBeta(ChildMove move, int alpha, int beta, int depth, Ply step) {
     //base case
     if ((depth == 0) || terminal(move.state)) {
       return new MoveScore(move.move, evaluate(move.state));
@@ -98,20 +97,24 @@ public class MMAgent implements AlgorithmInterface {
     if (step == Ply.MAX) { //max step
       value = Integer.MIN_VALUE;
       for (ChildMove child : children(move, Ply.MAX, false)) {
-        searchResult = minimax(child, depth - 1, Ply.MIN);
+        searchResult = alphaBeta(child, alpha, beta, depth - 1, Ply.MIN);
         if (searchResult.score >= value) {
           value = searchResult.score;
           bestMove = child.move;
         }
+        alpha = Math.max(alpha, value);
+        if (alpha >= beta) break; //pruning
       }
     } else { //min step
       value = Integer.MAX_VALUE;
       for (ChildMove child : children(move, Ply.MIN, false)) {
-        searchResult = minimax(child, depth - 1, Ply.MAX);
+        searchResult = alphaBeta(child, alpha, beta, depth - 1, Ply.MAX);
         if (searchResult.score <= value) {
           value = searchResult.score;
           bestMove = child.move;
         }
+        beta = Math.min(beta, value);
+        if (alpha >= beta) break;
       }
     }
 
@@ -215,7 +218,11 @@ public class MMAgent implements AlgorithmInterface {
    * @return the house the agent would like to move the seeds from this turn.
    */
   public int move(int[] board) {
-    MoveScore best = minimax(new ChildMove(-1, board), 8, Ply.MAX);
+    int alpha = Integer.MIN_VALUE;
+    int beta = Integer.MAX_VALUE;
+    int depth = 10;
+    ChildMove state = new ChildMove(-1, board);
+    MoveScore best = alphaBeta(state, alpha, beta, depth, Ply.MAX);
     return best.move;
   }
 
@@ -224,7 +231,7 @@ public class MMAgent implements AlgorithmInterface {
    * @return a hardcoded string, the name of the agent.
    */
   public String name() {
-    return "Minimax Agent";
+    return "Alpha-Beta Agent";
   }
 
   /**

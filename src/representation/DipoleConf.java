@@ -6,7 +6,7 @@ import java.util.List;
 
 import representation.DipoleMove.typeMove;
 
-public class DipoleConf implements Conf {
+public class DipoleConf implements Conf, Cloneable {
 
 	/*
 	 * private long p1=0; private long p2=0; private long p3=0; private long p4=0;
@@ -25,21 +25,21 @@ public class DipoleConf implements Conf {
 
 	private long pBlack;
 	private long pRed;
-	private boolean BLACK;
+	private boolean black;
 	private long[] pieces = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 	static long blackSquare = 0x55aa55aa55aa55aaL;
 
 	// Configurazione inzio partita
-	public DipoleConf(boolean BLACK) {
+	public DipoleConf(boolean black) {
 
-//		this.pieces[11] = 0x1000000000000008L;
-//		this.pRed = 0x8;
-//		this.pBlack = 0x1000000000000000L;
-		this.pieces[3] = 0x800000000L;
-		this.pieces[0] = 0x40000000000L;
-		this.pRed = 0x40000000000L;
-		this.pBlack = 0x800000000L;
-		this.BLACK=BLACK;
+
+		this.pieces[11] = 0x1000000000000008L;
+		this.pRed = 0x8L;
+		this.pBlack = 0x1000000000000000L;
+//		this.pieces[11] = 0x20000810200400L;
+//		this.pRed = 0x0L;
+//		this.pBlack = 0x20000810200400L;
+		this.black = black;
 
 	}
 
@@ -334,7 +334,7 @@ public class DipoleConf implements Conf {
 		long pawn;
 		long mines;
 		List<Move> actions = new LinkedList<Move>();
-		if (!BLACK) {
+		if (!black) {
 			mines = pRed;
 			while (mines != 0) {
 				pawn = mines & -mines;
@@ -352,17 +352,22 @@ public class DipoleConf implements Conf {
 				while (backAttack != 0) {
 					temp = backAttack & -backAttack;
 					backAttack ^= temp;
-					actions.add(new DipoleMove(pawn, temp, selectType, BLACK, typeMove.BACKATTACK));
+					actions.add(new DipoleMove(pawn, temp, selectType, black, typeMove.BACKATTACK,
+							Math.abs(this.getSquare(pawn) - this.getSquare(temp)) / 8));
 				}
 				while (frontAttack != 0) {
 					temp = frontAttack & -frontAttack;
 					frontAttack ^= temp;
-					actions.add(new DipoleMove(pawn, temp, selectType, BLACK, typeMove.FRONTATTACK));
+					actions.add(new DipoleMove(pawn, temp, selectType, black, typeMove.FRONTATTACK,
+							Math.abs(this.getSquare(pawn) - this.getSquare(temp)) / 8));
+
 				}
 				while (quietMove != 0) {
 					temp = quietMove & -quietMove;
 					quietMove ^= temp;
-					actions.add(new DipoleMove(pawn, temp, selectType, BLACK, typeMove.QUIETMOVE));
+					actions.add(new DipoleMove(pawn, temp, selectType, black, typeMove.QUIETMOVE,
+							Math.abs(this.getSquare(pawn) - this.getSquare(temp)) / 8));
+
 				}
 			}
 			return actions;
@@ -390,6 +395,7 @@ public class DipoleConf implements Conf {
 				}
 				allMoves2(pawn, pRed180, pBlack180, selectType, pieces180, Board.movingBook);
 				//allMoves(pawn, pRed, pBlack, selectType, pieces);
+				backAttack = flip180(backAttack);
 				frontAttack = flip180(frontAttack);
 				quietMove = flip180(quietMove);
 				pawn = flip180(pawn);
@@ -397,17 +403,24 @@ public class DipoleConf implements Conf {
 				while (backAttack != 0) {
 					temp = backAttack & -backAttack;
 					backAttack ^= temp;
-					actions.add(new DipoleMove(pawn, temp, selectType, BLACK, typeMove.BACKATTACK));
+					// to square di pawn
+					// to square di from
+					// 1 meno la'ltro in modulo, il risultato lo divido per 8
+					actions.add(new DipoleMove(pawn, temp, selectType, black, typeMove.BACKATTACK,
+							Math.abs(this.getSquare(pawn) - this.getSquare(temp)) / 8));
 				}
 				while (frontAttack != 0) {
 					temp = frontAttack & -frontAttack;
 					frontAttack ^= temp;
-					actions.add(new DipoleMove(pawn, temp, selectType, BLACK, typeMove.FRONTATTACK));
+					actions.add(new DipoleMove(pawn, temp, selectType, black, typeMove.FRONTATTACK,
+							Math.abs(this.getSquare(pawn) - this.getSquare(temp)) / 8));
+
 				}
 				while (quietMove != 0) {
 					temp = quietMove & -quietMove;
 					quietMove ^= temp;
-					actions.add(new DipoleMove(pawn, temp, selectType, BLACK, typeMove.QUIETMOVE));
+					actions.add(new DipoleMove(pawn, temp, selectType, black, typeMove.QUIETMOVE,
+							Math.abs(this.getSquare(pawn) - this.getSquare(temp)) / 8));
 				}
 			}
 			return actions;
@@ -509,10 +522,19 @@ public class DipoleConf implements Conf {
 		return 0;
 	}
 
+	// aggiornare lo stato mettendo le mosse massime (60 mosse);
 	@Override
 	public Status getStatus() {
-		// TODO Auto-generated method stub
-		return null;
+
+		if (pBlack != 0) {
+			if (pRed != 0) {
+				return Status.Ongoing;
+			} else {
+				return Status.BlackWon;
+			}
+		}
+		return Status.RedWon;
+
 	}
 
 	@Override
@@ -533,12 +555,10 @@ public class DipoleConf implements Conf {
 		return null;
 	}
 
-	@Override
 	public long[] getConf() {
-		// TODO Auto-generated method stub
-		return null;
+		return pieces.clone();
 	}
-	
+
 	public long getMoves() {
 		return moves;
 	}
@@ -561,14 +581,6 @@ public class DipoleConf implements Conf {
 
 	public void setBackAttack(long backAttack) {
 		this.backAttack = backAttack;
-	}
-
-	public long getMerge() {
-		return merge;
-	}
-
-	public void setMerge(long merge) {
-		this.merge = merge;
 	}
 
 	public long getDeath() {
@@ -603,16 +615,24 @@ public class DipoleConf implements Conf {
 		this.pRed = pRed;
 	}
 
-	public boolean isBLACK() {
-		return BLACK;
+	public boolean isBlack() {
+		return black;
 	}
 
-	public void setBLACK(boolean bLACK) {
-		BLACK = bLACK;
+	public void setBlack(boolean black) {
+		this.black = black;
 	}
 
 	public long[] getPieces() {
 		return pieces;
+	}
+
+	public long getBoard(int i) {
+		return this.pieces[i];
+	}
+
+	public void setBoard(int i, long v) {
+		this.pieces[i] = v;
 	}
 
 	public void setPieces(long[] pieces) {
@@ -627,4 +647,48 @@ public class DipoleConf implements Conf {
 		DipoleConf.blackSquare = blackSquare;
 	}
 
+	public void setStatus(Status status) {
+		this.status = status;
+	}
+
+	/**
+	 * da testare per vedere se il tutto viene copiato bene e se non intralcia
+	 * qualche meccanismo
+	 * 
+	 * 
+	 */
+	public DipoleConf clone() throws CloneNotSupportedException {
+		DipoleConf tmp = (DipoleConf) super.clone();
+		this.pieces = tmp.pieces.clone();
+		return tmp;
+
+	}
+
+	public String toString() {
+		String tmp = Long.toBinaryString(pRed | pBlack);
+		StringBuilder sb = new StringBuilder();
+		int c = tmp.length()-1;
+		for (int i = 0; i < 8; i++) {
+			sb.append('\n');
+			for (int j = 0; j < 8; j++) {
+				if (c >= 0) {
+					sb.append(tmp.charAt(c));
+					sb.append(' ');
+					c--;
+				} else {
+					sb.append('0');
+					sb.append(' ');
+					c--;
+				}
+			}
+		}
+		return sb.reverse().toString();
+
+
+	}
+
+	@Override
+	public long[] getForHash() {
+		return this.getPieces();
+	}
 }

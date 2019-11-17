@@ -3,6 +3,7 @@ package representation;
 public interface Move {
 
 	public boolean validOn(Conf input);
+	
 
 	/**
 	 * Actually apply this Action and return the resultant State
@@ -10,8 +11,9 @@ public interface Move {
 	 * @param input The State we are applying this Action on.
 	 * @return The resultant State from the application of this Action.
 	 * @throws InvalidActionException Some Actions can't be applied to some States.
+	 * @throws CloneNotSupportedException 
 	 */
-	public Conf applyTo(Conf input) throws InvalidActionException;
+	public Conf applyTo(Conf input) throws InvalidActionException, CloneNotSupportedException;
 	
 	/**
 	 * 
@@ -38,4 +40,4 @@ public interface Move {
 	 */
 	@Override
 	public boolean equals(Object obj);
-}
+	}

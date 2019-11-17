@@ -2,22 +2,25 @@ package representation;
 
 public class DipoleMove implements Move {
 
-	public enum typeMove{ BACKATTACK,FRONTATTACK,QUIETMOVE,MERGE,DEATH}
-	
+	public enum typeMove {
+		BACKATTACK, FRONTATTACK, QUIETMOVE, MERGE, DEATH
+	}
+
 	private long fromSq;
 	private long toSq;
-	private int type;
-	private boolean BLACK;
+	private int type; // è l'indice NON la tipologia
+	private boolean black;
 	private typeMove tP;
 	private int dist;
-	
-	
-	public DipoleMove(long fromSq, long toSq, int type, boolean black, typeMove tp) {
+
+	public DipoleMove(long fromSq, long toSq, int type, boolean black, typeMove tp, int dist) {
 		this.fromSq = fromSq;
 		this.toSq = toSq;
 		this.type = type;
-		this.BLACK = black;
+		this.black = black;
 		this.tP = tp;
+		this.dist = dist;
+
 	}
 	
 	public DipoleMove(){
@@ -50,10 +53,62 @@ public class DipoleMove implements Move {
 	}
 
 	@Override
-	public Conf applyTo(Conf input) throws InvalidActionException {
-		
-		
-		return null;
+	
+	public Conf applyTo(Conf input) throws InvalidActionException, CloneNotSupportedException {
+		DipoleConf tmp = (DipoleConf) input;
+		DipoleConf res = tmp.clone();
+		res.setBlack(!input.isBlack());
+		boolean allStack = type - dist < 0;
+
+		long fromtoSq = fromSq ^ toSq;
+
+		switch (this.tP) {
+		case QUIETMOVE:
+//			andrebbero controllate varie cose come:
+//				se una pedina si muove completamente quali bitboard aggiornare
+//				e come capirlo? del tipo type - dist < 0?
+//				aggiornare anche le bb pblack e pred in base a quale gicatore
+//				sta muovendo così da scegliere from o to bb.
+//			sarebbe utile mettere pblack e pred in una lista che coincida con il booleano
+			res.setBoard(type, tmp.getBoard(type) ^ fromSq);
+			res.setBoard(dist, tmp.getBoard(dist) ^ toSq);
+			res.setBoard(type - dist, tmp.getBoard(type - dist) ^ fromSq);
+			if (tmp.isBlack())
+				if (allStack)
+					res.setpBlack(tmp.getpBlack() ^ fromtoSq);
+				else
+					res.setpBlack(tmp.getpBlack() | fromtoSq);
+			else {
+				if (allStack)
+					res.setpRed(tmp.getpRed() ^ fromtoSq);
+				else
+					res.setpRed(tmp.getpRed() | fromtoSq);
+			}
+			break;
+		case MERGE:
+			res.setBoard(type, tmp.getBoard(type) ^ fromSq);
+			res.setBoard(dist, tmp.getBoard(dist) ^ toSq);
+			res.setBoard(type - dist, tmp.getBoard(type - dist) ^ fromSq);
+			int c = 0;
+
+//			trovo la pedina avversaria che viene mangiata
+			while ((tmp.getBoard(c) & toSq) == 0L) {
+				c++;
+			}
+
+			res.setBoard(c, tmp.getBoard(c) ^ toSq);
+			break;
+
+		case FRONTATTACK:
+			break;
+			
+		case BACKATTACK:
+			break;
+
+		}
+
+		return res;
+
 	}
 	
 	private void decodingMove(int code) {
