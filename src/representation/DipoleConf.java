@@ -435,7 +435,7 @@ public class DipoleConf implements Conf, Cloneable {
 		long pawn;
 		long mines;
 		List<Integer> actions = new ArrayList<Integer>();
-		if (!BLACK) {
+		if (!black) {
 			mines = pRed;
 			while (mines != 0) {
 				pawn = mines & -mines;
@@ -453,17 +453,17 @@ public class DipoleConf implements Conf, Cloneable {
 				while (backAttack != 0) {
 					temp = backAttack & -backAttack;
 					backAttack ^= temp;
-					actions.add(mossa.encodingMove(getSquare(pawn), getSquare(temp), selectType, BLACK, typeMove.BACKATTACK));
+					actions.add(mossa.encodingMove(getSquare(pawn), getSquare(temp), selectType, black, typeMove.BACKATTACK));
 				}
 				while (frontAttack != 0) {
 					temp = frontAttack & -frontAttack;
 					frontAttack ^= temp;
-					actions.add(mossa.encodingMove(getSquare(pawn), getSquare(temp), selectType, BLACK, typeMove.FRONTATTACK));	
+					actions.add(mossa.encodingMove(getSquare(pawn), getSquare(temp), selectType, black, typeMove.FRONTATTACK));	
 					}
 				while (quietMove != 0) {
 					temp = quietMove & -quietMove;
 					quietMove ^= temp;
-					actions.add(mossa.encodingMove(getSquare(pawn), getSquare(temp), selectType, BLACK, typeMove.QUIETMOVE));
+					actions.add(mossa.encodingMove(getSquare(pawn), getSquare(temp), selectType, black, typeMove.QUIETMOVE));
 					}
 			}
 			return actions;
@@ -499,17 +499,17 @@ public class DipoleConf implements Conf, Cloneable {
 				while (backAttack != 0) {
 					temp = backAttack & -backAttack;
 					backAttack ^= temp;
-					actions.add(mossa.encodingMove(getSquare(pawn), getSquare(temp), selectType, BLACK, typeMove.BACKATTACK));
+					actions.add(mossa.encodingMove(getSquare(pawn), getSquare(temp), selectType, black, typeMove.BACKATTACK));
 					}
 				while (frontAttack != 0) {
 					temp = frontAttack & -frontAttack;
 					frontAttack ^= temp;
-					actions.add(mossa.encodingMove(getSquare(pawn), getSquare(temp), selectType, BLACK, typeMove.FRONTATTACK));
+					actions.add(mossa.encodingMove(getSquare(pawn), getSquare(temp), selectType, black, typeMove.FRONTATTACK));
 					}
 				while (quietMove != 0) {
 					temp = quietMove & -quietMove;
 					quietMove ^= temp;
-					actions.add(mossa.encodingMove(getSquare(pawn), getSquare(temp), selectType, BLACK, typeMove.QUIETMOVE));
+					actions.add(mossa.encodingMove(getSquare(pawn), getSquare(temp), selectType, black, typeMove.QUIETMOVE));
 					}
 			}
 			return actions;
@@ -647,9 +647,6 @@ public class DipoleConf implements Conf, Cloneable {
 		DipoleConf.blackSquare = blackSquare;
 	}
 
-	public void setStatus(Status status) {
-		this.status = status;
-	}
 
 	/**
 	 * da testare per vedere se il tutto viene copiato bene e se non intralcia
