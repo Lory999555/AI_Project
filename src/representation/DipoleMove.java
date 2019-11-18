@@ -40,9 +40,13 @@ public class DipoleMove implements Move {
 		return (fromSq<<17)|(toSq<<11)|(Math.abs((fromSq>>3)-(toSq>>3))<<8)|(type<<4)|((black?1:0)<<3)|(tp.ordinal());
 	}
 	
+	public void decodingMove(int code) {
+		
+	}
+	
 	@Override
 	public String toString() {
-		return tP.name()+ " from: " + fromSq + " to "+ toSq + " type: " + type + " BLACK: "+ BLACK ;
+		return tP.name()+ " from: " + fromSq + " to "+ toSq + " type: " + type + " BLACK: "+ black ;
 //		return "0";
 	}
 	
@@ -111,9 +115,6 @@ public class DipoleMove implements Move {
 
 	}
 	
-	private void decodingMove(int code) {
-		
-	}
 
 	@Override
 	public int getValue() {

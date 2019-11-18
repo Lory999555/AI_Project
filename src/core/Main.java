@@ -10,12 +10,8 @@ import heuristics.*;
 import representation.DipoleConf;
 import representation.DipoleMove;
 import representation.Move;
-<<<<<<< HEAD
-import representation.DipoleMove.typeMove;
-=======
 import representation.*;
 
->>>>>>> branch 'master' of https://github.com/Lory999555/AI-Project
 
 public class Main {
 
@@ -35,15 +31,10 @@ public class Main {
 		 * // long after= System.currentTimeMillis()-now; long after = new
 		 * Date().getTime() - now; System.out.println(after);
 		 **/
-<<<<<<< HEAD
 		long now = System.nanoTime();
-=======
-		//LAVORAMU();
 
-		long now = System.currentTimeMillis();
->>>>>>> branch 'master' of https://github.com/Lory999555/AI-Project
+		//LAVORAMU();
 		DipoleConf prova = new DipoleConf(true);
-<<<<<<< HEAD
 		DipoleMove move = new DipoleMove();
 //		List<Move> mosse = prova.getActions();
 		List<Integer> mosse = prova.getActions2(move);
@@ -52,15 +43,7 @@ public class Main {
 		}
 		
 		System.out.println(System.nanoTime()-now);
-=======
-		//System.out.println(prova);
-		List<Move> mosse = prova.getActions();
-		//System.out.println(mosse.size());
-//		for (int i=0;i< mosse.size();i++) {
-//			System.out.println(mosse.get(i).toString());
-//		}
-//		System.out.println(System.currentTimeMillis()-now);
->>>>>>> branch 'master' of https://github.com/Lory999555/AI-Project
+
 		LAVORAMU();
 		
 		HeuristicInterface hi = new BBEvaluator();
