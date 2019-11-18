@@ -22,12 +22,14 @@ public class DipoleMove implements Move {
 		this.dist = dist;
 
 	}
-	
-	public DipoleMove(){
+
+	public DipoleMove() {
 	}
-	
+
 	/**
-	 * encoding move in 23 bit: 6 fromSq + 6 toSq + 3 distance + 4 type + 1 color + 3 move type
+	 * encoding move in 23 bit: 6 fromSq + 6 toSq + 3 distance + 4 type + 1 color +
+	 * 3 move type
+	 * 
 	 * @param fromSq
 	 * @param toSq
 	 * @param type
@@ -36,16 +38,19 @@ public class DipoleMove implements Move {
 	 * @return int
 	 */
 	public int encodingMove(int fromSq, int toSq, int type, boolean black, typeMove tp) {
-		System.out.println("f "+fromSq+", to "+toSq+ " = "+(Math.abs((fromSq>>3)-(toSq>>3))+" -> "+(Math.abs((fromSq>>3)-(toSq>>3))<<8)));
-		return (fromSq<<17)|(toSq<<11)|(Math.abs((fromSq>>3)-(toSq>>3))<<8)|(type<<4)|((black?1:0)<<3)|(tp.ordinal());
+		System.out.println("f " + fromSq + ", to " + toSq + " = "
+				+ (Math.abs((fromSq >> 3) - (toSq >> 3)) + " -> " + (Math.abs((fromSq >> 3) - (toSq >> 3)) << 8)));
+		return (fromSq << 17) | (toSq << 11) | (Math.abs((fromSq >> 3) - (toSq >> 3)) << 8) | (type << 4)
+				| ((black ? 1 : 0) << 3) | (tp.ordinal());
 	}
-	
+
 	@Override
 	public String toString() {
-		return tP.name()+ " from: " + fromSq + " to "+ toSq + " type: " + type + " BLACK: "+ BLACK ;
+		return tP.name() + " from: " + fromSq + " to " + toSq + " type: " + type + " BLACK: " + black + " dist: "
+				+ dist;
 //		return "0";
 	}
-	
+
 	@Override
 	public boolean validOn(Conf input) {
 		// TODO Auto-generated method stub
@@ -53,12 +58,13 @@ public class DipoleMove implements Move {
 	}
 
 	@Override
-	
+
 	public Conf applyTo(Conf input) throws InvalidActionException, CloneNotSupportedException {
 		DipoleConf tmp = (DipoleConf) input;
 		DipoleConf res = tmp.clone();
 		res.setBlack(!input.isBlack());
-		boolean allStack = type - dist < 0;
+		boolean allStack = (type - dist) == -1;
+		assert (type - dist >= -1);
 
 		long fromtoSq = fromSq ^ toSq;
 
@@ -70,38 +76,46 @@ public class DipoleMove implements Move {
 //				aggiornare anche le bb pblack e pred in base a quale gicatore
 //				sta muovendo così da scegliere from o to bb.
 //			sarebbe utile mettere pblack e pred in una lista che coincida con il booleano
-			res.setBoard(type, tmp.getBoard(type) ^ fromSq);
-			res.setBoard(dist, tmp.getBoard(dist) ^ toSq);
-			res.setBoard(type - dist, tmp.getBoard(type - dist) ^ fromSq);
-			if (tmp.isBlack())
+
+			// eliminare la pedina from
+			res.setBoard(type, res.getBoard(type) ^ fromSq);
+
+			// generare la pedina destinazione
+			res.setBoard(dist - 1, res.getBoard(dist - 1) ^ toSq);
+
+			if (tmp.isBlack()) {
 				if (allStack)
-					res.setpBlack(tmp.getpBlack() ^ fromtoSq);
-				else
-					res.setpBlack(tmp.getpBlack() | fromtoSq);
-			else {
+					res.setpBlack(res.getpBlack() ^ fromtoSq);
+				else {
+					res.setBoard(type - dist, res.getBoard(type - dist) ^ fromSq);
+					res.setpBlack(res.getpBlack() | fromtoSq);
+				}
+			} else {
 				if (allStack)
-					res.setpRed(tmp.getpRed() ^ fromtoSq);
-				else
-					res.setpRed(tmp.getpRed() | fromtoSq);
+					res.setpRed(res.getpRed() ^ fromtoSq);
+				else {
+					res.setBoard(type - dist, res.getBoard(type - dist) ^ fromSq);
+					res.setpRed(res.getpRed() | fromtoSq);
+				}
 			}
 			break;
 		case MERGE:
-			res.setBoard(type, tmp.getBoard(type) ^ fromSq);
-			res.setBoard(dist, tmp.getBoard(dist) ^ toSq);
-			res.setBoard(type - dist, tmp.getBoard(type - dist) ^ fromSq);
-			int c = 0;
-
+//			res.setBoard(type, tmp.getBoard(type) ^ fromSq);
+//			res.setBoard(dist, tmp.getBoard(dist) ^ toSq);
+//			res.setBoard(type - dist, tmp.getBoard(type - dist) ^ fromSq);
+//			int c = 0;
+//
 //			trovo la pedina avversaria che viene mangiata
-			while ((tmp.getBoard(c) & toSq) == 0L) {
-				c++;
-			}
-
-			res.setBoard(c, tmp.getBoard(c) ^ toSq);
+//			while ((tmp.getBoard(c) & toSq) == 0L) {
+//				c++;
+//			}
+//
+//			res.setBoard(c, tmp.getBoard(c) ^ toSq);
 			break;
 
 		case FRONTATTACK:
 			break;
-			
+
 		case BACKATTACK:
 			break;
 
@@ -110,9 +124,9 @@ public class DipoleMove implements Move {
 		return res;
 
 	}
-	
+
 	private void decodingMove(int code) {
-		
+
 	}
 
 	@Override
