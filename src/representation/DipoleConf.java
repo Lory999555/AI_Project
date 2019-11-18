@@ -459,21 +459,35 @@ public class DipoleConf implements Conf, Cloneable {
 				while (backAttack != 0) {
 					temp = backAttack & -backAttack;
 					backAttack ^= temp;
+<<<<<<< HEAD
 					actions.add(mossa.encodingMove(getSquare(pawn), getSquare(temp), selectType, black,
 							typeMove.BACKATTACK));
+=======
+					actions.add(mossa.encodingMove(getSquare(pawn), getSquare(temp), selectType, black, typeMove.BACKATTACK));
+>>>>>>> branch 'master' of https://github.com/Lory999555/AI-Project
 				}
 				while (frontAttack != 0) {
 					temp = frontAttack & -frontAttack;
 					frontAttack ^= temp;
+<<<<<<< HEAD
 					actions.add(mossa.encodingMove(getSquare(pawn), getSquare(temp), selectType, black,
 							typeMove.FRONTATTACK));
 				}
+=======
+					actions.add(mossa.encodingMove(getSquare(pawn), getSquare(temp), selectType, black, typeMove.FRONTATTACK));	
+					}
+>>>>>>> branch 'master' of https://github.com/Lory999555/AI-Project
 				while (quietMove != 0) {
 					temp = quietMove & -quietMove;
 					quietMove ^= temp;
+<<<<<<< HEAD
 					actions.add(mossa.encodingMove(getSquare(pawn), getSquare(temp), selectType, black,
 							typeMove.QUIETMOVE));
 				}
+=======
+					actions.add(mossa.encodingMove(getSquare(pawn), getSquare(temp), selectType, black, typeMove.QUIETMOVE));
+					}
+>>>>>>> branch 'master' of https://github.com/Lory999555/AI-Project
 			}
 			return actions;
 		} else {
@@ -509,21 +523,36 @@ public class DipoleConf implements Conf, Cloneable {
 				while (backAttack != 0) {
 					temp = backAttack & -backAttack;
 					backAttack ^= temp;
+<<<<<<< HEAD
 					actions.add(mossa.encodingMove(getSquare(pawn), getSquare(temp), selectType, black,
 							typeMove.BACKATTACK));
 				}
+=======
+					actions.add(mossa.encodingMove(getSquare(pawn), getSquare(temp), selectType, black, typeMove.BACKATTACK));
+					}
+>>>>>>> branch 'master' of https://github.com/Lory999555/AI-Project
 				while (frontAttack != 0) {
 					temp = frontAttack & -frontAttack;
 					frontAttack ^= temp;
+<<<<<<< HEAD
 					actions.add(mossa.encodingMove(getSquare(pawn), getSquare(temp), selectType, black,
 							typeMove.FRONTATTACK));
 				}
+=======
+					actions.add(mossa.encodingMove(getSquare(pawn), getSquare(temp), selectType, black, typeMove.FRONTATTACK));
+					}
+>>>>>>> branch 'master' of https://github.com/Lory999555/AI-Project
 				while (quietMove != 0) {
 					temp = quietMove & -quietMove;
 					quietMove ^= temp;
+<<<<<<< HEAD
 					actions.add(mossa.encodingMove(getSquare(pawn), getSquare(temp), selectType, black,
 							typeMove.QUIETMOVE));
 				}
+=======
+					actions.add(mossa.encodingMove(getSquare(pawn), getSquare(temp), selectType, black, typeMove.QUIETMOVE));
+					}
+>>>>>>> branch 'master' of https://github.com/Lory999555/AI-Project
 			}
 			return actions;
 		}

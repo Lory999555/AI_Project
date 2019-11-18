@@ -9,14 +9,23 @@ import algorithms.*;
 import heuristics.*;
 import representation.DipoleConf;
 import representation.DipoleMove;
+<<<<<<< HEAD
+=======
+import representation.DipoleMove.typeMove;
+>>>>>>> branch 'master' of https://github.com/Lory999555/AI-Project
 import representation.Move;
 
 import representation.*;
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> branch 'master' of https://github.com/Lory999555/AI-Project
 
 public class Main {
 
 	public static void main(String[] args) {
+<<<<<<< HEAD
 		LAVORAMU();
 	
 		long now = System.currentTimeMillis();
@@ -35,6 +44,39 @@ public class Main {
 
 		
 		
+=======
+		/**
+		 * // long a = 263172;
+		 * 
+		 * // System.out.println(a); // long b = flipVertical(a); //
+		 * System.out.println(b); long aa = 4; long[] ciccio = { aa }; //
+		 * System.out.println(aa); // System.out.println(ciccio[0]); // aa=7;
+		 * 
+		 * // long now=System.currentTimeMillis(); long now = new Date().getTime();
+		 * 
+		 * for (int i = 0; i < 100000000; i++) { ciccio[0] ^= 1; } //
+		 * System.out.println(ciccio[0]);
+		 * 
+		 * // long after= System.currentTimeMillis()-now; long after = new
+		 * Date().getTime() - now; System.out.println(after);
+		 **/
+
+		long now = System.nanoTime();
+		//LAVORAMU();
+		DipoleConf prova = new DipoleConf(true);
+		DipoleMove move = new DipoleMove();
+//		List<Move> mosse = prova.getActions();
+		List<Integer> mosse = prova.getActions2(move);
+		for (int i=0;i< mosse.size();i++) {
+//			System.out.println(mosse.get(i).toString());
+			move.decodingMove(mosse.get(i));
+			System.out.println(move.toString());
+		}
+		
+		System.out.println(System.nanoTime()-now);
+
+			
+>>>>>>> branch 'master' of https://github.com/Lory999555/AI-Project
 	}
 
 	public static long flipVertical(long x) {
