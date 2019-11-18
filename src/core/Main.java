@@ -39,7 +39,9 @@ public class Main {
 //		List<Move> mosse = prova.getActions();
 		List<Integer> mosse = prova.getActions2(move);
 		for (int i=0;i< mosse.size();i++) {
-			System.out.println(mosse.get(i).toString());
+//			System.out.println(mosse.get(i).toString());
+			move.decodingMove(mosse.get(i));
+			System.out.println(move.toString());
 		}
 		
 		System.out.println(System.nanoTime()-now);
