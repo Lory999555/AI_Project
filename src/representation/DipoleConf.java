@@ -690,27 +690,6 @@ public class DipoleConf implements Conf, Cloneable {
 
 	}
 
-	public String toString() {
-		String tmp = Long.toBinaryString(pRed | pBlack);
-		StringBuilder sb = new StringBuilder();
-		int c = tmp.length()-1;
-		for (int i = 0; i < 8; i++) {
-			sb.append('\n');
-			for (int j = 0; j < 8; j++) {
-				if (c >= 0) {
-					sb.append(tmp.charAt(c));
-					sb.append(' ');
-					c--;
-				} else {
-					sb.append('0');
-					sb.append(' ');
-					c--;
-				}
-			}
-		}
-		return sb.reverse().toString();
-
-	}
 
 	public String toString() {
 		StringBuilder sb = new StringBuilder("0000000000000000000000000000000000000000000000000000000000000000");
