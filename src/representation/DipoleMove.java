@@ -48,7 +48,7 @@ public class DipoleMove implements Move {
 		tP = typeMove.values()[code & 0x7];
 		black = (((code & 0x8) >>> 3) == 1 ? true : false);
 		type = (code & 0xf0) >>> 4;
-		dist = ((code & 0x700) >>> 8)-1;
+		dist = (code & 0x700) >>> 8;
 		toSq = (code & 0x1f800) >>> 11;
 		fromSq = (code & 0x7e0000) >>> 17;
 	}
@@ -69,59 +69,72 @@ public class DipoleMove implements Move {
 	@Override
 
 	public Conf applyTo(Conf input) throws InvalidActionException, CloneNotSupportedException {
-		DipoleConf tmp = (DipoleConf) input;
-		DipoleConf res = tmp.clone();
-		res.setBlack(!input.isBlack());
-		boolean allStack = type - dist < 0;
-		long fromtoSq = fromSq ^ toSq;
-		switch (this.tP) {
-		case QUIETMOVE:
-//			andrebbero controllate varie cose come:
-//				se una pedina si muove completamente quali bitboard aggiornare? se stessa
-//				e come capirlo? del tipo type - dist < 0?
-//				aggiornare anche le bb pblack e pred in base a quale gicatore
-//				sta muovendo così da scegliere from o to bb.
-//			sarebbe utile mettere pblack e pred in una lista che coincida con il booleano
-			res.setBoard(type, tmp.getBoard(type) ^ fromSq);
-			res.setBoard(dist, tmp.getBoard(dist) ^ toSq);
-			res.setBoard(type - dist, tmp.getBoard(type - dist) ^ fromSq);
-			if (tmp.isBlack())
-				if (allStack)
-					res.setpBlack(tmp.getpBlack() ^ fromtoSq);
-				else
-					res.setpBlack(tmp.getpBlack() | fromtoSq);
-			else {
-				if (allStack)
-					res.setpRed(tmp.getpRed() ^ fromtoSq);
-				else
-					res.setpRed(tmp.getpRed() | fromtoSq);
-			}
-			break;
-		case MERGE:
-			res.setBoard(type, tmp.getBoard(type) ^ fromSq);
-			res.setBoard(dist, tmp.getBoard(dist) ^ toSq);
-			res.setBoard(type - dist, tmp.getBoard(type - dist) ^ fromSq);
-			int c = 0;
+	    DipoleConf tmp = (DipoleConf) input;
+	    DipoleConf res = tmp.clone();
+	    res.setBlack(!input.isBlack());
+	    boolean allStack = (type - dist) == -1;
+	    assert(type-dist >= -1);
 
-//			trovo la pedina avversaria che viene mangiata
-			while ((tmp.getBoard(c) & toSq) == 0L) {
-				c++;
-			}
+	    long fromtoSq = fromSq ^ toSq;
 
-			res.setBoard(c, tmp.getBoard(c) ^ toSq);
-			break;
+	    switch (this.tP) {
+	    case QUIETMOVE:
+//	      andrebbero controllate varie cose come:
+//	        se una pedina si muove completamente quali bitboard aggiornare
+//	        e come capirlo? del tipo type - dist < 0?
+//	        aggiornare anche le bb pblack e pred in base a quale gicatore
+//	        sta muovendo così da scegliere from o to bb.
+//	      sarebbe utile mettere pblack e pred in una lista che coincida con il booleano
+	      
+	      
+	      //eliminare la pedina from
+	      res.setBoard(type, res.getBoard(type) ^ fromSq);
+	      
+	      //generare la pedina destinazione
+	      res.setBoard(dist-1, res.getBoard(dist-1) ^ toSq);
+	      
+	      if (tmp.isBlack()) {
+	        if (allStack)
+	          res.setpBlack(res.getpBlack() ^ fromtoSq);
+	        else {
+	          res.setBoard(type - dist, res.getBoard(type - dist) ^ fromSq);
+	          res.setpBlack(res.getpBlack() | fromtoSq);
+	        }
+	      }
+	      else {
+	        if (allStack)
+	          res.setpRed(res.getpRed() ^ fromtoSq);
+	        else {
+	          res.setBoard(type - dist, res.getBoard(type - dist) ^ fromSq);
+	          res.setpRed(res.getpRed() | fromtoSq);
+	        }
+	      }
+	      break;
+	    case MERGE:
+//	      res.setBoard(type, tmp.getBoard(type) ^ fromSq);
+//	      res.setBoard(dist, tmp.getBoard(dist) ^ toSq);
+//	      res.setBoard(type - dist, tmp.getBoard(type - dist) ^ fromSq);
+//	      int c = 0;
+	//
+//	      trovo la pedina avversaria che viene mangiata
+//	      while ((tmp.getBoard(c) & toSq) == 0L) {
+//	        c++;
+//	      }
+	//
+//	      res.setBoard(c, tmp.getBoard(c) ^ toSq);
+	      break;
 
-		case FRONTATTACK:
-			break;
+	    case FRONTATTACK:
+	      break;
+	      
+	    case BACKATTACK:
+	      break;
 
-		case BACKATTACK:
-			break;
+	    }
 
-		}
+	    return res;
 
-		return res;
-
-	}
+	  }
 	
 	public Conf applyTo2(Conf input,int code) throws InvalidActionException, CloneNotSupportedException {
 		int cont = 0;
@@ -142,75 +155,107 @@ public class DipoleMove implements Move {
 //				aggiornare anche le bb pblack e pred in base a quale gicatore
 //				sta muovendo così da scegliere from o to bb.
 //			sarebbe utile mettere pblack e pred in una lista che coincida con il booleano
-			res.setBoard(type, tmp.getBoard(type) ^ fromSq);
-			res.setBoard(dist, tmp.getBoard(dist) ^ toSq);
+			res.setBoard(type, res.getBoard(type) ^ fromSq);
+			res.setBoard(dist-1, res.getBoard(dist-1) ^ toSq);
 //			res.setBoard(type - dist, tmp.getBoard(type - dist) ^ fromSq);
 			if (tmp.isBlack()) {
 				if (allStack)
-					res.setpBlack(tmp.getpBlack() ^ fromtoSq);
+					res.setpBlack(res.getpBlack() ^ fromtoSq);
 				else {
-					res.setBoard(type - dist, tmp.getBoard(type - dist) ^ fromSq);
-					res.setpBlack(tmp.getpBlack() | fromtoSq);					
+					res.setBoard(type - dist, res.getBoard(type - dist) ^ fromSq);
+					res.setpBlack(res.getpBlack() | fromtoSq);					
 				}
 			}else {
 				if (allStack)
-					res.setpRed(tmp.getpRed() ^ fromtoSq);
+					res.setpRed(res.getpRed() ^ fromtoSq);
 				else {
-					res.setBoard(type - dist, tmp.getBoard(type - dist) ^ fromSq);
-					res.setpRed(tmp.getpRed() | fromtoSq);			
+					res.setBoard(type - dist, res.getBoard(type - dist) ^ fromSq);
+					res.setpRed(res.getpRed() | fromtoSq);			
 				}
 			}
 			break;
 		case MERGE:
-			res.setBoard(type, tmp.getBoard(type) ^ fromSq);					// toglie l'intero stack di dimensione type
+			res.setBoard(type, res.getBoard(type) ^ fromSq);					// toglie l'intero stack di dimensione type
 			cont = 0;
-			while((tmp.getBoard(cont) & toSq) == 0) {
+			while((res.getBoard(cont) & toSq) == 0) {
 				cont++;
 			}
-			res.setBoard(cont, tmp.getBoard(cont) ^ toSq);						// toglie l'intero stack da toSq			
-			res.setBoard(type+cont, tmp.getBoard(type+cont) ^ toSq);			// inserisce in posizione toSq il nuovo stack dato dalla somma dei 2
+			res.setBoard(cont, res.getBoard(cont) ^ toSq);						// toglie l'intero stack da toSq			
+			res.setBoard(type+cont, res.getBoard(type+cont) ^ toSq);			// inserisce in posizione toSq il nuovo stack dato dalla somma dei 2
 			
 			if (tmp.isBlack()) {
 				if (allStack)
-					res.setpBlack(tmp.getpBlack() ^ fromSq);
+					res.setpBlack(res.getpBlack() ^ fromSq);
 				else {
-					res.setBoard(type - dist, tmp.getBoard(type - dist) ^ fromSq);
+					res.setBoard(type - dist, res.getBoard(type - dist) ^ fromSq);
 				}
 			}else {
 				if (allStack)
-					res.setpRed(tmp.getpRed() ^ fromSq);
+					res.setpRed(res.getpRed() ^ fromSq);
 				else {
-					res.setBoard(type - dist, tmp.getBoard(type - dist) ^ fromSq);
+					res.setBoard(type - dist, res.getBoard(type - dist) ^ fromSq);
 				}
 			}
 			break;
 
 		case FRONTATTACK:
-			res.setBoard(type, tmp.getBoard(type) ^ fromSq);
-			res.setBoard(dist, tmp.getBoard(dist) ^ toSq);
+			res.setBoard(type, res.getBoard(type) ^ fromSq);
 			cont = 0;
-			while((tmp.getBoard(cont) & toSq) == 0) {
+			while((res.getBoard(cont) & toSq) == 0) {
 				cont++;
 			}
+			res.setBoard(cont, res.getBoard(cont) ^ toSq); //tolgo pedina nemica
+			res.setBoard(dist-1, res.getBoard(dist-1) ^ toSq);
+			
 			if (tmp.isBlack()) {
-				if (allStack)
-					res.setpBlack(tmp.getpBlack() ^ fromtoSq);
-				else {
-					res.setBoard(type - dist, tmp.getBoard(type - dist) ^ fromSq);
-					res.setpBlack(tmp.getpBlack() | fromtoSq);					
+				if (allStack) {
+					res.setpBlack(res.getpBlack() ^ fromtoSq);
 				}
+				else {
+					res.setBoard(type - dist, res.getBoard(type - dist) ^ fromSq);
+					res.setpBlack(res.getpBlack() | fromtoSq);					
+				}
+				res.setpRed(res.getpRed()^toSq);
 			}else {
 				if (allStack)
-					res.setpRed(tmp.getpRed() ^ fromtoSq);
+					res.setpRed(res.getpRed() ^ fromtoSq);
 				else {
-					res.setBoard(type - dist, tmp.getBoard(type - dist) ^ fromSq);
-					res.setpRed(tmp.getpRed() | fromtoSq);			
+					res.setBoard(type - dist, res.getBoard(type - dist) ^ fromSq);
+					res.setpRed(res.getpRed() | fromtoSq);			
 				}
+				res.setpBlack(res.getpBlack()^toSq);
 			}
 			
 			break;
 
 		case BACKATTACK:
+			res.setBoard(type, res.getBoard(type) ^ fromSq);
+			cont = 0;
+			while((res.getBoard(cont) & toSq) == 0) {
+				cont++;
+			}
+			res.setBoard(cont, res.getBoard(cont) ^ toSq); //tolgo pedina nemica
+			res.setBoard(dist-1, res.getBoard(dist-1) ^ toSq);
+			
+			if (tmp.isBlack()) {
+				if (allStack) {
+					res.setpBlack(res.getpBlack() ^ fromtoSq);
+				}
+				else {
+					res.setBoard(type - dist, res.getBoard(type - dist) ^ fromSq);
+					res.setpBlack(res.getpBlack() | fromtoSq);					
+				}
+				res.setpRed(res.getpRed()^toSq);
+			}else {
+				if (allStack)
+					res.setpRed(res.getpRed() ^ fromtoSq);
+				else {
+					res.setBoard(type - dist, res.getBoard(type - dist) ^ fromSq);
+					res.setpRed(res.getpRed() | fromtoSq);			
+				}
+				res.setpBlack(res.getpBlack()^toSq);
+			}
+			
 			break;
 
 		}

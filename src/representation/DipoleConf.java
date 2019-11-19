@@ -188,9 +188,9 @@ public class DipoleConf implements Conf, Cloneable {
 		backAttack = backMask & opponent;
 		long frontMask = backMask ^ rose;
 		frontAttack = frontMask & opponent;
-		quietMove = frontMask ^ frontAttack;
-		moves = backAttack | frontAttack | quietMove;
-		// backAttack = getBackAttack(rose, pBlack, sq, x);
+		merge  = frontMask & mines;
+		quietMove = frontMask ^ frontAttack^merge;
+		moves = backAttack | frontAttack | quietMove | merge; //forse non serve
 	}
 	
 //	// precalcolo rosa dell'intera scacchiera
@@ -353,20 +353,27 @@ public class DipoleConf implements Conf, Cloneable {
 					temp = backAttack & -backAttack;
 					backAttack ^= temp;
 					actions.add(new DipoleMove(pawn, temp, selectType, black, typeMove.BACKATTACK,
-							Math.abs(this.getSquare(pawn) - this.getSquare(temp)) / 8));
+							Math.abs((this.getSquare(pawn)>>>3) - (this.getSquare(temp)>>>3))));
 				}
 				while (frontAttack != 0) {
 					temp = frontAttack & -frontAttack;
 					frontAttack ^= temp;
 					actions.add(new DipoleMove(pawn, temp, selectType, black, typeMove.FRONTATTACK,
-							Math.abs(this.getSquare(pawn) - this.getSquare(temp)) / 8));
+							Math.abs((this.getSquare(pawn)>>>3) - (this.getSquare(temp)>>>3))));
 
 				}
 				while (quietMove != 0) {
 					temp = quietMove & -quietMove;
 					quietMove ^= temp;
 					actions.add(new DipoleMove(pawn, temp, selectType, black, typeMove.QUIETMOVE,
-							Math.abs(this.getSquare(pawn) - this.getSquare(temp)) / 8));
+							Math.abs((this.getSquare(pawn)>>>3) - (this.getSquare(temp)>>>3))));
+
+				}
+				while (merge != 0) {
+					temp = merge & -merge;
+					merge ^= temp;
+					actions.add(new DipoleMove(pawn, temp, selectType, black, typeMove.MERGE,
+							Math.abs((this.getSquare(pawn)>>>3) - (this.getSquare(temp)>>>3))));
 
 				}
 			}
@@ -407,20 +414,26 @@ public class DipoleConf implements Conf, Cloneable {
 					// to square di from
 					// 1 meno la'ltro in modulo, il risultato lo divido per 8
 					actions.add(new DipoleMove(pawn, temp, selectType, black, typeMove.BACKATTACK,
-							Math.abs(this.getSquare(pawn) - this.getSquare(temp)) / 8));
+							Math.abs((this.getSquare(pawn)>>>3) - (this.getSquare(temp)>>>3))));
 				}
 				while (frontAttack != 0) {
 					temp = frontAttack & -frontAttack;
 					frontAttack ^= temp;
 					actions.add(new DipoleMove(pawn, temp, selectType, black, typeMove.FRONTATTACK,
-							Math.abs(this.getSquare(pawn) - this.getSquare(temp)) / 8));
+							Math.abs((this.getSquare(pawn)>>>3) - (this.getSquare(temp)>>>3))));
 
 				}
 				while (quietMove != 0) {
 					temp = quietMove & -quietMove;
 					quietMove ^= temp;
 					actions.add(new DipoleMove(pawn, temp, selectType, black, typeMove.QUIETMOVE,
-							Math.abs(this.getSquare(pawn) - this.getSquare(temp)) / 8));
+							Math.abs((this.getSquare(pawn)>>>3) - (this.getSquare(temp)>>>3))));
+				}
+				while (merge != 0) {
+					temp = merge & -merge;
+					merge ^= temp;
+					actions.add(new DipoleMove(pawn, temp, selectType, black, typeMove.MERGE,
+							Math.abs((this.getSquare(pawn)>>>3) - (this.getSquare(temp)>>>3))));
 				}
 			}
 			return actions;
@@ -464,6 +477,11 @@ public class DipoleConf implements Conf, Cloneable {
 					temp = quietMove & -quietMove;
 					quietMove ^= temp;
 					actions.add(mossa.encodingMove(getSquare(pawn), getSquare(temp), selectType, black, typeMove.QUIETMOVE));
+					}
+				while (merge != 0) {
+					temp = merge & -merge;
+					merge ^= temp;
+					actions.add(mossa.encodingMove(getSquare(pawn), getSquare(temp), selectType, black, typeMove.MERGE));
 					}
 			}
 			return actions;
@@ -510,6 +528,11 @@ public class DipoleConf implements Conf, Cloneable {
 					temp = quietMove & -quietMove;
 					quietMove ^= temp;
 					actions.add(mossa.encodingMove(getSquare(pawn), getSquare(temp), selectType, black, typeMove.QUIETMOVE));
+					}
+				while (merge != 0) {
+					temp = merge & -merge;
+					merge ^= temp;
+					actions.add(mossa.encodingMove(getSquare(pawn), getSquare(temp), selectType, black, typeMove.MERGE));
 					}
 			}
 			return actions;
