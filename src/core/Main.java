@@ -9,16 +9,42 @@ import algorithms.*;
 import heuristics.*;
 import representation.DipoleConf;
 import representation.DipoleMove;
+<<<<<<< HEAD
+=======
 import representation.DipoleMove.typeMove;
+>>>>>>> branch 'master' of https://github.com/Lory999555/AI-Project
 import representation.Move;
 
 import representation.*;
 
+<<<<<<< HEAD
+=======
 
+>>>>>>> branch 'master' of https://github.com/Lory999555/AI-Project
 
 public class Main {
 
 	public static void main(String[] args) {
+<<<<<<< HEAD
+		LAVORAMU();
+	
+		long now = System.currentTimeMillis();
+		DipoleConf prova = new DipoleConf(true);
+		List<Move> mosse = prova.getActions();
+
+		HeuristicInterface hi = new BBEvaluator();
+		
+		AlgorithmInterface ai = new MTDFAgent(hi);
+		
+		Conf root = new DipoleConf(false);
+		//Conf root = new DipoleConf(false);
+		System.out.println(root);
+		Move choise = ai.compute(root);
+		System.out.println(choise);
+
+		
+		
+=======
 		/**
 		 * // long a = 263172;
 		 * 
@@ -50,6 +76,7 @@ public class Main {
 		System.out.println(System.nanoTime()-now);
 
 			
+>>>>>>> branch 'master' of https://github.com/Lory999555/AI-Project
 	}
 
 	public static long flipVertical(long x) {
@@ -67,7 +94,7 @@ public class Main {
 		//System.out.println(date.toString());
 		//System.out.println(now.toString());
 		long tiempu = now.getTime() - date.getTime();
-		System.out.println("Giorni PERSI : " + tiempu/(1000*60*60*24) +"\n https://gfycat.com/reasonabledismalkinglet-stinson-barney!!!");
+		System.out.println("Giorni PERSI : " + tiempu/(1000*60*60*24) +"\nhttps://gfycat.com/reasonabledismalkinglet-stinson-barney!!!");
 	}
 	
 	

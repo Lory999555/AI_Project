@@ -40,6 +40,10 @@ public class DipoleMove implements Move {
 	public int encodingMove(int fromSq, int toSq, int type, boolean black, typeMove tp) {
 		System.out.println("f " + fromSq + ", to " + toSq + " = "
 				+ (Math.abs((fromSq >> 3) - (toSq >> 3)) + " -> " + (Math.abs((fromSq >> 3) - (toSq >> 3)) << 8)));
+		return (fromSq << 17) | (toSq << 11) | (Math.abs((fromSq >> 3) - (toSq >> 3)) << 8) | (type << 4)
+				| ((black ? 1 : 0) << 3) | (tp.ordinal());
+		System.out.println("f " + fromSq + ", to " + toSq + " = "
+				+ (Math.abs((fromSq >> 3) - (toSq >> 3)) + " -> " + (Math.abs((fromSq >> 3) - (toSq >> 3)) << 8)));
 		return (fromSq << 17) | (toSq << 11) | (Math.abs((fromSq >>> 3) - (toSq >>> 3)) << 8) | (type << 4)
 				| ((black ? 1 : 0) << 3) | (tp.ordinal());
 	}
@@ -55,7 +59,8 @@ public class DipoleMove implements Move {
 
 	@Override
 	public String toString() {
-		return tP.name() + " from: " + fromSq + " to " + toSq +" dist: "+ dist +" type: " + type + " BLACK: " + black;
+		return tP.name() + " from: " + fromSq + " to " + toSq + " type: " + type + " BLACK: " + black + " dist: "
+				+ dist;
 //		return "0";
 	}
 
@@ -65,10 +70,10 @@ public class DipoleMove implements Move {
 		return false;
 	}
 
-	
 	@Override
 
 	public Conf applyTo(Conf input) throws InvalidActionException, CloneNotSupportedException {
+<<<<<<< HEAD
 	    DipoleConf tmp = (DipoleConf) input;
 	    DipoleConf res = tmp.clone();
 	    res.setBlack(!input.isBlack());
@@ -123,6 +128,60 @@ public class DipoleMove implements Move {
 	//
 //	      res.setBoard(c, tmp.getBoard(c) ^ toSq);
 	      break;
+=======
+		DipoleConf tmp = (DipoleConf) input;
+		DipoleConf res = tmp.clone();
+		res.setBlack(!input.isBlack());
+		boolean allStack = (type - dist) == -1;
+		assert (type - dist >= -1);
+
+		long fromtoSq = fromSq ^ toSq;
+
+		switch (this.tP) {
+		case QUIETMOVE:
+//			andrebbero controllate varie cose come:
+//				se una pedina si muove completamente quali bitboard aggiornare
+//				e come capirlo? del tipo type - dist < 0?
+//				aggiornare anche le bb pblack e pred in base a quale gicatore
+//				sta muovendo così da scegliere from o to bb.
+//			sarebbe utile mettere pblack e pred in una lista che coincida con il booleano
+
+			// eliminare la pedina from
+			res.setBoard(type, res.getBoard(type) ^ fromSq);
+
+			// generare la pedina destinazione
+			res.setBoard(dist - 1, res.getBoard(dist - 1) ^ toSq);
+
+			if (tmp.isBlack()) {
+				if (allStack)
+					res.setpBlack(res.getpBlack() ^ fromtoSq);
+				else {
+					res.setBoard(type - dist, res.getBoard(type - dist) ^ fromSq);
+					res.setpBlack(res.getpBlack() | fromtoSq);
+				}
+			} else {
+				if (allStack)
+					res.setpRed(res.getpRed() ^ fromtoSq);
+				else {
+					res.setBoard(type - dist, res.getBoard(type - dist) ^ fromSq);
+					res.setpRed(res.getpRed() | fromtoSq);
+				}
+			}
+			break;
+		case MERGE:
+//			res.setBoard(type, tmp.getBoard(type) ^ fromSq);
+//			res.setBoard(dist, tmp.getBoard(dist) ^ toSq);
+//			res.setBoard(type - dist, tmp.getBoard(type - dist) ^ fromSq);
+//			int c = 0;
+//
+//			trovo la pedina avversaria che viene mangiata
+//			while ((tmp.getBoard(c) & toSq) == 0L) {
+//				c++;
+//			}
+//
+//			res.setBoard(c, tmp.getBoard(c) ^ toSq);
+			break;
+>>>>>>> branch 'master' of https://github.com/Lory999555/AI-Project
 
 	    case FRONTATTACK:
 	      break;
@@ -142,7 +201,7 @@ public class DipoleMove implements Move {
 		DipoleConf res = tmp.clone();
 		res.setBlack(!input.isBlack());
 		decodingMove(code);
-		
+
 		boolean allStack = type - dist == 0;
 
 		long fromtoSq = fromSq ^ toSq;

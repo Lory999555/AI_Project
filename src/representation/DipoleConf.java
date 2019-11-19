@@ -346,6 +346,7 @@ public class DipoleConf implements Conf, Cloneable {
 					}
 					selectType++;
 				}
+				assert (selectType < 12);
 				allMoves2(pawn, pBlack, pRed, selectType, pieces, Board.movingBook);
 				//allMoves(pawn, pBlack, pRed, selectType, pieces);
 				long temp;
@@ -400,6 +401,8 @@ public class DipoleConf implements Conf, Cloneable {
 					}
 					selectType++;
 				}
+
+				assert (selectType < 12);
 				allMoves2(pawn, pRed180, pBlack180, selectType, pieces180, Board.movingBook);
 				//allMoves(pawn, pRed, pBlack, selectType, pieces);
 				backAttack = flip180(backAttack);
@@ -460,6 +463,8 @@ public class DipoleConf implements Conf, Cloneable {
 					}
 					selectType++;
 				}
+				assert (selectType < 12);
+
 				allMoves2(pawn, pBlack, pRed, selectType, pieces, Board.movingBook);
 				//allMoves(pawn, pBlack, pRed, selectType, pieces);
 				long temp;
@@ -507,6 +512,7 @@ public class DipoleConf implements Conf, Cloneable {
 					}
 					selectType++;
 				}
+				assert (selectType < 12);
 				allMoves2(pawn, pRed180, pBlack180, selectType, pieces180, Board.movingBook);
 				//allMoves(pawn, pRed, pBlack, selectType, pieces);
 				backAttack = flip180(backAttack);
@@ -704,6 +710,112 @@ public class DipoleConf implements Conf, Cloneable {
 		}
 		return sb.reverse().toString();
 
+	}
+
+	public String toString() {
+		StringBuilder sb = new StringBuilder("0000000000000000000000000000000000000000000000000000000000000000");
+		for (int i = 0; i < pieces.length; i++) {
+			long pred = pieces[i] & pRed;
+			long pblack = pieces[i] & pBlack;
+			String tmpr = Long.toBinaryString(pred);
+			String tmpb = Long.toBinaryString(pblack);
+			for (int j = tmpr.length()-1; j >= 0; j--) {
+				if (tmpr.charAt(j) == '1')
+					switch (i) {
+					case 0:
+						sb.setCharAt(tmpr.length()-j-1, 'A');
+						break;
+					case 1:
+						sb.setCharAt(tmpr.length()-j-1, 'B');
+						break;
+					case 2:
+						sb.setCharAt(tmpr.length()-j-1, 'C');
+						break;
+					case 3:
+						sb.setCharAt(tmpr.length()-j-1, 'D');
+						break;
+					case 4:
+						sb.setCharAt(tmpr.length()-j-1, 'E');
+						break;
+					case 5:
+						sb.setCharAt(tmpr.length()-j-1, 'F');
+						break;
+					case 6:
+						sb.setCharAt(tmpr.length()-j-1, 'G');
+						break;
+					case 7:
+						sb.setCharAt(tmpr.length()-j-1, 'H');
+						break;
+					case 8:
+						sb.setCharAt(tmpr.length()-j-1, 'I');
+						break;
+					case 9:
+						sb.setCharAt(tmpr.length()-j-1, 'L');
+						break;
+					case 10:
+						sb.setCharAt(tmpr.length()-j-1, 'M');
+						break;
+					case 11:
+						sb.setCharAt(tmpr.length()-j-1, 'N');
+						break;
+					}
+			}
+
+			for (int j = tmpb.length()-1; j >= 0; j--) {
+				if (tmpb.charAt(j) == '1')
+					switch (i) {
+					case 0:
+						sb.setCharAt(tmpb.length()-j-1, 'a');
+						break;
+					case 1:
+						sb.setCharAt(tmpb.length()-j-1, 'b');
+						break;
+					case 2:
+						sb.setCharAt(tmpb.length()-j-1, 'c');
+						break;
+					case 3:
+						sb.setCharAt(tmpb.length()-j-1, 'd');
+						break;
+					case 4:
+						sb.setCharAt(tmpb.length()-j-1, 'e');
+						break;
+					case 5:
+						sb.setCharAt(tmpb.length()-j-1, 'f');
+						break;
+					case 6:
+						sb.setCharAt(tmpb.length()-j-1, 'g');
+						break;
+					case 7:
+						sb.setCharAt(tmpb.length()-j-1, 'h');
+						break;
+					case 8:
+						sb.setCharAt(tmpb.length()-j-1, 'i');
+						break;
+					case 9:
+						sb.setCharAt(tmpb.length()-j-1, 'l');
+						break;
+					case 10:
+						sb.setCharAt(tmpb.length()-j-1, 'm');
+						break;
+					case 11:
+						sb.setCharAt(tmpb.length()-j-1, 'n');
+						break;
+					}
+			}
+		}
+
+		sb.insert(56, '\n');
+		sb.insert(48, '\n');
+		sb.insert(40, '\n');
+		sb.insert(32, '\n');
+		sb.insert(24, '\n');
+		sb.insert(16, '\n');
+		sb.insert(8, '\n');
+		for (int i = 0; i <= sb.length(); i += 2) {
+			sb.insert(i, ' ');
+		}
+
+		return sb.reverse().toString();
 
 	}
 
