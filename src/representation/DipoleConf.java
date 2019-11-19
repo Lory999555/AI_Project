@@ -459,35 +459,21 @@ public class DipoleConf implements Conf, Cloneable {
 				while (backAttack != 0) {
 					temp = backAttack & -backAttack;
 					backAttack ^= temp;
-<<<<<<< HEAD
 					actions.add(mossa.encodingMove(getSquare(pawn), getSquare(temp), selectType, black,
 							typeMove.BACKATTACK));
-=======
-					actions.add(mossa.encodingMove(getSquare(pawn), getSquare(temp), selectType, black, typeMove.BACKATTACK));
->>>>>>> branch 'master' of https://github.com/Lory999555/AI-Project
 				}
 				while (frontAttack != 0) {
 					temp = frontAttack & -frontAttack;
 					frontAttack ^= temp;
-<<<<<<< HEAD
 					actions.add(mossa.encodingMove(getSquare(pawn), getSquare(temp), selectType, black,
 							typeMove.FRONTATTACK));
 				}
-=======
-					actions.add(mossa.encodingMove(getSquare(pawn), getSquare(temp), selectType, black, typeMove.FRONTATTACK));	
-					}
->>>>>>> branch 'master' of https://github.com/Lory999555/AI-Project
 				while (quietMove != 0) {
 					temp = quietMove & -quietMove;
 					quietMove ^= temp;
-<<<<<<< HEAD
 					actions.add(mossa.encodingMove(getSquare(pawn), getSquare(temp), selectType, black,
 							typeMove.QUIETMOVE));
 				}
-=======
-					actions.add(mossa.encodingMove(getSquare(pawn), getSquare(temp), selectType, black, typeMove.QUIETMOVE));
-					}
->>>>>>> branch 'master' of https://github.com/Lory999555/AI-Project
 			}
 			return actions;
 		} else {
@@ -523,36 +509,24 @@ public class DipoleConf implements Conf, Cloneable {
 				while (backAttack != 0) {
 					temp = backAttack & -backAttack;
 					backAttack ^= temp;
-<<<<<<< HEAD
+
 					actions.add(mossa.encodingMove(getSquare(pawn), getSquare(temp), selectType, black,
 							typeMove.BACKATTACK));
 				}
-=======
-					actions.add(mossa.encodingMove(getSquare(pawn), getSquare(temp), selectType, black, typeMove.BACKATTACK));
-					}
->>>>>>> branch 'master' of https://github.com/Lory999555/AI-Project
 				while (frontAttack != 0) {
 					temp = frontAttack & -frontAttack;
 					frontAttack ^= temp;
-<<<<<<< HEAD
 					actions.add(mossa.encodingMove(getSquare(pawn), getSquare(temp), selectType, black,
 							typeMove.FRONTATTACK));
 				}
-=======
-					actions.add(mossa.encodingMove(getSquare(pawn), getSquare(temp), selectType, black, typeMove.FRONTATTACK));
-					}
->>>>>>> branch 'master' of https://github.com/Lory999555/AI-Project
 				while (quietMove != 0) {
 					temp = quietMove & -quietMove;
 					quietMove ^= temp;
-<<<<<<< HEAD
+
 					actions.add(mossa.encodingMove(getSquare(pawn), getSquare(temp), selectType, black,
 							typeMove.QUIETMOVE));
 				}
-=======
-					actions.add(mossa.encodingMove(getSquare(pawn), getSquare(temp), selectType, black, typeMove.QUIETMOVE));
-					}
->>>>>>> branch 'master' of https://github.com/Lory999555/AI-Project
+
 			}
 			return actions;
 		}
@@ -732,86 +706,86 @@ public class DipoleConf implements Conf, Cloneable {
 			long pblack = pieces[i] & pBlack;
 			String tmpr = Long.toBinaryString(pred);
 			String tmpb = Long.toBinaryString(pblack);
-			for (int j = tmpr.length()-1; j >= 0; j--) {
+			for (int j = tmpr.length() - 1; j >= 0; j--) {
 				if (tmpr.charAt(j) == '1')
 					switch (i) {
 					case 0:
-						sb.setCharAt(tmpr.length()-j-1, 'A');
+						sb.setCharAt(tmpr.length() - j - 1, 'A');
 						break;
 					case 1:
-						sb.setCharAt(tmpr.length()-j-1, 'B');
+						sb.setCharAt(tmpr.length() - j - 1, 'B');
 						break;
 					case 2:
-						sb.setCharAt(tmpr.length()-j-1, 'C');
+						sb.setCharAt(tmpr.length() - j - 1, 'C');
 						break;
 					case 3:
-						sb.setCharAt(tmpr.length()-j-1, 'D');
+						sb.setCharAt(tmpr.length() - j - 1, 'D');
 						break;
 					case 4:
-						sb.setCharAt(tmpr.length()-j-1, 'E');
+						sb.setCharAt(tmpr.length() - j - 1, 'E');
 						break;
 					case 5:
-						sb.setCharAt(tmpr.length()-j-1, 'F');
+						sb.setCharAt(tmpr.length() - j - 1, 'F');
 						break;
 					case 6:
-						sb.setCharAt(tmpr.length()-j-1, 'G');
+						sb.setCharAt(tmpr.length() - j - 1, 'G');
 						break;
 					case 7:
-						sb.setCharAt(tmpr.length()-j-1, 'H');
+						sb.setCharAt(tmpr.length() - j - 1, 'H');
 						break;
 					case 8:
-						sb.setCharAt(tmpr.length()-j-1, 'I');
+						sb.setCharAt(tmpr.length() - j - 1, 'I');
 						break;
 					case 9:
-						sb.setCharAt(tmpr.length()-j-1, 'L');
+						sb.setCharAt(tmpr.length() - j - 1, 'L');
 						break;
 					case 10:
-						sb.setCharAt(tmpr.length()-j-1, 'M');
+						sb.setCharAt(tmpr.length() - j - 1, 'M');
 						break;
 					case 11:
-						sb.setCharAt(tmpr.length()-j-1, 'N');
+						sb.setCharAt(tmpr.length() - j - 1, 'N');
 						break;
 					}
 			}
 
-			for (int j = tmpb.length()-1; j >= 0; j--) {
+			for (int j = tmpb.length() - 1; j >= 0; j--) {
 				if (tmpb.charAt(j) == '1')
 					switch (i) {
 					case 0:
-						sb.setCharAt(tmpb.length()-j-1, 'a');
+						sb.setCharAt(tmpb.length() - j - 1, 'a');
 						break;
 					case 1:
-						sb.setCharAt(tmpb.length()-j-1, 'b');
+						sb.setCharAt(tmpb.length() - j - 1, 'b');
 						break;
 					case 2:
-						sb.setCharAt(tmpb.length()-j-1, 'c');
+						sb.setCharAt(tmpb.length() - j - 1, 'c');
 						break;
 					case 3:
-						sb.setCharAt(tmpb.length()-j-1, 'd');
+						sb.setCharAt(tmpb.length() - j - 1, 'd');
 						break;
 					case 4:
-						sb.setCharAt(tmpb.length()-j-1, 'e');
+						sb.setCharAt(tmpb.length() - j - 1, 'e');
 						break;
 					case 5:
-						sb.setCharAt(tmpb.length()-j-1, 'f');
+						sb.setCharAt(tmpb.length() - j - 1, 'f');
 						break;
 					case 6:
-						sb.setCharAt(tmpb.length()-j-1, 'g');
+						sb.setCharAt(tmpb.length() - j - 1, 'g');
 						break;
 					case 7:
-						sb.setCharAt(tmpb.length()-j-1, 'h');
+						sb.setCharAt(tmpb.length() - j - 1, 'h');
 						break;
 					case 8:
-						sb.setCharAt(tmpb.length()-j-1, 'i');
+						sb.setCharAt(tmpb.length() - j - 1, 'i');
 						break;
 					case 9:
-						sb.setCharAt(tmpb.length()-j-1, 'l');
+						sb.setCharAt(tmpb.length() - j - 1, 'l');
 						break;
 					case 10:
-						sb.setCharAt(tmpb.length()-j-1, 'm');
+						sb.setCharAt(tmpb.length() - j - 1, 'm');
 						break;
 					case 11:
-						sb.setCharAt(tmpb.length()-j-1, 'n');
+						sb.setCharAt(tmpb.length() - j - 1, 'n');
 						break;
 					}
 			}
