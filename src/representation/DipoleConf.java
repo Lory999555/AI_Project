@@ -176,7 +176,7 @@ public class DipoleConf implements Conf, Cloneable {
 		moves = backAttack | frontAttack | quietMove;
 	}
 
-	private void allMoves2(long x, long opponent, long mines, int type, long[] pieces, long[][] possibleMove) {
+	public void allMoves2(long x, long opponent, long mines, int type, long[] pieces, long[][] possibleMove) {
 		if (type > 6)
 			type = 6;
 		int sq = getSquare(x);
@@ -649,6 +649,14 @@ public class DipoleConf implements Conf, Cloneable {
 		this.quietMove = quietMove;
 	}
 
+	public long getMerge() {
+		return merge;
+	}
+
+	public void setMerge(long merge) {
+		this.merge = merge;
+	}
+
 	public long getpBlack() {
 		return pBlack;
 	}
@@ -820,5 +828,10 @@ public class DipoleConf implements Conf, Cloneable {
 	@Override
 	public long[] getForHash() {
 		return this.getPieces();
+	}
+
+	public int getType(long pawn) {
+		// TODO Auto-generated method stub
+		return 0;
 	}
 }
