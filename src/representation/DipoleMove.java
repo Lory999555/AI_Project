@@ -45,6 +45,15 @@ public class DipoleMove implements Move {
 
 	}
 
+	// distanza utilizzata dalle mosse death e dalle mosse back attack in quanto la
+	// distnza gliela passiamo da parametri
+	public int encodingMove(int fromSq, int toSq, int dist, int type, boolean black, typeMove tp) {
+		System.out.println("f " + fromSq + ", to " + toSq + " = "
+				+ (Math.abs((fromSq >> 3) - (toSq >> 3)) + " -> " + (Math.abs((fromSq >> 3) - (toSq >> 3)) << 8)));
+		return (fromSq << 17) | (toSq << 11) | (dist << 8) | (type << 4) | ((black ? 1 : 0) << 3) | (tp.ordinal());
+
+	}
+
 	public void decodingMove(int code) {
 		tP = typeMove.values()[code & 0x7];
 		black = (((code & 0x8) >>> 3) == 1 ? true : false);
@@ -70,7 +79,7 @@ public class DipoleMove implements Move {
 	@Override
 
 	public Conf applyTo(Conf input) throws InvalidActionException, CloneNotSupportedException {
-		int cont = 0;
+		int cont;
 		DipoleConf tmp = (DipoleConf) input;
 		DipoleConf res = tmp.clone();
 		res.setBlack(!input.isBlack());
@@ -88,6 +97,7 @@ public class DipoleMove implements Move {
 //				aggiornare anche le bb pblack e pred in base a quale gicatore
 //				sta muovendo così da scegliere from o to bb.
 //			sarebbe utile mettere pblack e pred in una lista che coincida con il booleano
+			
 			res.setBoard(type, res.getBoard(type) ^ fromSq);
 			res.setBoard(dist - 1, res.getBoard(dist - 1) ^ toSq);
 //			res.setBoard(type - dist, tmp.getBoard(type - dist) ^ fromSq);
@@ -117,9 +127,9 @@ public class DipoleMove implements Move {
 			while ((res.getBoard(cont) & toSq) == 0) {
 				cont++;
 			}
-			assert (cont < 11);
+
 			res.setBoard(cont, res.getBoard(cont) ^ toSq); // toglie l'intero stack da toSq
-			res.setBoard(dist + cont, res.getBoard(dist + cont) ^ toSq); // inserisce in posizione toSq il nuovo stack
+			res.setBoard(type + cont, res.getBoard(type + cont) ^ toSq); // inserisce in posizione toSq il nuovo stack
 																			// dato dalla somma dei 2
 
 			if (tmp.isBlack()) {
@@ -174,8 +184,6 @@ public class DipoleMove implements Move {
 			while ((res.getBoard(cont) & toSq) == 0) {
 				cont++;
 			}
-			assert(dist > 0);
-			
 			res.setBoard(cont, res.getBoard(cont) ^ toSq); // tolgo pedina nemica
 			res.setBoard(dist - 1, res.getBoard(dist - 1) ^ toSq);
 
@@ -198,14 +206,28 @@ public class DipoleMove implements Move {
 			}
 
 			break;
+		case DEATH:
+			res.setBoard(type, res.getBoard(type) ^ fromSq);
+			if (tmp.isBlack()) {
+				if (allStack) {
+					res.setpBlack(res.getpBlack() ^ fromSq);
+				} else {
+					res.setBoard(type - dist, res.getBoard(type - dist) ^ fromSq);
+				}
+			} else {
+				if (allStack)
+					res.setpRed(res.getpRed() ^ fromSq);
+				else {
+					res.setBoard(type - dist, res.getBoard(type - dist) ^ fromSq);
+				}
+			}
 
 		}
 
 		return res;
-
 	}
 
-
+	
 	public Conf applyTo2(Conf input, int code) throws InvalidActionException, CloneNotSupportedException {
 		int cont = 0;
 		DipoleConf tmp = (DipoleConf) input;
@@ -334,6 +356,21 @@ public class DipoleMove implements Move {
 			}
 
 			break;
+		case DEATH:
+			res.setBoard(type, res.getBoard(type) ^ fromSq);
+			if (tmp.isBlack()) {
+				if (allStack) {
+					res.setpBlack(res.getpBlack() ^ fromSq);
+				} else {
+					res.setBoard(type - dist, res.getBoard(type - dist) ^ fromSq);
+				}
+			} else {
+				if (allStack)
+					res.setpRed(res.getpRed() ^ fromSq);
+				else {
+					res.setBoard(type - dist, res.getBoard(type - dist) ^ fromSq);
+				}
+			}
 
 		}
 

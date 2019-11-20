@@ -176,7 +176,7 @@ public class DipoleConf implements Conf, Cloneable {
 		moves = backAttack | frontAttack | quietMove;
 	}
 
-	private void allMoves2(long x, long opponent, long mines, int type, long[] pieces, long[][] possibleMove) {
+	public void allMoves2(long x, long opponent, long mines, int type, long[] pieces, long[][] possibleMove) {
 		if (type > 6)
 			type = 6;
 		int sq = getSquare(x);
@@ -456,7 +456,10 @@ public class DipoleConf implements Conf, Cloneable {
 	 */
 	public List<Integer> getActions2(DipoleMove mossa) {
 		long pawn;
+		int sqPawn;
 		long mines;
+		int dist;
+
 		List<Integer> actions = new ArrayList<Integer>();
 		if (!black) {
 			mines = pRed;
@@ -464,6 +467,7 @@ public class DipoleConf implements Conf, Cloneable {
 				pawn = mines & -mines;
 				mines ^= pawn;
 				int selectType = 0;
+				int death = 0;
 				while (selectType < 12) {
 					if ((pawn & pieces[selectType]) != 0) {
 						break;
@@ -473,31 +477,38 @@ public class DipoleConf implements Conf, Cloneable {
 				assert (selectType < 12);
 
 				allMoves2(pawn, pBlack, pRed, selectType, pieces, Board.movingBook);
+				sqPawn = getSquare(pawn);
 				// allMoves(pawn, pBlack, pRed, selectType, pieces);
 				long temp;
 				while (backAttack != 0) {
 					temp = backAttack & -backAttack;
 					backAttack ^= temp;
-					actions.add(mossa.encodingMove(getSquare(pawn), getSquare(temp), selectType, black,
-							typeMove.BACKATTACK));
+					int sqTemp = getSquare(temp);
+					dist = (Math.abs((sqPawn >> 3) - (sqTemp >> 3)) << 8);
+					if (dist == 0)
+						dist = Math.abs(sqPawn - sqTemp);
+					actions.add(mossa.encodingMove(sqPawn, sqTemp, dist, selectType, black, typeMove.BACKATTACK));
 				}
 				while (frontAttack != 0) {
 					temp = frontAttack & -frontAttack;
 					frontAttack ^= temp;
-					actions.add(mossa.encodingMove(getSquare(pawn), getSquare(temp), selectType, black,
-							typeMove.FRONTATTACK));
+					actions.add(mossa.encodingMove(sqPawn, getSquare(temp), selectType, black, typeMove.FRONTATTACK));
 				}
 				while (quietMove != 0) {
 					temp = quietMove & -quietMove;
 					quietMove ^= temp;
-					actions.add(mossa.encodingMove(getSquare(pawn), getSquare(temp), selectType, black,
-							typeMove.QUIETMOVE));
+					actions.add(mossa.encodingMove(sqPawn, getSquare(temp), selectType, black, typeMove.QUIETMOVE));
 				}
 				while (merge != 0) {
 					temp = merge & -merge;
 					merge ^= temp;
-					actions.add(
-							mossa.encodingMove(getSquare(pawn), getSquare(temp), selectType, black, typeMove.MERGE));
+					actions.add(mossa.encodingMove(sqPawn, getSquare(temp), selectType, black, typeMove.MERGE));
+				}
+				death = Board.deathNote[sqPawn];
+				if (death <= selectType + 1) {
+					for (int i = death; i < selectType + 1; i++) {
+						actions.add(mossa.encodingMove(sqPawn, 0, i, selectType, black, typeMove.DEATH));
+					}
 				}
 			}
 			return actions;
@@ -529,20 +540,24 @@ public class DipoleConf implements Conf, Cloneable {
 				backAttack = flip180(backAttack);
 				frontAttack = flip180(frontAttack);
 				quietMove = flip180(quietMove);
+				merge = flip180(merge);
 				pawn = flip180(pawn);
+				sqPawn = getSquare(pawn);
 				long temp;
 				while (backAttack != 0) {
 					temp = backAttack & -backAttack;
 					backAttack ^= temp;
-
-					actions.add(mossa.encodingMove(getSquare(pawn), getSquare(temp), selectType, black,
-							typeMove.BACKATTACK));
+					int sqTemp = getSquare(temp);
+					dist = (Math.abs((sqPawn >> 3) - (sqTemp >> 3)) << 8);
+					if (dist == 0)
+						dist = Math.abs(sqPawn - sqTemp);
+					actions.add(
+							mossa.encodingMove(sqPawn, getSquare(temp), dist, selectType, black, typeMove.BACKATTACK));
 				}
 				while (frontAttack != 0) {
 					temp = frontAttack & -frontAttack;
 					frontAttack ^= temp;
-					actions.add(mossa.encodingMove(getSquare(pawn), getSquare(temp), selectType, black,
-							typeMove.FRONTATTACK));
+					actions.add(mossa.encodingMove(sqPawn, getSquare(temp), selectType, black, typeMove.FRONTATTACK));
 				}
 				while (quietMove != 0) {
 					temp = quietMove & -quietMove;
@@ -642,6 +657,14 @@ public class DipoleConf implements Conf, Cloneable {
 
 	public void setQuietMove(long quietMove) {
 		this.quietMove = quietMove;
+	}
+
+	public long getMerge() {
+		return merge;
+	}
+
+	public void setMerge(long merge) {
+		this.merge = merge;
 	}
 
 	public long getpBlack() {
