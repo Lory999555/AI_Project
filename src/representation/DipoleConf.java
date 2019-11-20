@@ -32,7 +32,6 @@ public class DipoleConf implements Conf, Cloneable {
 	// Configurazione inzio partita
 	public DipoleConf(boolean black) {
 
-
 		this.pieces[11] = 0x1000000000000008L;
 		this.pRed = 0x8L;
 		this.pBlack = 0x1000000000000000L;
@@ -135,7 +134,7 @@ public class DipoleConf implements Conf, Cloneable {
 		}
 		return rose ^ (rose & tmp);
 	}
-	
+
 	private long removeImpossibleMove2(long rose, int sq, long opponent, long mine, int type, long[] pieces) {
 		long notFree = opponent;
 		long ovest = fileMask(sq);
@@ -189,9 +188,9 @@ public class DipoleConf implements Conf, Cloneable {
 		backAttack = backMask & opponent;
 		long frontMask = backMask ^ rose;
 		frontAttack = frontMask & opponent;
-		merge  = frontMask & mines;
-		quietMove = frontMask ^ frontAttack^merge;
-		moves = backAttack | frontAttack | quietMove | merge; //forse non serve
+		merge = frontMask & mines;
+		quietMove = frontMask ^ frontAttack ^ merge;
+		moves = backAttack | frontAttack | quietMove | merge; // forse non serve
 	}
 
 //	// precalcolo rosa dell'intera scacchiera
@@ -236,8 +235,6 @@ public class DipoleConf implements Conf, Cloneable {
 //		return rose;
 //	}// precalculations
 
-	
-	
 //	 // Ritorna la rosa di azione della pedina presa in considerazione private
 //	 long getRose(long square, int type, long mine, long opponent) {
 //	 
@@ -259,7 +256,6 @@ public class DipoleConf implements Conf, Cloneable {
 //	 square >>>= -shift; } notFreeSquare ^= pieces[cont] & (~mine); cont +=
 //	 addMove; tmp =square^(square & notFreeSquare); ret |= tmp; } ret ^= (ret &
 //	 notFreeSquare); return ret; }
-
 
 	// ritorna il numero della casella in cui è posizionato il pedone
 	public int getSquare(long position) {
@@ -354,8 +350,13 @@ public class DipoleConf implements Conf, Cloneable {
 				while (backAttack != 0) {
 					temp = backAttack & -backAttack;
 					backAttack ^= temp;
-					actions.add(new DipoleMove(pawn, temp, selectType, black, typeMove.BACKATTACK,
-							Math.abs((this.getSquare(pawn) >>> 3) - (this.getSquare(temp) >>> 3))));
+					int dist = Math.abs((this.getSquare(pawn) >>> 3) - (this.getSquare(temp) >>> 3));
+					assert(Math.abs(this.getSquare(pawn) - (this.getSquare(temp))) > 0);
+					if (dist != 0)
+						actions.add(new DipoleMove(pawn, temp, selectType, black, typeMove.BACKATTACK, dist));
+					else 
+						actions.add(new DipoleMove(pawn, temp, selectType, black, typeMove.BACKATTACK,
+								Math.abs(this.getSquare(pawn) - (this.getSquare(temp)))));
 				}
 				while (frontAttack != 0) {
 					temp = frontAttack & -frontAttack;
@@ -367,14 +368,14 @@ public class DipoleConf implements Conf, Cloneable {
 					temp = quietMove & -quietMove;
 					quietMove ^= temp;
 					actions.add(new DipoleMove(pawn, temp, selectType, black, typeMove.QUIETMOVE,
-							Math.abs((this.getSquare(pawn)>>>3) - (this.getSquare(temp)>>>3))));
+							Math.abs((this.getSquare(pawn) >>> 3) - (this.getSquare(temp) >>> 3))));
 
 				}
 				while (merge != 0) {
 					temp = merge & -merge;
 					merge ^= temp;
 					actions.add(new DipoleMove(pawn, temp, selectType, black, typeMove.MERGE,
-							Math.abs((this.getSquare(pawn)>>>3) - (this.getSquare(temp)>>>3))));
+							Math.abs((this.getSquare(pawn) >>> 3) - (this.getSquare(temp) >>> 3))));
 
 				}
 			}
@@ -408,6 +409,7 @@ public class DipoleConf implements Conf, Cloneable {
 				backAttack = flip180(backAttack);
 				frontAttack = flip180(frontAttack);
 				quietMove = flip180(quietMove);
+				merge = flip180(merge);
 				pawn = flip180(pawn);
 				long temp;
 				while (backAttack != 0) {
@@ -416,8 +418,13 @@ public class DipoleConf implements Conf, Cloneable {
 					// to square di pawn
 					// to square di from
 					// 1 meno la'ltro in modulo, il risultato lo divido per 8
-					actions.add(new DipoleMove(pawn, temp, selectType, black, typeMove.BACKATTACK,
-							Math.abs((this.getSquare(pawn) >>> 3) - (this.getSquare(temp) >>> 3))));
+					int dist = Math.abs((this.getSquare(pawn) >>> 3) - (this.getSquare(temp) >>> 3));
+					assert(Math.abs(this.getSquare(pawn) - (this.getSquare(temp))) > 0);
+					if (dist != 0)
+						actions.add(new DipoleMove(pawn, temp, selectType, black, typeMove.BACKATTACK, dist));
+					else 
+						actions.add(new DipoleMove(pawn, temp, selectType, black, typeMove.BACKATTACK,
+								Math.abs(this.getSquare(pawn) - (this.getSquare(temp)))));
 				}
 				while (frontAttack != 0) {
 					temp = frontAttack & -frontAttack;
@@ -429,13 +436,13 @@ public class DipoleConf implements Conf, Cloneable {
 					temp = quietMove & -quietMove;
 					quietMove ^= temp;
 					actions.add(new DipoleMove(pawn, temp, selectType, black, typeMove.QUIETMOVE,
-							Math.abs((this.getSquare(pawn)>>>3) - (this.getSquare(temp)>>>3))));
+							Math.abs((this.getSquare(pawn) >>> 3) - (this.getSquare(temp) >>> 3))));
 				}
 				while (merge != 0) {
 					temp = merge & -merge;
 					merge ^= temp;
 					actions.add(new DipoleMove(pawn, temp, selectType, black, typeMove.MERGE,
-							Math.abs((this.getSquare(pawn)>>>3) - (this.getSquare(temp)>>>3))));
+							Math.abs((this.getSquare(pawn) >>> 3) - (this.getSquare(temp) >>> 3))));
 				}
 			}
 			return actions;
@@ -486,13 +493,12 @@ public class DipoleConf implements Conf, Cloneable {
 					actions.add(mossa.encodingMove(getSquare(pawn), getSquare(temp), selectType, black,
 							typeMove.QUIETMOVE));
 				}
-					actions.add(mossa.encodingMove(getSquare(pawn), getSquare(temp), selectType, black, typeMove.QUIETMOVE));
-					}
 				while (merge != 0) {
 					temp = merge & -merge;
 					merge ^= temp;
-					actions.add(mossa.encodingMove(getSquare(pawn), getSquare(temp), selectType, black, typeMove.MERGE));
-					}
+					actions.add(
+							mossa.encodingMove(getSquare(pawn), getSquare(temp), selectType, black, typeMove.MERGE));
+				}
 			}
 			return actions;
 		} else {
@@ -541,13 +547,15 @@ public class DipoleConf implements Conf, Cloneable {
 				while (quietMove != 0) {
 					temp = quietMove & -quietMove;
 					quietMove ^= temp;
-					actions.add(mossa.encodingMove(getSquare(pawn), getSquare(temp), selectType, black, typeMove.QUIETMOVE));
-					}
+					actions.add(mossa.encodingMove(getSquare(pawn), getSquare(temp), selectType, black,
+							typeMove.QUIETMOVE));
+				}
 				while (merge != 0) {
 					temp = merge & -merge;
 					merge ^= temp;
-					actions.add(mossa.encodingMove(getSquare(pawn), getSquare(temp), selectType, black, typeMove.MERGE));
-					}
+					actions.add(
+							mossa.encodingMove(getSquare(pawn), getSquare(temp), selectType, black, typeMove.MERGE));
+				}
 			}
 			return actions;
 		}
@@ -683,7 +691,6 @@ public class DipoleConf implements Conf, Cloneable {
 	public static void setBlackSquare(long blackSquare) {
 		DipoleConf.blackSquare = blackSquare;
 	}
-
 
 	/**
 	 * da testare per vedere se il tutto viene copiato bene e se non intralcia
