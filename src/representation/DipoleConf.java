@@ -647,10 +647,6 @@ public class DipoleConf implements Conf, Cloneable {
 		DipoleConf.blackSquare = blackSquare;
 	}
 
-<<<<<<< HEAD
-
-=======
->>>>>>> branch 'master' of https://github.com/Lory999555/AI-Project
 
 	/**
 	 * da testare per vedere se il tutto viene copiato bene e se non intralcia

@@ -55,7 +55,6 @@ public class DipoleMove implements Move {
 
 	@Override
 	public String toString() {
-		return tP.name()+ " from: " + fromSq + " to "+ toSq + " type: " + type + " BLACK: "+ black ;
 		return tP.name() + " from: " + fromSq + " to " + toSq +" dist: "+ dist +" type: " + type + " BLACK: " + black;
 //		return "0";
 	}
@@ -86,11 +85,10 @@ public class DipoleMove implements Move {
 //			sarebbe utile mettere pblack e pred in una lista che coincida con il booleano
 			res.setBoard(type, tmp.getBoard(type) ^ fromSq);
 			res.setBoard(dist, tmp.getBoard(dist) ^ toSq);
-			res.setBoard(type - dist, tmp.getBoard(type - dist) ^ fromSq);
 			if (tmp.isBlack())
 				if (allStack)
 					res.setpBlack(tmp.getpBlack() ^ fromtoSq);
-				else
+				else 
 					res.setpBlack(tmp.getpBlack() | fromtoSq);
 			else {
 				if (allStack)
@@ -176,15 +174,10 @@ public class DipoleMove implements Move {
 			if (tmp.isBlack()) {
 				if (allStack)
 					res.setpBlack(tmp.getpBlack() ^ fromSq);
-				else {
-					res.setBoard(type - dist, tmp.getBoard(type - dist) ^ fromSq);
-				}
+
 			}else {
 				if (allStack)
 					res.setpRed(tmp.getpRed() ^ fromSq);
-				else {
-					res.setBoard(type - dist, tmp.getBoard(type - dist) ^ fromSq);
-				}
 			}
 			break;
 
