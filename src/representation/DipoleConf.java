@@ -32,6 +32,7 @@ public class DipoleConf implements Conf, Cloneable {
 	// Configurazione inzio partita
 	public DipoleConf(boolean black) {
 
+
 		this.pieces[11] = 0x1000000000000008L;
 		this.pRed = 0x8L;
 		this.pBlack = 0x1000000000000000L;
@@ -358,7 +359,6 @@ public class DipoleConf implements Conf, Cloneable {
 					frontAttack ^= temp;
 					actions.add(new DipoleMove(pawn, temp, selectType, black, typeMove.FRONTATTACK,
 							Math.abs((this.getSquare(pawn) >>> 3) - (this.getSquare(temp) >>> 3))));
-
 				}
 				while (quietMove != 0) {
 					temp = quietMove & -quietMove;

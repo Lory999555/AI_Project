@@ -89,6 +89,7 @@ public class DipoleMove implements Move {
 
 		switch (this.tP) {
 		case QUIETMOVE:
+<<<<<<< HEAD
 //	      andrebbero controllate varie cose come:
 //	        se una pedina si muove completamente quali bitboard aggiornare
 //	        e come capirlo? del tipo type - dist < 0?
@@ -131,7 +132,67 @@ public class DipoleMove implements Move {
 			//
 //	      res.setBoard(c, tmp.getBoard(c) ^ toSq);
 			break;
+=======
+//			andrebbero controllate varie cose come:
+//				se una pedina si muove completamente quali bitboard aggiornare
+//				e come capirlo? del tipo type - dist < 0?
+//				aggiornare anche le bb pblack e pred in base a quale gicatore
+//				sta muovendo così da scegliere from o to bb.
+//			sarebbe utile mettere pblack e pred in una lista che coincida con il booleano
+>>>>>>> branch 'master' of https://github.com/Lory999555/AI-Project
 
+<<<<<<< HEAD
+		case FRONTATTACK:
+			break;
+=======
+			// eliminare la pedina from
+			res.setBoard(type, res.getBoard(type) ^ fromSq);
+>>>>>>> branch 'master' of https://github.com/Lory999555/AI-Project
+
+<<<<<<< HEAD
+		case BACKATTACK:
+			break;
+=======
+			// generare la pedina destinazione
+			res.setBoard(dist - 1, res.getBoard(dist - 1) ^ toSq);
+>>>>>>> branch 'master' of https://github.com/Lory999555/AI-Project
+
+<<<<<<< HEAD
+		}
+=======
+			if (tmp.isBlack()) {
+				if (allStack)
+					res.setpBlack(res.getpBlack() ^ fromtoSq);
+				else {
+					res.setBoard(type - dist, res.getBoard(type - dist) ^ fromSq);
+					res.setpBlack(res.getpBlack() | fromtoSq);
+				}
+			} else {
+				if (allStack)
+					res.setpRed(res.getpRed() ^ fromtoSq);
+				else {
+					res.setBoard(type - dist, res.getBoard(type - dist) ^ fromSq);
+					res.setpRed(res.getpRed() | fromtoSq);
+				}
+			}
+			break;
+		case MERGE:
+//			res.setBoard(type, tmp.getBoard(type) ^ fromSq);
+//			res.setBoard(dist, tmp.getBoard(dist) ^ toSq);
+//			res.setBoard(type - dist, tmp.getBoard(type - dist) ^ fromSq);
+//			int c = 0;
+//
+//			trovo la pedina avversaria che viene mangiata
+//			while ((tmp.getBoard(c) & toSq) == 0L) {
+//				c++;
+//			}
+//
+//			res.setBoard(c, tmp.getBoard(c) ^ toSq);
+			break;
+>>>>>>> branch 'master' of https://github.com/Lory999555/AI-Project
+
+<<<<<<< HEAD
+=======
 		case FRONTATTACK:
 			break;
 
@@ -140,6 +201,7 @@ public class DipoleMove implements Move {
 
 		}
 
+>>>>>>> branch 'master' of https://github.com/Lory999555/AI-Project
 		return res;
 
 	}
@@ -170,6 +232,7 @@ public class DipoleMove implements Move {
 				if (allStack)
 					res.setpBlack(res.getpBlack() ^ fromtoSq);
 				else {
+
 					res.setBoard(type - dist, res.getBoard(type - dist) ^ fromSq);
 					res.setpBlack(res.getpBlack() | fromtoSq);
 				}
@@ -177,21 +240,39 @@ public class DipoleMove implements Move {
 				if (allStack)
 					res.setpRed(res.getpRed() ^ fromtoSq);
 				else {
+
 					res.setBoard(type - dist, res.getBoard(type - dist) ^ fromSq);
 					res.setpRed(res.getpRed() | fromtoSq);
 				}
 			}
 			break;
 		case MERGE:
+<<<<<<< HEAD
 			res.setBoard(type, res.getBoard(type) ^ fromSq); // toglie l'intero stack di dimensione type
+=======
+
+			res.setBoard(type, res.getBoard(type) ^ fromSq);					// toglie l'intero stack di dimensione type
+>>>>>>> branch 'master' of https://github.com/Lory999555/AI-Project
 			cont = 0;
+<<<<<<< HEAD
 			while ((res.getBoard(cont) & toSq) == 0) {
+=======
+
+			while((res.getBoard(cont) & toSq) == 0) {
+>>>>>>> branch 'master' of https://github.com/Lory999555/AI-Project
 				cont++;
 			}
+<<<<<<< HEAD
 			res.setBoard(cont, res.getBoard(cont) ^ toSq); // toglie l'intero stack da toSq
 			res.setBoard(dist + cont, res.getBoard(type + cont) ^ toSq); // inserisce in posizione toSq il nuovo stack
 																			// dato dalla somma dei 2
 
+=======
+
+			res.setBoard(cont, res.getBoard(cont) ^ toSq);						// toglie l'intero stack da toSq			
+			res.setBoard(type+cont, res.getBoard(type+cont) ^ toSq);			// inserisce in posizione toSq il nuovo stack dato dalla somma dei 2
+			
+>>>>>>> branch 'master' of https://github.com/Lory999555/AI-Project
 			if (tmp.isBlack()) {
 				if (allStack) {
 					res.setpBlack(res.getpBlack() ^ fromSq);
@@ -220,7 +301,13 @@ public class DipoleMove implements Move {
 			if (tmp.isBlack()) {
 				if (allStack) {
 					res.setpBlack(res.getpBlack() ^ fromtoSq);
+<<<<<<< HEAD
 				} else {
+=======
+				}
+				else {
+				
+>>>>>>> branch 'master' of https://github.com/Lory999555/AI-Project
 					res.setBoard(type - dist, res.getBoard(type - dist) ^ fromSq);
 					res.setpBlack(res.getpBlack() | fromtoSq);
 				}
@@ -229,6 +316,7 @@ public class DipoleMove implements Move {
 				if (allStack)
 					res.setpRed(res.getpRed() ^ fromtoSq);
 				else {
+
 					res.setBoard(type - dist, res.getBoard(type - dist) ^ fromSq);
 					res.setpRed(res.getpRed() | fromtoSq);
 				}
