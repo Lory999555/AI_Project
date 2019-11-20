@@ -40,22 +40,33 @@ public class DipoleMove implements Move {
 	public int encodingMove(int fromSq, int toSq, int type, boolean black, typeMove tp) {
 		System.out.println("f " + fromSq + ", to " + toSq + " = "
 				+ (Math.abs((fromSq >> 3) - (toSq >> 3)) + " -> " + (Math.abs((fromSq >> 3) - (toSq >> 3)) << 8)));
-		return (fromSq << 17) | (toSq << 11) | (Math.abs((fromSq >>> 3) - (toSq >>> 3)) << 8) | (type << 4)
+		return (fromSq << 17) | (toSq << 11) | (Math.abs((fromSq >> 3) - (toSq >> 3)) << 8) | (type << 4)
 				| ((black ? 1 : 0) << 3) | (tp.ordinal());
+
+	}
+
+	// distanza utilizzata dalle mosse death e dalle mosse back attack in quanto la
+	// distnza gliela passiamo da parametri
+	public int encodingMove(int fromSq, int toSq, int dist, int type, boolean black, typeMove tp) {
+		System.out.println("f " + fromSq + ", to " + toSq + " = "
+				+ (Math.abs((fromSq >> 3) - (toSq >> 3)) + " -> " + (Math.abs((fromSq >> 3) - (toSq >> 3)) << 8)));
+		return (fromSq << 17) | (toSq << 11) | (dist << 8) | (type << 4) | ((black ? 1 : 0) << 3) | (tp.ordinal());
+
 	}
 
 	public void decodingMove(int code) {
 		tP = typeMove.values()[code & 0x7];
 		black = (((code & 0x8) >>> 3) == 1 ? true : false);
 		type = (code & 0xf0) >>> 4;
-		dist = ((code & 0x700) >>> 8)-1;
+		dist = (code & 0x700) >>> 8;
 		toSq = (code & 0x1f800) >>> 11;
 		fromSq = (code & 0x7e0000) >>> 17;
 	}
 
 	@Override
 	public String toString() {
-		return tP.name() + " from: " + fromSq + " to " + toSq +" dist: "+ dist +" type: " + type + " BLACK: " + black;
+		return tP.name() + " from: " + fromSq + " to " + toSq + " type: " + type + " BLACK: " + black + " dist: "
+				+ dist;
 //		return "0";
 	}
 
@@ -65,20 +76,65 @@ public class DipoleMove implements Move {
 		return false;
 	}
 
-	
 	@Override
 
 	public Conf applyTo(Conf input) throws InvalidActionException, CloneNotSupportedException {
 		DipoleConf tmp = (DipoleConf) input;
 		DipoleConf res = tmp.clone();
 		res.setBlack(!input.isBlack());
-		boolean allStack = type - dist < 0;
+		boolean allStack = (type - dist) == -1;
+		assert (type - dist >= -1);
+
 		long fromtoSq = fromSq ^ toSq;
 
 		switch (this.tP) {
 		case QUIETMOVE:
+<<<<<<< HEAD
+//	      andrebbero controllate varie cose come:
+//	        se una pedina si muove completamente quali bitboard aggiornare
+//	        e come capirlo? del tipo type - dist < 0?
+//	        aggiornare anche le bb pblack e pred in base a quale gicatore
+//	        sta muovendo così da scegliere from o to bb.
+//	      sarebbe utile mettere pblack e pred in una lista che coincida con il booleano
+
+			// eliminare la pedina from
+			res.setBoard(type, res.getBoard(type) ^ fromSq);
+
+			// generare la pedina destinazione
+			res.setBoard(dist - 1, res.getBoard(dist - 1) ^ toSq);
+
+			if (tmp.isBlack()) {
+				if (allStack)
+					res.setpBlack(res.getpBlack() ^ fromtoSq);
+				else {
+					res.setBoard(type - dist, res.getBoard(type - dist) ^ fromSq);
+					res.setpBlack(res.getpBlack() | fromtoSq);
+				}
+			} else {
+				if (allStack)
+					res.setpRed(res.getpRed() ^ fromtoSq);
+				else {
+					res.setBoard(type - dist, res.getBoard(type - dist) ^ fromSq);
+					res.setpRed(res.getpRed() | fromtoSq);
+				}
+			}
+			break;
+		case MERGE:
+//	      res.setBoard(type, tmp.getBoard(type) ^ fromSq);
+//	      res.setBoard(dist, tmp.getBoard(dist) ^ toSq);
+//	      res.setBoard(type - dist, tmp.getBoard(type - dist) ^ fromSq);
+//	      int c = 0;
+			//
+//	      trovo la pedina avversaria che viene mangiata
+//	      while ((tmp.getBoard(c) & toSq) == 0L) {
+//	        c++;
+//	      }
+			//
+//	      res.setBoard(c, tmp.getBoard(c) ^ toSq);
+			break;
+=======
 //			andrebbero controllate varie cose come:
-//				se una pedina si muove completamente quali bitboard aggiornare? se stessa
+//				se una pedina si muove completamente quali bitboard aggiornare
 //				e come capirlo? del tipo type - dist < 0?
 //				aggiornare anche le bb pblack e pred in base a quale gicatore
 //				sta muovendo così da scegliere from o to bb.
@@ -86,31 +142,64 @@ public class DipoleMove implements Move {
 			res.setBoard(type, tmp.getBoard(type) ^ fromSq);
 			res.setBoard(dist, tmp.getBoard(dist) ^ toSq);
 			if (tmp.isBlack())
+>>>>>>> branch 'master' of https://github.com/Lory999555/AI-Project
+
+<<<<<<< HEAD
+		case FRONTATTACK:
+			break;
+=======
+			// eliminare la pedina from
+			res.setBoard(type, res.getBoard(type) ^ fromSq);
+>>>>>>> branch 'master' of https://github.com/Lory999555/AI-Project
+
+<<<<<<< HEAD
+		case BACKATTACK:
+			break;
+=======
+			// generare la pedina destinazione
+			res.setBoard(dist - 1, res.getBoard(dist - 1) ^ toSq);
+>>>>>>> branch 'master' of https://github.com/Lory999555/AI-Project
+
+<<<<<<< HEAD
+		}
+=======
+			if (tmp.isBlack()) {
 				if (allStack)
 					res.setpBlack(tmp.getpBlack() ^ fromtoSq);
 				else 
 					res.setpBlack(tmp.getpBlack() | fromtoSq);
 			else {
+					res.setpBlack(res.getpBlack() ^ fromtoSq);
+				else {
+					res.setBoard(type - dist, res.getBoard(type - dist) ^ fromSq);
+					res.setpBlack(res.getpBlack() | fromtoSq);
+				}
+			} else {
 				if (allStack)
-					res.setpRed(tmp.getpRed() ^ fromtoSq);
-				else
-					res.setpRed(tmp.getpRed() | fromtoSq);
+					res.setpRed(res.getpRed() ^ fromtoSq);
+				else {
+					res.setBoard(type - dist, res.getBoard(type - dist) ^ fromSq);
+					res.setpRed(res.getpRed() | fromtoSq);
+				}
 			}
 			break;
 		case MERGE:
-			res.setBoard(type, tmp.getBoard(type) ^ fromSq);
-			res.setBoard(dist, tmp.getBoard(dist) ^ toSq);
-			res.setBoard(type - dist, tmp.getBoard(type - dist) ^ fromSq);
-			int c = 0;
-
+//			res.setBoard(type, tmp.getBoard(type) ^ fromSq);
+//			res.setBoard(dist, tmp.getBoard(dist) ^ toSq);
+//			res.setBoard(type - dist, tmp.getBoard(type - dist) ^ fromSq);
+//			int c = 0;
+//
 //			trovo la pedina avversaria che viene mangiata
-			while ((tmp.getBoard(c) & toSq) == 0L) {
-				c++;
-			}
-
-			res.setBoard(c, tmp.getBoard(c) ^ toSq);
+//			while ((tmp.getBoard(c) & toSq) == 0L) {
+//				c++;
+//			}
+//
+//			res.setBoard(c, tmp.getBoard(c) ^ toSq);
 			break;
+>>>>>>> branch 'master' of https://github.com/Lory999555/AI-Project
 
+<<<<<<< HEAD
+=======
 		case FRONTATTACK:
 			break;
 			
@@ -119,19 +208,22 @@ public class DipoleMove implements Move {
 
 		}
 
+>>>>>>> branch 'master' of https://github.com/Lory999555/AI-Project
 		return res;
 
 	}
 	
 
 	public Conf applyTo2(Conf input,int code) throws InvalidActionException, CloneNotSupportedException {
+
+	public Conf applyTo2(Conf input, int code) throws InvalidActionException, CloneNotSupportedException {
 		int cont = 0;
 		DipoleConf tmp = (DipoleConf) input;
 		DipoleConf res = tmp.clone();
 		res.setBlack(!input.isBlack());
 		decodingMove(code);
-		
-		boolean allStack = type - dist == 0;
+
+		boolean allStack = (type - dist) == -1;
 
 		long fromtoSq = fromSq ^ toSq;
 
@@ -143,71 +235,155 @@ public class DipoleMove implements Move {
 //				aggiornare anche le bb pblack e pred in base a quale gicatore
 //				sta muovendo così da scegliere from o to bb.
 //			sarebbe utile mettere pblack e pred in una lista che coincida con il booleano
-			res.setBoard(type, tmp.getBoard(type) ^ fromSq);
-			res.setBoard(dist, tmp.getBoard(dist) ^ toSq);
+			res.setBoard(type, res.getBoard(type) ^ fromSq);
+			res.setBoard(dist - 1, res.getBoard(dist - 1) ^ toSq);
 //			res.setBoard(type - dist, tmp.getBoard(type - dist) ^ fromSq);
 			if (tmp.isBlack()) {
 				if (allStack)
-					res.setpBlack(tmp.getpBlack() ^ fromtoSq);
+					res.setpBlack(res.getpBlack() ^ fromtoSq);
 				else {
-					res.setBoard(type - dist, tmp.getBoard(type - dist) ^ fromSq);
-					res.setpBlack(tmp.getpBlack() | fromtoSq);					
+
+					res.setBoard(type - dist, res.getBoard(type - dist) ^ fromSq);
+					res.setpBlack(res.getpBlack() | fromtoSq);
 				}
-			}else {
+			} else {
 				if (allStack)
-					res.setpRed(tmp.getpRed() ^ fromtoSq);
+					res.setpRed(res.getpRed() ^ fromtoSq);
 				else {
-					res.setBoard(type - dist, tmp.getBoard(type - dist) ^ fromSq);
-					res.setpRed(tmp.getpRed() | fromtoSq);			
+
+					res.setBoard(type - dist, res.getBoard(type - dist) ^ fromSq);
+					res.setpRed(res.getpRed() | fromtoSq);
 				}
 			}
 			break;
 		case MERGE:
-			res.setBoard(type, tmp.getBoard(type) ^ fromSq);					// toglie l'intero stack di dimensione type
+<<<<<<< HEAD
+			res.setBoard(type, res.getBoard(type) ^ fromSq); // toglie l'intero stack di dimensione type
+=======
+
+			res.setBoard(type, res.getBoard(type) ^ fromSq);					// toglie l'intero stack di dimensione type
+>>>>>>> branch 'master' of https://github.com/Lory999555/AI-Project
 			cont = 0;
-			while((tmp.getBoard(cont) & toSq) == 0) {
+<<<<<<< HEAD
+			while ((res.getBoard(cont) & toSq) == 0) {
+=======
+
+			while((res.getBoard(cont) & toSq) == 0) {
+>>>>>>> branch 'master' of https://github.com/Lory999555/AI-Project
 				cont++;
 			}
-			res.setBoard(cont, tmp.getBoard(cont) ^ toSq);						// toglie l'intero stack da toSq			
-			res.setBoard(type+cont, tmp.getBoard(type+cont) ^ toSq);			// inserisce in posizione toSq il nuovo stack dato dalla somma dei 2
+<<<<<<< HEAD
+			res.setBoard(cont, res.getBoard(cont) ^ toSq); // toglie l'intero stack da toSq
+			res.setBoard(dist + cont, res.getBoard(type + cont) ^ toSq); // inserisce in posizione toSq il nuovo stack
+																			// dato dalla somma dei 2
+
+=======
+
+			res.setBoard(cont, res.getBoard(cont) ^ toSq);						// toglie l'intero stack da toSq			
+			res.setBoard(type+cont, res.getBoard(type+cont) ^ toSq);			// inserisce in posizione toSq il nuovo stack dato dalla somma dei 2
 			
+>>>>>>> branch 'master' of https://github.com/Lory999555/AI-Project
 			if (tmp.isBlack()) {
 				if (allStack)
 					res.setpBlack(tmp.getpBlack() ^ fromSq);
 
+				if (allStack) {
+					res.setpBlack(res.getpBlack() ^ fromSq);
+
+				} else {
+					res.setBoard(type - dist, res.getBoard(type - dist) ^ fromSq);
+				}
 			}else {
 				if (allStack)
 					res.setpRed(tmp.getpRed() ^ fromSq);
+			} else {
+				if (allStack) {
+					res.setpRed(res.getpRed() ^ fromSq);
+				} else {
+					res.setBoard(type - dist, res.getBoard(type - dist) ^ fromSq);
+				}
 			}
 			break;
 
 		case FRONTATTACK:
-			res.setBoard(type, tmp.getBoard(type) ^ fromSq);
-			res.setBoard(dist, tmp.getBoard(dist) ^ toSq);
+			res.setBoard(type, res.getBoard(type) ^ fromSq);
 			cont = 0;
-			while((tmp.getBoard(cont) & toSq) == 0) {
+			while ((res.getBoard(cont) & toSq) == 0) {
 				cont++;
 			}
+			res.setBoard(cont, res.getBoard(cont) ^ toSq); // tolgo pedina nemica
+			res.setBoard(dist - 1, res.getBoard(dist - 1) ^ toSq);
+
 			if (tmp.isBlack()) {
-				if (allStack)
-					res.setpBlack(tmp.getpBlack() ^ fromtoSq);
-				else {
-					res.setBoard(type - dist, tmp.getBoard(type - dist) ^ fromSq);
-					res.setpBlack(tmp.getpBlack() | fromtoSq);					
+				if (allStack) {
+					res.setpBlack(res.getpBlack() ^ fromtoSq);
+<<<<<<< HEAD
+				} else {
+=======
 				}
-			}else {
-				if (allStack)
-					res.setpRed(tmp.getpRed() ^ fromtoSq);
 				else {
-					res.setBoard(type - dist, tmp.getBoard(type - dist) ^ fromSq);
-					res.setpRed(tmp.getpRed() | fromtoSq);			
+				
+>>>>>>> branch 'master' of https://github.com/Lory999555/AI-Project
+					res.setBoard(type - dist, res.getBoard(type - dist) ^ fromSq);
+					res.setpBlack(res.getpBlack() | fromtoSq);
 				}
+				res.setpRed(res.getpRed() ^ toSq);
+			} else {
+				if (allStack)
+					res.setpRed(res.getpRed() ^ fromtoSq);
+				else {
+
+					res.setBoard(type - dist, res.getBoard(type - dist) ^ fromSq);
+					res.setpRed(res.getpRed() | fromtoSq);
+				}
+				res.setpBlack(res.getpBlack() ^ toSq);
 			}
-			
+
 			break;
 
 		case BACKATTACK:
+			res.setBoard(type, res.getBoard(type) ^ fromSq);
+			cont = 0;
+			while ((res.getBoard(cont) & toSq) == 0) {
+				cont++;
+			}
+			res.setBoard(cont, res.getBoard(cont) ^ toSq); // tolgo pedina nemica
+			res.setBoard(dist - 1, res.getBoard(dist - 1) ^ toSq);
+
+			if (tmp.isBlack()) {
+				if (allStack) {
+					res.setpBlack(res.getpBlack() ^ fromtoSq);
+				} else {
+					res.setBoard(type - dist, res.getBoard(type - dist) ^ fromSq);
+					res.setpBlack(res.getpBlack() | fromtoSq);
+				}
+				res.setpRed(res.getpRed() ^ toSq);
+			} else {
+				if (allStack)
+					res.setpRed(res.getpRed() ^ fromtoSq);
+				else {
+					res.setBoard(type - dist, res.getBoard(type - dist) ^ fromSq);
+					res.setpRed(res.getpRed() | fromtoSq);
+				}
+				res.setpBlack(res.getpBlack() ^ toSq);
+			}
+
 			break;
+		case DEATH:
+			res.setBoard(type, res.getBoard(type) ^ fromSq);
+			if (tmp.isBlack()) {
+				if (allStack) {
+					res.setpBlack(res.getpBlack() ^ fromSq);
+				} else {
+					res.setBoard(type - dist, res.getBoard(type - dist) ^ fromSq);
+				}
+			} else {
+				if (allStack)
+					res.setpRed(res.getpRed() ^ fromSq);
+				else {
+					res.setBoard(type - dist, res.getBoard(type - dist) ^ fromSq);
+				}
+			}
 
 		}
 
