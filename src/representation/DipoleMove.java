@@ -82,8 +82,9 @@ public class DipoleMove implements Move {
 		DipoleConf tmp = (DipoleConf) input;
 		DipoleConf res = tmp.clone();
 		res.setBlack(!input.isBlack());
+		//decodingMove(code);
+
 		boolean allStack = (type - dist) == -1;
-		assert (type - dist >= -1);
 
 		long fromtoSq = fromSq ^ toSq;
 
@@ -98,14 +99,13 @@ public class DipoleMove implements Move {
 
 			// eliminare la pedina from
 			res.setBoard(type, res.getBoard(type) ^ fromSq);
-
-			// generare la pedina destinazione
 			res.setBoard(dist - 1, res.getBoard(dist - 1) ^ toSq);
-
+//			res.setBoard(type - dist, tmp.getBoard(type - dist) ^ fromSq);
 			if (tmp.isBlack()) {
 				if (allStack)
 					res.setpBlack(res.getpBlack() ^ fromtoSq);
 				else {
+
 					res.setBoard(type - dist, res.getBoard(type - dist) ^ fromSq);
 					res.setpBlack(res.getpBlack() | fromtoSq);
 				}
@@ -113,31 +113,124 @@ public class DipoleMove implements Move {
 				if (allStack)
 					res.setpRed(res.getpRed() ^ fromtoSq);
 				else {
+
 					res.setBoard(type - dist, res.getBoard(type - dist) ^ fromSq);
 					res.setpRed(res.getpRed() | fromtoSq);
 				}
 			}
 			break;
 		case MERGE:
-//	      res.setBoard(type, tmp.getBoard(type) ^ fromSq);
-//	      res.setBoard(dist, tmp.getBoard(dist) ^ toSq);
-//	      res.setBoard(type - dist, tmp.getBoard(type - dist) ^ fromSq);
-//	      int c = 0;
-			//
-//	      trovo la pedina avversaria che viene mangiata
-//	      while ((tmp.getBoard(c) & toSq) == 0L) {
-//	        c++;
-//	      }
-			//
-//	      res.setBoard(c, tmp.getBoard(c) ^ toSq);
+
+			res.setBoard(type, res.getBoard(type) ^ fromSq); // toglie l'intero stack di dimensione type
+			cont = 0;
+
+			while ((res.getBoard(cont) & toSq) == 0) {
+				cont++;
+			}
+
+			res.setBoard(cont, res.getBoard(cont) ^ toSq); // toglie l'intero stack da toSq
+			res.setBoard(dist + cont, res.getBoard(dist + cont) ^ toSq); // inserisce in posizione toSq il nuovo stack
+																			// dato dalla somma dei 2
+
+			if (tmp.isBlack()) {
+				if (allStack)
+					res.setpBlack(res.getpBlack() ^ fromSq);
+				else {
+					res.setBoard(type - dist, res.getBoard(type - dist) ^ fromSq);
+				}
+			} else {
+				if (allStack)
+					res.setpRed(res.getpRed() ^ fromSq);
+				else {
+					res.setBoard(type - dist, res.getBoard(type - dist) ^ fromSq);
+				}
+			}
 			break;
 			
+
+
 		case FRONTATTACK:
 			break;
 
 		case BACKATTACK:
 			break;
 		}
+			res.setBoard(type, res.getBoard(type) ^ fromSq);
+			cont = 0;
+			while ((res.getBoard(cont) & toSq) == 0) {
+				cont++;
+			}
+			res.setBoard(cont, res.getBoard(cont) ^ toSq); // tolgo pedina nemica
+			res.setBoard(dist - 1, res.getBoard(dist - 1) ^ toSq);
+
+			if (tmp.isBlack()) {
+				if (allStack) {
+					res.setpBlack(res.getpBlack() ^ fromtoSq);
+				} else {
+
+					res.setBoard(type - dist, res.getBoard(type - dist) ^ fromSq);
+					res.setpBlack(res.getpBlack() | fromtoSq);
+				}
+				res.setpRed(res.getpRed() ^ toSq);
+			} else {
+				if (allStack)
+					res.setpRed(res.getpRed() ^ fromtoSq);
+				else {
+
+					res.setBoard(type - dist, res.getBoard(type - dist) ^ fromSq);
+					res.setpRed(res.getpRed() | fromtoSq);
+				}
+				res.setpBlack(res.getpBlack() ^ toSq);
+			}
+
+			break;
+
+		case BACKATTACK:
+			res.setBoard(type, res.getBoard(type) ^ fromSq);
+			cont = 0;
+			while ((res.getBoard(cont) & toSq) == 0) {
+				cont++;
+			}
+			res.setBoard(cont, res.getBoard(cont) ^ toSq); // tolgo pedina nemica
+			res.setBoard(dist - 1, res.getBoard(dist - 1) ^ toSq);
+
+			if (tmp.isBlack()) {
+				if (allStack) {
+					res.setpBlack(res.getpBlack() ^ fromtoSq);
+				} else {
+					res.setBoard(type - dist, res.getBoard(type - dist) ^ fromSq);
+					res.setpBlack(res.getpBlack() | fromtoSq);
+				}
+				res.setpRed(res.getpRed() ^ toSq);
+			} else {
+				if (allStack)
+					res.setpRed(res.getpRed() ^ fromtoSq);
+				else {
+					res.setBoard(type - dist, res.getBoard(type - dist) ^ fromSq);
+					res.setpRed(res.getpRed() | fromtoSq);
+				}
+				res.setpBlack(res.getpBlack() ^ toSq);
+			}
+
+			break;
+		case DEATH:
+			res.setBoard(type, res.getBoard(type) ^ fromSq);
+			if (tmp.isBlack()) {
+				if (allStack) {
+					res.setpBlack(res.getpBlack() ^ fromSq);
+				} else {
+					res.setBoard(type - dist, res.getBoard(type - dist) ^ fromSq);
+				}
+			} else {
+				if (allStack)
+					res.setpRed(res.getpRed() ^ fromSq);
+				else {
+					res.setBoard(type - dist, res.getBoard(type - dist) ^ fromSq);
+				}
+			}
+
+		}
+
 		return res;
 
 	}

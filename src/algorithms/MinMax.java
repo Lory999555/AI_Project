@@ -61,7 +61,8 @@ public class MinMax implements AlgorithmInterface {
 		for (Move action : conf.getActions()) {
 			try {
 				// Algorithm!
-				Conf newState = action.applyTo(conf);
+				Conf newState;
+				newState = action.applyTo(conf);
 				float newValue = this.miniMaxRecursor(newState, Float.NEGATIVE_INFINITY, Float.POSITIVE_INFINITY, 1,
 						!this.maximize);
 				if (DEBUG)
@@ -74,20 +75,12 @@ public class MinMax implements AlgorithmInterface {
 				// Add it to the list of candidates?
 				if (flag * newValue >= flag * value)
 					bestActions.add(action);
-			} catch (InvalidActionException e) {
+			} catch (InvalidActionException | CloneNotSupportedException e) {
 				throw new RuntimeException("Invalid action!");
 			}
 		}
 		// Pick one of the best randomly
 		Collections.shuffle(bestActions);
-		// Graph?
-		try {
-			GraphVizPrinter.setDecision(bestActions.get(0).applyTo(conf));
-		} catch (InvalidActionException e) {
-			throw new RuntimeException("Invalid action!");
-		}
-		if (DEBUG)
-			GraphVizPrinter.printGraphToFile();
 		return bestActions.get(0);
 	}
 
@@ -130,7 +123,7 @@ public class MinMax implements AlgorithmInterface {
 					GraphVizPrinter.setRelation(childState, newValue, state);
 				if (flag * newValue > flag * value)
 					value = newValue;
-			} catch (InvalidActionException e) {
+			} catch (InvalidActionException | CloneNotSupportedException e) {
 				throw new RuntimeException("Invalid action!");
 			}
 			// Pruning!

@@ -65,7 +65,7 @@ public class MTDFAgent implements AlgorithmInterface {
 		MAX, MIN
 	}
 
-	private static int MAX_SEARCH_DEPTH = 100;
+	private static int MAX_SEARCH_DEPTH = 5;
 	private static int MAX_RECORD = 5000;
 	private static long MAX_RUN_TIME = 1000; // maximum runtime in milliseconds
 	//private HashMap<Long, TransEntry> transTable;
@@ -73,7 +73,7 @@ public class MTDFAgent implements AlgorithmInterface {
 	private long searchCutoff;
 	private ZobristGen zg;
 	private HeuristicInterface h;
-	private static int debug_max = 20;  //it used to iterate in debug mode
+	private static int debug_max = 5;  //it used to iterate in debug mode
 	private static int debug = 0;  //it used to iterate in debug mode
 
 	/**
@@ -194,11 +194,12 @@ public class MTDFAgent implements AlgorithmInterface {
 		best = MTDF(root, guess, depth);
 		while ((depth < MAX_SEARCH_DEPTH) && (!timeUp() || debug < debug_max)) {
 			debug++;
-			++depth;
+			depth++;
 			best = MTDF(root, guess, depth);
 			guess = best.value;
-		}
 
+		}
+		System.out.println(depth);
 		return best.move;
 	}
 

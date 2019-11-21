@@ -6,14 +6,28 @@ import java.util.Date;
 import java.util.List;
 
 import algorithms.*;
+<<<<<<< HEAD
 import heuristics.*;
+=======
+import heuristics.*;
+import representation.DipoleConf;
+import representation.DipoleMove;
+
+import representation.Move;
+
+>>>>>>> branch 'master' of https://github.com/Lory999555/AI-Project
 import representation.*;
 
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> branch 'master' of https://github.com/Lory999555/AI-Project
 
 public class Main {
 
 	public static void main(String[] args) {
+<<<<<<< HEAD
 
 		/**
 		 * // long a = 263172;
@@ -31,7 +45,24 @@ public class Main {
 		 * Date().getTime() - now; System.out.println(after);
 		 **/
 		long now = System.nanoTime();
+=======
+		long now = System.currentTimeMillis();
+		DipoleConf prova = new DipoleConf(true);
+		List<Move> mosse = prova.getActions();
 
+		HeuristicInterface hi = new BBEvaluator();
+		
+		AlgorithmInterface ai = new MTDFAgent(hi);
+		
+		Conf root = new DipoleConf(false);
+		//Conf root = new DipoleConf(false);
+		LAVORAMU();
+		System.out.println(root);
+		Move choise = ai.compute(root);
+		System.out.println(choise);
+>>>>>>> branch 'master' of https://github.com/Lory999555/AI-Project
+
+<<<<<<< HEAD
 		//LAVORAMU();
 		DipoleConf prova = new DipoleConf(true);
 		DipoleMove move = new DipoleMove();
@@ -44,16 +75,10 @@ public class Main {
 		}
 		
 		System.out.println(System.nanoTime()-now);
+=======
+>>>>>>> branch 'master' of https://github.com/Lory999555/AI-Project
 	}
 
-	public static long flipVertical(long x) {
-		long k1 = 0x00FF00FF00FF00FFL;
-		long k2 = 0x0000FFFF0000FFFFL;
-		x = ((x >>> 8) & k1) | ((x & k1) << 8);
-		x = ((x >>> 16) & k2) | ((x & k2) << 16);
-		x = (x >>> 32) | (x << 32);
-		return x;
-	}
 
 	public static void LAVORAMU() {
 		Date date = new Date(2019 - 1900, 9, 18);
