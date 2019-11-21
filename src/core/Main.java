@@ -7,15 +7,14 @@ import java.util.List;
 
 import algorithms.*;
 import heuristics.*;
-import representation.DipoleConf;
-import representation.DipoleMove;
-import representation.Move;
 import representation.*;
+
 
 
 public class Main {
 
 	public static void main(String[] args) {
+
 		/**
 		 * // long a = 263172;
 		 * 
@@ -45,18 +44,6 @@ public class Main {
 		}
 		
 		System.out.println(System.nanoTime()-now);
-
-		LAVORAMU();
-		
-		HeuristicInterface hi = new BBEvaluator();
-		
-		AlgorithmInterface ai = new MTDFAgent(hi);
-		
-		Conf root = new DipoleConf(false);
-		
-		Move choise = ai.compute(root);
-		System.out.println(choise);
-		
 	}
 
 	public static long flipVertical(long x) {
@@ -74,7 +61,7 @@ public class Main {
 		//System.out.println(date.toString());
 		//System.out.println(now.toString());
 		long tiempu = now.getTime() - date.getTime();
-		System.out.println("Giorni PERSI : " + tiempu/(1000*60*60*24) +"\n https://gfycat.com/reasonabledismalkinglet-stinson-barney!!!");
+		System.out.println("Giorni PERSI : " + tiempu/(1000*60*60*24) +"\nhttps://gfycat.com/reasonabledismalkinglet-stinson-barney!!!");
 	}
 	
 	

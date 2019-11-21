@@ -177,7 +177,7 @@ public class DipoleConf implements Conf, Cloneable {
 		moves = backAttack | frontAttack | quietMove;
 	}
 	
-	private void allMoves2(long x, long opponent, long mines, int type, long[] pieces, long[][] possibleMove) {
+	public void allMoves2(long x, long opponent, long mines, int type, long[] pieces, long[][] possibleMove) {
 		if(type>6) type=6;		
 		int sq = getSquare(x);
 		long rose = possibleMove[type][sq];
