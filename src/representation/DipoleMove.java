@@ -129,7 +129,7 @@ public class DipoleMove implements Move {
 			}
 
 			res.setBoard(cont, res.getBoard(cont) ^ toSq); // toglie l'intero stack da toSq
-			res.setBoard(type + cont, res.getBoard(type + cont) ^ toSq); // inserisce in posizione toSq il nuovo stack
+			res.setBoard(dist + cont, res.getBoard(dist + cont) ^ toSq); // inserisce in posizione toSq il nuovo stack
 																			// dato dalla somma dei 2
 
 			if (tmp.isBlack()) {

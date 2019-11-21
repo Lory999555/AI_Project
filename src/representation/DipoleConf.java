@@ -861,4 +861,9 @@ public class DipoleConf implements Conf, Cloneable {
 	public long[] getForHash() {
 		return this.getPieces();
 	}
+
+	public int getType(long pawn) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
 }
