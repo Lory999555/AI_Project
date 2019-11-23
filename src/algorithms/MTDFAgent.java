@@ -1,5 +1,8 @@
 package algorithms;
+
 import java.util.Map;
+
+import com.sun.org.apache.xml.internal.resolver.helpers.Debug;
 
 import heuristics.HeuristicInterface;
 import memory.TranspositionTable;
@@ -65,16 +68,16 @@ public class MTDFAgent implements AlgorithmInterface {
 		MAX, MIN
 	}
 
-	private static int MAX_SEARCH_DEPTH = 5;
+	private static int MAX_SEARCH_DEPTH = 50;
 	private static int MAX_RECORD = 5000;
 	private static long MAX_RUN_TIME = 1000; // maximum runtime in milliseconds
-	//private HashMap<Long, TransEntry> transTable;
+	// private HashMap<Long, TransEntry> transTable;
 	private Map<Long, NodeInfo> transpositionTable;
 	private long searchCutoff;
 	private ZobristGen zg;
 	private HeuristicInterface h;
-	private static int debug_max = 5;  //it used to iterate in debug mode
-	private static int debug = 0;  //it used to iterate in debug mode
+	private static int debug_max = 5; // it used to iterate in debug mode
+	private static int debug = 0; // it used to iterate in debug mode
 
 	/**
 	 * Constructs an instance of the AI agent for gameplay.
@@ -87,7 +90,7 @@ public class MTDFAgent implements AlgorithmInterface {
 		zg = new ZobristGen();
 
 		// init transposition table
-		//transTable = new HashMap<Long, TransEntry>();
+		// transTable = new HashMap<Long, TransEntry>();
 		transpositionTable = new TranspositionTable<Long, MTDFAgent.NodeInfo>(MAX_RECORD);
 
 		// init heuristic function
@@ -101,7 +104,10 @@ public class MTDFAgent implements AlgorithmInterface {
 	 * @return true if time is up, otherwise false
 	 */
 	private boolean timeUp() {
-		return (new Date().getTime() > searchCutoff);
+		if (java.lang.management.ManagementFactory.getRuntimeMXBean().getInputArguments().toString()
+				.indexOf("-agentlib:jdwp") > 0)
+			return false;
+		return (new Date().getTime() > searchCutoff - 100);
 	}
 
 	/**
@@ -182,7 +188,7 @@ public class MTDFAgent implements AlgorithmInterface {
 	public Move compute(Conf root) {
 		int depth = 1;
 		int guess = 0;
-		MoveValue best;
+		MoveValue best = null;
 		
 		// ChildMove state;
 
@@ -191,15 +197,20 @@ public class MTDFAgent implements AlgorithmInterface {
 		// state = new ChildMove(board);
 
 		this.searchCutoff = new Date().getTime() + MAX_RUN_TIME;
-		best = MTDF(root, guess, depth);
-		while ((depth < MAX_SEARCH_DEPTH) && (!timeUp() || debug < debug_max)) {
-			debug++;
-			depth++;
+//		best = MTDF(root, guess, depth);
+		while ((depth < MAX_SEARCH_DEPTH) && !timeUp() /** || debug < debug_max */) 
+		{
+			// debug++;
+//			depth++;
 			best = MTDF(root, guess, depth);
+			depth++;
 			guess = best.value;
+			
+			//System.out.println("\n-------------- "+depth+" ---------------\n");
 
 		}
-		System.out.println(depth);
+		assert (best.move != null);
+		System.out.println("\n FINAL depth: -------------- "+depth+" ---------------\n");
 		return best.move;
 	}
 
@@ -227,7 +238,7 @@ public class MTDFAgent implements AlgorithmInterface {
 			} else {
 				lowerbound = value;
 			}
-		} while (lowerbound < upperbound);
+		} while ((lowerbound < upperbound) && !timeUp());
 
 		return mv;
 
@@ -252,25 +263,30 @@ public class MTDFAgent implements AlgorithmInterface {
 		long hash = zg.zobristHash(conf.getForHash());
 
 		// base case
-		if ((depth == 0) || conf.getStatus() != Conf.Status.Ongoing) {
+		if ((depth == 0) || conf.getStatus() != Conf.Status.Ongoing || timeUp()) {
+			//System.out.println("valuto: "+prec+" || valore ="+h.evaluate(conf)+"\n configurazione: \n"+conf+"\n");
 			return new MoveValue(prec, h.evaluate(conf));
 		}
 
 		// trans table lookup
-		if (check(hash)) { // potrebbe essere utile incapsulare il tutto in una classe e gestirla da li
+/**			if (check(hash)) { // potrebbe essere utile incapsulare il tutto in una classe e gestirla da li
 			trans = transpositionTable.get(hash); // uitlizzando tecniche specifiche (LRU)
+			System.out.println("entro nella tt con: "+hash+" || della conf: \n"+conf+"\n");
 			if (trans.depth >= depth) {
 				if (trans.lowerbound >= beta) {
+					System.out.println("creo la mossa con il lower bound: "+prec);
 					return new MoveValue(prec, trans.lowerbound);
 				}
 				if (trans.upperbound <= alpha) {
+					System.out.println("creo la mossa con l'upper bound: "+prec);
 					return new MoveValue(prec, trans.upperbound);
 				}
+				System.out.println("Non creo la mossa");
 				alpha = Math.max(alpha, trans.lowerbound);
 				beta = Math.min(beta, trans.upperbound);
 			}
 		}
-
+*/
 		// recursive
 		if (step == Ply.MAX) { // max step
 			value = Integer.MIN_VALUE;
@@ -278,7 +294,9 @@ public class MTDFAgent implements AlgorithmInterface {
 			// for (ChildMove child : children(move, Ply.MAX, false)) {
 			for (Move childm : conf.getActions()) {
 				try {
-					tmp=childm.applyTo(conf);  // MI DA ERRORE PERCHè NON C'è L'APPLY TO
+					tmp = childm.applyTo(conf); // MI DA ERRORE PERCHè NON C'è L'APPLY TO
+					//System.out.println("analizzo la mossa: "+ childm+" || tmp: \n"+tmp+"\n");
+
 				} catch (InvalidActionException | CloneNotSupportedException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -297,12 +315,13 @@ public class MTDFAgent implements AlgorithmInterface {
 			b = beta; // save original beta
 			for (Move childm : conf.getActions()) {
 				try {
-					tmp=childm.applyTo(conf);
+					tmp = childm.applyTo(conf);
+					//System.out.println("analizzo la mossa: "+ childm+" || tmp: \n"+tmp+"\n");
 				} catch (InvalidActionException | CloneNotSupportedException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-				searchResult = alphaBetaWithMemory(tmp,childm, alpha, b, depth - 1, Ply.MAX);
+				searchResult = alphaBetaWithMemory(tmp, childm, alpha, b, depth - 1, Ply.MAX);
 				if (searchResult.value <= value) {
 					value = searchResult.value;
 					bestMove = childm;
@@ -336,6 +355,8 @@ public class MTDFAgent implements AlgorithmInterface {
 			}
 			trans.depth = depth;
 			transpositionTable.put(hash, trans);
+			//System.out.println("metto nella tt: "+hash+"\n"+conf);
+
 		}
 
 		return new MoveValue(bestMove, value);

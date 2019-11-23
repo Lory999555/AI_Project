@@ -22,7 +22,6 @@ public class DipoleConf implements Conf, Cloneable {
 	private long merge;
 	private long death;
 	private long quietMove;
-
 	private long pBlack;
 	private long pRed;
 	private boolean black;
@@ -351,10 +350,10 @@ public class DipoleConf implements Conf, Cloneable {
 					temp = backAttack & -backAttack;
 					backAttack ^= temp;
 					int dist = Math.abs((this.getSquare(pawn) >>> 3) - (this.getSquare(temp) >>> 3));
-					assert(Math.abs(this.getSquare(pawn) - (this.getSquare(temp))) > 0);
+					assert (Math.abs(this.getSquare(pawn) - (this.getSquare(temp))) > 0);
 					if (dist != 0)
 						actions.add(new DipoleMove(pawn, temp, selectType, black, typeMove.BACKATTACK, dist));
-					else 
+					else
 						actions.add(new DipoleMove(pawn, temp, selectType, black, typeMove.BACKATTACK,
 								Math.abs(this.getSquare(pawn) - (this.getSquare(temp)))));
 				}
@@ -419,10 +418,10 @@ public class DipoleConf implements Conf, Cloneable {
 					// to square di from
 					// 1 meno la'ltro in modulo, il risultato lo divido per 8
 					int dist = Math.abs((this.getSquare(pawn) >>> 3) - (this.getSquare(temp) >>> 3));
-					assert(Math.abs(this.getSquare(pawn) - (this.getSquare(temp))) > 0);
+					assert (Math.abs(this.getSquare(pawn) - (this.getSquare(temp))) > 0);
 					if (dist != 0)
 						actions.add(new DipoleMove(pawn, temp, selectType, black, typeMove.BACKATTACK, dist));
-					else 
+					else
 						actions.add(new DipoleMove(pawn, temp, selectType, black, typeMove.BACKATTACK,
 								Math.abs(this.getSquare(pawn) - (this.getSquare(temp)))));
 				}
@@ -863,7 +862,36 @@ public class DipoleConf implements Conf, Cloneable {
 	}
 
 	public int getType(long pawn) {
-		// TODO Auto-generated method stub
-		return 0;
+		int selectType = 0;
+		while (selectType < 12) {
+			if ((pawn & pieces[selectType]) != 0) {
+				break;
+			}
+			selectType++;
+		}
+		return selectType;
 	}
+	
+	public int getType180(long pawn) {
+		flip180(pawn);
+		int selectType = 0;
+		while (selectType < 12) {
+			if ((pawn & pieces[selectType]) != 0) {
+				break;
+			}
+			selectType++;
+		}
+		return selectType;
+	}
+	
+	public long[] getPieces180(){
+		int cont=0;
+		long [] pieces180 = new long [12];
+		while (cont < 12) {
+			pieces180[cont] = flip180(pieces[cont]);
+			cont++;
+		}
+		return pieces180;
+	}
+
 }

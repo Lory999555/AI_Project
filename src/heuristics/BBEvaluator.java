@@ -1,23 +1,148 @@
 package heuristics;
 
-import java.util.Random;
+import java.util.LinkedList;
 
+import representation.Board;
 import representation.Conf;
+import representation.DipoleConf;
 
-public class BBEvaluator implements HeuristicInterface{
+public class BBEvaluator implements HeuristicInterface {
+	private int val[] = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 }; // valore delle pedine
+	private double valPositionR[] = { 2, 1.75, 1.50, 1.25, 1, 0.6, 0.3, 0 }; // valore della posizione in base alla riga
+	private double valPositionB[] = { 0, 0.3, 0.6, 1, 1.25, 1.50, 1.75, 2 };
 	
-	private Random r;
-	public BBEvaluator() {
-		r = new Random(845212);
+	private double valPosition2R[] = { 2, 2, 4, 5, 4, 2, 1, 0 }; // valore della posizione in base alla riga
+	private double valPosition2B[] = { 0, 1, 2, 4, 5, 4, 2, 2 };
+	
+	private int mobilityB;
+	private int backAttackB;
+	private int frontAttackB;
+	private int mobilityR;
+	private int backAttackR;
+	private int frontAttackR;
+	private long pRed;
+	private long pBlack;
+
+	//sarebbe utile sapere che pedina è sotto attacco
+	//
+	public int evaluate(Conf c) {
+		DipoleConf dc = (DipoleConf) c;
+		pRed = dc.getpRed();
+		pBlack = dc.getpBlack();
+		numberMovesBlack(dc);
+		numberMovesRed(dc);
+		double eval = (materialR(dc) + mobilityR + 1.5*frontAttackR + 2 * backAttackR)
+				- (materialB(dc) + mobilityB + 1.5*frontAttackB + 2 * backAttackB);
+		return (int) Math.round(eval);
 	}
 
-	
-	@Override
-	public int evaluate(Conf conf) {
-		// TODO Auto-generated method stub
-		int c = r.nextInt();
-		System.out.println(c);
-		return c;
+	public double evaluateMob(Conf c) {
+		DipoleConf dc = (DipoleConf) c;
+		numberMovesBlack(dc);
+		numberMovesRed(dc);
+		double eval = mobilityR - mobilityB;
+		return eval;
+	}
+
+	public double evaluateMat(Conf c) {
+		DipoleConf dc = (DipoleConf) c;
+		numberMovesBlack(dc);
+		numberMovesRed(dc);
+		double eval = materialR(dc) - materialB(dc);
+		return eval;
+	}
+
+	public double evaluateAtt(Conf c) {
+		DipoleConf dc = (DipoleConf) c;
+		numberMovesBlack(dc);
+		numberMovesRed(dc);
+		double eval = frontAttackR + 2 * backAttackR - frontAttackB - 2 * backAttackB;
+		return eval;
+	}
+
+	/**
+	 * @param DipoleConf
+	 * @return number of mobility (quiet move), number of backAttack and number of
+	 *         frontAttack
+	 */
+	private void numberMovesRed(DipoleConf c) {
+		long pB = pBlack;
+		long pR = pRed;
+		mobilityR = 0;
+		backAttackR = 0;
+		frontAttackR = 0;
+		long pawn;
+		while (pR != 0) {
+			pawn = pR & -pR;
+			pR ^= pawn;
+			c.allMoves2(pawn, pB, pR, c.getType(pawn), c.getPieces(), Board.movingBook);
+			mobilityR += c.popCount(c.getQuietMove() | c.getMerge());
+			backAttackR += c.popCount(c.getBackAttack());
+			frontAttackR += c.popCount(c.getFrontAttack());
+		}
+	}
+
+	/**
+	 * @param DipoleConf
+	 * @return number of mobility (quiet move), number of backAttack and number of
+	 *         frontAttack
+	 */
+	private int numberMovesBlack(DipoleConf c) {
+		long pB = c.flip180(pBlack);
+		long pR = c.flip180(pRed);
+		mobilityB = 0;
+		backAttackB = 0;
+		frontAttackB = 0;
+		long pawn;
+		while (pB != 0) {
+			pawn = pB & -pB;
+			pB ^= pawn;
+			c.allMoves2(pawn, pR, pB, c.getType180(pawn), c.getPieces180(), Board.movingBook);
+			mobilityB += c.popCount(c.getQuietMove() | c.getMerge());
+			backAttackB += c.popCount(c.getBackAttack());
+			frontAttackB += c.popCount(c.getFrontAttack());
+		}
+		return 0;
+	}
+
+	/**
+	 * @param DipoleConf
+	 * @return returns the value of the pieces in relation to their position
+	 */
+	private double materialB(DipoleConf c) { // N.B. se l'euristica rimane così, posso richiamare il numberMove
+		// direttamente nel while presente in questa classe
+		double material = 0;
+		long pieces = pBlack;
+		long pawn;
+		int square;
+		int type;
+		while (pieces != 0) {
+			pawn = pieces & -pieces;
+			pieces ^= pawn;
+			square = c.getSquare(pawn);
+			type = c.getType(pawn);
+			assert(type < 12);
+			material += (val[type] * valPositionB[square >>> 3]);
+		} // while
+		return material;
+	}
+
+	private double materialR(DipoleConf c) { // N.B. se l'euristica rimane così, posso richiamare il numberMove
+		// direttamente nel while presente in questa classe
+		double material = 0;
+		long pieces = pRed;
+		long pawn;
+		int square;
+		int type;
+		while (pieces != 0) {
+			pawn = pieces & -pieces;
+			pieces ^= pawn;
+			square = c.getSquare(pawn);
+			type = c.getType(pawn);
+			assert(type < 12);
+			material += (val[type] * valPositionR[square >>> 3]);
+		} // while
+		return material;
 	}
 
 }
