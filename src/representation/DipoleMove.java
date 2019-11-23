@@ -12,6 +12,7 @@ public class DipoleMove implements Move {
 	private boolean black;
 	private typeMove tP;
 	private int dist;
+	
 
 	public DipoleMove(long fromSq, long toSq, int type, boolean black, typeMove tp, int dist) {
 		this.fromSq = fromSq;
@@ -25,7 +26,7 @@ public class DipoleMove implements Move {
 
 	public DipoleMove() {
 	}
-
+	
 	/**
 	 * encoding move in 23 bit: 6 fromSq + 6 toSq + 3 distance + 4 type + 1 color +
 	 * 3 move type
@@ -79,31 +80,28 @@ public class DipoleMove implements Move {
 	@Override
 
 	public Conf applyTo(Conf input) throws InvalidActionException, CloneNotSupportedException {
-		int cont;
 		assert(input != null);
 		DipoleConf tmp = (DipoleConf) input;
 		DipoleConf res = tmp.clone();
 		res.setBlack(!input.isBlack());
-		//decodingMove(code);
+		int cont;
 
+		// Mi indica se si va a muovere tutto lo stack oppure solo una minima parte
 		boolean allStack = (type - dist) == -1;
 
 		long fromtoSq = fromSq ^ toSq;
 
 		switch (this.tP) {
 		case QUIETMOVE:
-//			andrebbero controllate varie cose come:
-//				se una pedina si muove completamente quali bitboard aggiornare
-//				e come capirlo? del tipo type - dist < 0?
-//				aggiornare anche le bb pblack e pred in base a quale gicatore
-//				sta muovendo così da scegliere from o to bb.
-//			sarebbe utile mettere pblack e pred in una lista che coincida con il booleano
 			
+			// elimina la pedina from dalla bitBoard che ne insica il tipo. Es se noi spostiamo
+			// una pedina da 6 andiamo ad elimniare questa pedina dal tipo 6
 			res.setBoard(type, res.getBoard(type) ^ fromSq);
+			//inseriamo nella casella di destinazione il numero di pedine spostate che corrisponde alla distanza meno 1
 			res.setBoard(dist - 1, res.getBoard(dist - 1) ^ toSq);
-//			res.setBoard(type - dist, tmp.getBoard(type - dist) ^ fromSq);
 			if (tmp.isBlack()) {
 				if (allStack)
+					// se spostiamo tutto lo stack
 					res.setpBlack(res.getpBlack() ^ fromtoSq);
 				else {
 
@@ -147,6 +145,8 @@ public class DipoleMove implements Move {
 				}
 			}
 			break;
+			
+
 
 		case FRONTATTACK:
 			res.setBoard(type, res.getBoard(type) ^ fromSq);
@@ -226,9 +226,10 @@ public class DipoleMove implements Move {
 		}
 
 		return res;
-	}
 
+	}
 	
+
 	public Conf applyTo2(Conf input, int code) throws InvalidActionException, CloneNotSupportedException {
 		int cont = 0;
 		DipoleConf tmp = (DipoleConf) input;
@@ -242,16 +243,8 @@ public class DipoleMove implements Move {
 
 		switch (this.tP) {
 		case QUIETMOVE:
-//			andrebbero controllate varie cose come:
-//				se una pedina si muove completamente quali bitboard aggiornare
-//				e come capirlo? del tipo type - dist < 0?
-//				aggiornare anche le bb pblack e pred in base a quale gicatore
-//				sta muovendo così da scegliere from o to bb.
-//			sarebbe utile mettere pblack e pred in una lista che coincida con il booleano
-			
 			res.setBoard(type, res.getBoard(type) ^ fromSq);
 			res.setBoard(dist - 1, res.getBoard(dist - 1) ^ toSq);
-//			res.setBoard(type - dist, tmp.getBoard(type - dist) ^ fromSq);
 			if (tmp.isBlack()) {
 				if (allStack)
 					res.setpBlack(res.getpBlack() ^ fromtoSq);
@@ -271,27 +264,24 @@ public class DipoleMove implements Move {
 			}
 			break;
 		case MERGE:
-
 			res.setBoard(type, res.getBoard(type) ^ fromSq); // toglie l'intero stack di dimensione type
 			cont = 0;
-
 			while ((res.getBoard(cont) & toSq) == 0) {
 				cont++;
 			}
-
 			res.setBoard(cont, res.getBoard(cont) ^ toSq); // toglie l'intero stack da toSq
-			res.setBoard(type + cont, res.getBoard(type + cont) ^ toSq); // inserisce in posizione toSq il nuovo stack
+			res.setBoard(dist + cont, res.getBoard(dist + cont) ^ toSq); // inserisce in posizione toSq il nuovo stack
 																			// dato dalla somma dei 2
-
 			if (tmp.isBlack()) {
-				if (allStack)
-					res.setpBlack(res.getpBlack() ^ fromSq);
-				else {
+				if (allStack) {
+					res.setpBlack(tmp.getpBlack() ^ fromSq);
+				} else {
 					res.setBoard(type - dist, res.getBoard(type - dist) ^ fromSq);
 				}
-			} else {
+			}else {
+				
 				if (allStack)
-					res.setpRed(res.getpRed() ^ fromSq);
+					res.setpRed(tmp.getpRed() ^ fromSq);
 				else {
 					res.setBoard(type - dist, res.getBoard(type - dist) ^ fromSq);
 				}
@@ -310,8 +300,8 @@ public class DipoleMove implements Move {
 			if (tmp.isBlack()) {
 				if (allStack) {
 					res.setpBlack(res.getpBlack() ^ fromtoSq);
-				} else {
-
+				}
+				else {
 					res.setBoard(type - dist, res.getBoard(type - dist) ^ fromSq);
 					res.setpBlack(res.getpBlack() | fromtoSq);
 				}
@@ -383,6 +373,46 @@ public class DipoleMove implements Move {
 	public int getValue() {
 		// TODO Auto-generated method stub
 		return 0;
+	}
+
+	public long getFromSq() {
+		return fromSq;
+	}
+
+	public void setFromSq(long fromSq) {
+		this.fromSq = fromSq;
+	}
+
+	public long getToSq() {
+		return toSq;
+	}
+
+	public void setToSq(long toSq) {
+		this.toSq = toSq;
+	}
+
+	public int getType() {
+		return type;
+	}
+
+	public void setType(int type) {
+		this.type = type;
+	}
+
+	public typeMove gettP() {
+		return tP;
+	}
+
+	public void settP(typeMove tP) {
+		this.tP = tP;
+	}
+
+	public int getDist() {
+		return dist;
+	}
+
+	public void setDist(int dist) {
+		this.dist = dist;
 	}
 
 }

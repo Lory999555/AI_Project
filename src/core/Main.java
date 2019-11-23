@@ -7,12 +7,25 @@ import java.util.List;
 import algorithms.*;
 import heuristics.*;
 import representation.*;
+import converter.ConverterMove;
+import converter.SenderReceiver;
+import heuristics.*;
+import representation.*;
+import representation.DipoleMove.typeMove;
+
+import java.util.concurrent.Semaphore;
 import representation.Conf.Status;
 
 public class Main {
+	
+	public static Semaphore srSem= new Semaphore(0);
+	public static Semaphore algSem= new Semaphore(0);
+	public static boolean blackPlayer;
 
 	public static void main(String[] args) throws InvalidActionException, CloneNotSupportedException {
 		LAVORAMU();
+		startServer();
+
 
 		Move choise;
 		Conf state;
@@ -67,6 +80,40 @@ public class Main {
 
 	}
 
+
+	public static void startServer() throws InvalidActionException, CloneNotSupportedException {
+		blackPlayer=false;
+		Conf state = new DipoleConf(blackPlayer);
+		SenderReceiver sr = new SenderReceiver();
+		sr.start();
+		ConverterMove cm = new ConverterMove();
+		int type = 11;
+		Move move ;
+		while(true) {
+			try {
+				algSem.acquire();
+				
+				if(sr.getStatus().equals("OPPONENT_MOVE")) {
+					move= cm.unpacking(sr.getMove(),state);
+					state= move.applyTo(state);
+				}
+				
+				if(sr.getStatus().equals("YOUR_TURN")) {
+					move = new DipoleMove(8,1024,type,blackPlayer,typeMove.QUIETMOVE,1);
+					state= move.applyTo(state);
+					System.out.println(cm.generatePacket(move));
+					sr.setMove(cm.generatePacket(move));
+					type-=2;
+				}
+				
+				srSem.release();
+				
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+	
 	public static void LAVORAMU() {
 		Date date = new Date(2019 - 1900, 9, 18);
 		Date now = new Date();
