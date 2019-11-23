@@ -2,6 +2,10 @@ package representation;
 
 public class Board {
 	
+	public enum File {H,G,F,E,D,C,B,A};
+	public enum directionNS {S,P,N};
+	public enum directionEO {E,P,O};
+	
 	public static final long b_d = 0x00000000000000ffL; // down
 	public static final long b_u = 0xff00000000000000L; // up
 	public static final long b_r = 0x0101010101010101L; // right
@@ -77,4 +81,82 @@ public class Board {
 			 								1, 0, 1, 0, 1, 0, 1, 0
 			 								};
 	
+	
+	// ritorna il numero della casella in cui è posizionato il pedone
+	public static int getSquare(long position) {
+		long b = position ^ (position - 1);
+		int fold = (int) (b ^ (b >>> 32));
+		return Board.BIT_TABLE[(fold * 0x783a9b23) >>> 26];
+	}
+	
+	
+	// Ritorna la posizione esatta del pedone sottoforma di stringa (ES A8) a
+	// partire da una bitboard
+	public static String DeBruijn(long position) {
+		return Board.SQUARE_NAMES[getSquare(position)];
+	}
+	
+	// ritorna l'indice di una casella della scacchiera a partire dalla stringa passata
+	public static int stringToSquare(String file,String rank) {
+		return File.valueOf(file).ordinal()*8 + (8- Integer.parseInt(rank));
+	}
+	
+	// ritorna una bitBoard a partire dall'indice di una casella della scacchiera
+	public static long squareToBitboard( int square) {
+		return 1L << square;
+	}
+	
+	// data una posizione, la direzione e la distanza ritorna la casella dove la pedina effettuerà lo spostamento.
+	// utilizzata se lo spostamento è verso una direzione N,S,E,O
+	public static int toSquare( int square,String NSEO,int dist) {
+		return (((enumNSValue(NSEO)-1)*1)*dist)*8 +((enumEOValue(NSEO)-1)*1)*(dist)+ square ;
+	}
+	
+	// data una posizione, la direzione e la distanza ritorna la casella dove la pedina effettuerà lo spostamento
+	// utilizzata se lo spostamento è verso una direzionen NE,NO,SE,SO
+	public static int toSquare( int square,String NS,String EO,int dist) {
+		return ((enumNSValue(NS)-1)*dist)*8 + (enumEOValue(EO)-1)*(dist)+square ;
+	}
+	
+	//ritorna il valore dell'enum passato. Se l'enum non esiste cattura l'errore e ritorna 1
+	public static int enumNSValue(String ns) {
+		try {
+			return  directionNS.valueOf(ns).ordinal();
+		}catch(IllegalArgumentException e) {
+			return 1;
+		}
+	}
+	
+	//ritorna il valore dell'enum passato. Se l'enum non esiste cattura l'errore e ritorna 1
+	public static int enumEOValue(String eo) {
+		try {
+			return  directionEO.valueOf(eo).ordinal();
+		}catch(IllegalArgumentException e) {
+			return 1;
+		}
+	}
+	
+
+	// flippa di 180 la BitBoard passata
+	public static long flip180(long x) {
+
+		// flipping vertically
+		long k1 = 0x00FF00FF00FF00FFL;
+		long k2 = 0x0000FFFF0000FFFFL;
+		x = ((x >>> 8) & k1) | ((x & k1) << 8);
+		x = ((x >>> 16) & k2) | ((x & k2) << 16);
+		x = (x >>> 32) | (x << 32);
+
+		// mirroring horizontally
+		long k3 = 0x5555555555555555L;
+		long k4 = 0x3333333333333333L;
+		long k5 = 0x0f0f0f0f0f0f0f0fL;
+		x = ((x >>> 1) & k3) + 2 * (x & k3);
+		x = ((x >>> 2) & k4) + 4 * (x & k4);
+		x = ((x >>> 4) & k5) + 16 * (x & k5);
+
+		return x;
+	}
+
+
 }
