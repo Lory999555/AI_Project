@@ -66,7 +66,7 @@ public class DipoleMove implements Move {
 
 	@Override
 	public String toString() {
-		return tP.name() + " from: " + fromSq + " to " + toSq + " type: " + type + " BLACK: " + black + " dist: "
+		return tP.name() + " from: " + Board.getSquare(fromSq) + " to " + Board.getSquare(toSq) + " type: " + type + " BLACK: " + black + " dist: "
 				+ dist;
 //		return "0";
 	}
@@ -85,6 +85,7 @@ public class DipoleMove implements Move {
 		DipoleConf res = tmp.clone();
 		res.setBlack(!input.isBlack());
 		int cont;
+		assert(type < 12);
 
 		// Mi indica se si va a muovere tutto lo stack oppure solo una minima parte
 		boolean allStack = (type - dist) == -1;

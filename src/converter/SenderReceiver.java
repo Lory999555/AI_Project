@@ -10,6 +10,8 @@ import java.net.InetAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
 
+import core.Main;
+
 public class SenderReceiver extends Thread {
 	private InetAddress addr;
 	private Socket socket = null;
@@ -54,6 +56,15 @@ public class SenderReceiver extends Thread {
 				userInput = in.readLine();
 				System.out.println(userInput);
 				serverInfo = userInput.split(" ");
+
+				if (serverInfo[0].equals("WELCOME")) {
+					status = "WELCOME";
+					if (serverInfo[1].equals("Black"))
+						Main.blackPlayer = true;
+					else
+						Main.blackPlayer = false;
+				}
+				
 				if (serverInfo[0].equals("OPPONENT_MOVE")) {
 					status = "OPPONENT_MOVE";
 					move = serverInfo[1];
@@ -64,8 +75,9 @@ public class SenderReceiver extends Thread {
 						e.printStackTrace();
 					}
 				}
+				
 				if (serverInfo[0].equals("YOUR_TURN")) {
-					status="YOUR_TURN";
+					status = "YOUR_TURN";
 					try {
 						core.Main.algSem.release();
 						core.Main.srSem.acquire();

@@ -29,15 +29,12 @@ public class DipoleConf implements Conf, Cloneable {
 	static long blackSquare = 0x55aa55aa55aa55aaL;
 
 	// Configurazione inzio partita
-	public DipoleConf(boolean black) {
+	public DipoleConf() {
 
 		this.pieces[11] = 0x1000000000000008L;
 		this.pRed = 0x8L;
 		this.pBlack = 0x1000000000000000L;
-//		this.pieces[11] = 0x20000810200400L;
-//		this.pRed = 0x0L;
-//		this.pBlack = 0x20000810200400L;
-		this.black = black;
+		this.black = false;
 
 	}
 
@@ -133,8 +130,8 @@ public class DipoleConf implements Conf, Cloneable {
 		long nord = sud;
 		long tmp = 0;
 		int cont = 0;
-		type+=1;
-		while (cont < type) {
+		int typecond = type + 1;
+		while (cont < typecond) {
 			ovest ^= ovest & Board.b_l;
 			est ^= est & Board.b_r;
 			sud ^= sud & Board.b_d;
@@ -327,17 +324,19 @@ public class DipoleConf implements Conf, Cloneable {
 				mines ^= pawn;
 				int selectType = 0;
 				int death = 0;
-				
-				/*
-				 * while (selectType < 12) { if ((pawn & pieces[selectType]) != 0) { break; }
-				 * selectType++; }
-				 */
-				
+
+				while (selectType < 12) {
+					if ((pawn & pieces[selectType]) != 0) {
+						break;
+					}
+					selectType++;
+				}
+
 				// ritorniamo il tipo della pedina
-				selectType = getType(pawn);
+				// selectType = getType(pawn);
 				allMoves2(pawn, pBlack, pRed, selectType, pieces, Board.movingBook);
 				// allMoves(pawn, pBlack, pRed, selectType, pieces);
-				
+
 				long temp;
 				while (backAttack != 0) {
 					temp = backAttack & -backAttack;
@@ -373,15 +372,15 @@ public class DipoleConf implements Conf, Cloneable {
 							Math.abs((Board.getSquare(pawn) >>> 3) - (Board.getSquare(temp) >>> 3))));
 
 				}
-				death = Board.deathNote[Board.getSquare(pawn)];
-				if (death <= selectType + 1) {
-					for (int i = death; i < selectType + 1; i++) {
-						// generiamo una mossa per ogni morte che abbiamo. Es se la morte minima è 3 e
-						// la mia pedina è di tipo 6
-						// vado a creare la mossa morte 3,4,5,6.
-						actions.add(new DipoleMove(pawn, 0, selectType, black, typeMove.DEATH, i));
-					}
-				}
+//				death = Board.deathNote[Board.getSquare(pawn)];
+//				if (death <= selectType + 1) {
+//					for (int i = death; i < selectType + 1; i++) {
+//						// generiamo una mossa per ogni morte che abbiamo. Es se la morte minima è 3 e
+//						// la mia pedina è di tipo 6
+//						// vado a creare la mossa morte 3,4,5,6.
+//						actions.add(new DipoleMove(pawn, 0, selectType, black, typeMove.DEATH, i));
+//					}
+//				}
 			}
 			return actions;
 		} else {
@@ -401,11 +400,15 @@ public class DipoleConf implements Conf, Cloneable {
 				pawn = mines & -mines;
 				mines ^= pawn;
 				int selectType = 0;
-				/*
-				 * while (selectType < 12) { if ((pawn & pieces[selectType]) != 0) { break; }
-				 * selectType++; }
-				 */
-				selectType = getType180(pawn);
+
+				while (selectType < 12) {
+					if ((pawn & pieces180[selectType]) != 0) {
+						break;
+					}
+					selectType++;
+				}
+
+				// selectType = getType180(pawn);
 				allMoves2(pawn, pRed180, pBlack180, selectType, pieces180, Board.movingBook);
 				// allMoves(pawn, pRed, pBlack, selectType, pieces);
 				backAttack = Board.flip180(backAttack);
@@ -443,15 +446,15 @@ public class DipoleConf implements Conf, Cloneable {
 					actions.add(new DipoleMove(pawn, temp, selectType, black, typeMove.MERGE,
 							Math.abs((Board.getSquare(pawn) >>> 3) - (Board.getSquare(temp) >>> 3))));
 				}
-				death = Board.deathNote[Board.getSquare(pawn)];
-				if (death <= selectType + 1) {
-					for (int i = death; i < selectType + 1; i++) {
-						// generiamo una mossa per ogni morte che abbiamo. Es se la morte minima è 3 e
-						// la mia pedina è di tipo 6
-						// vado a creare la mossa morte 3,4,5,6.
-						actions.add(new DipoleMove(pawn, 0, selectType, black, typeMove.DEATH, i));
-					}
-				}
+//				death = Board.deathNote[Board.getSquare(pawn)];
+//				if (death <= selectType + 1) {
+//					for (int i = death; i < selectType + 1; i++) {
+//						// generiamo una mossa per ogni morte che abbiamo. Es se la morte minima è 3 e
+//						// la mia pedina è di tipo 6
+//						// vado a creare la mossa morte 3,4,5,6.
+//						actions.add(new DipoleMove(pawn, 0, selectType, black, typeMove.DEATH, i));
+//					}
+//				}
 			}
 			return actions;
 		}
@@ -479,13 +482,15 @@ public class DipoleConf implements Conf, Cloneable {
 				int selectType = 0;
 				int death = 0;
 
-				/*
-				 * while (selectType < 12) { if ((pawn & pieces[selectType]) != 0) { break; }
-				 * selectType++; }
-				 */
+				while (selectType < 12) {
+					if ((pawn & pieces[selectType]) != 0) {
+						break;
+					}
+					selectType++;
+				}
 
 				// ritorniamo il tipo della pedina
-				selectType = getType(pawn);
+				// selectType = getType(pawn);
 				allMoves2(pawn, pBlack, pRed, selectType, pieces, Board.movingBook);
 				sqPawn = Board.getSquare(pawn);
 				// allMoves(pawn, pBlack, pRed, selectType, pieces);
@@ -557,7 +562,7 @@ public class DipoleConf implements Conf, Cloneable {
 				int selectType = 0;
 				int death = 0;
 				// ritorniamo il tipo della pedina
-				
+
 				while (selectType < 12) {
 					if ((pawn & pieces180[selectType]) != 0) {
 						break;

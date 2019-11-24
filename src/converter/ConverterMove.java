@@ -14,7 +14,7 @@ public class ConverterMove implements ConverterSignal {
 		// String direction;
 		if (fromSQ.charAt(0) > toSQ.charAt(0)) {
 			if (fromSQ.charAt(1) > toSQ.charAt(1)) {
-				return "MOVE "+fromSQ + "," + "NO" + "," + move.getDist();
+				return "MOVE "+fromSQ + "," + "NW" + "," + move.getDist();
 			} else {
 				if (fromSQ.charAt(1) < toSQ.charAt(1)) {
 					return "MOVE "+fromSQ + "," + "NE" + "," + move.getDist();
@@ -23,17 +23,23 @@ public class ConverterMove implements ConverterSignal {
 				}
 			}
 		} else {
-
-			if (fromSQ.charAt(1) > toSQ.charAt(1)) {
-				return "MOVE "+fromSQ + "," + "SO" + "," + move.getDist();
-			} else {
-				if (fromSQ.charAt(1) < toSQ.charAt(1)) {
-					return "MOVE "+fromSQ + "," + "SE" + "," + move.getDist();
+			if(fromSQ.charAt(0) == toSQ.charAt(0)) {
+				if(fromSQ.charAt(1) > toSQ.charAt(1)) {
+					return "MOVE "+fromSQ + "," + "W" + "," + move.getDist();
+				}else {
+					return "MOVE "+fromSQ + "," + "E" + "," + move.getDist();
+				}
+			}else {
+				if (fromSQ.charAt(1) > toSQ.charAt(1)) {
+					return "MOVE "+fromSQ + "," + "SW" + "," + move.getDist();
 				} else {
-					return "MOVE "+fromSQ + "," + "S" + "," + move.getDist();
+					if (fromSQ.charAt(1) < toSQ.charAt(1)) {
+						return "MOVE "+fromSQ + "," + "SE" + "," + move.getDist();
+					} else {
+						return "MOVE "+fromSQ + "," + "S" + "," + move.getDist();
+					}
 				}
 			}
-
 		}
 	}
 
@@ -60,7 +66,7 @@ public class ConverterMove implements ConverterSignal {
 				typeM = typeMove.QUIETMOVE;
 			}
 			else {
-					if(((toBit & move.getpBlack()) != 0)) {
+					if(((toBit & move.getpRed()) != 0)) {
 						typeM = typeMove.MERGE;
 					}else {
 						int verify = (fromSQ >>> 3) - (toSQ >> 3);
@@ -77,7 +83,7 @@ public class ConverterMove implements ConverterSignal {
 				typeM = typeMove.QUIETMOVE;
 			}
 			else {
-					if(((toBit & move.getpRed()) != 0)) {
+					if(((toBit & move.getpBlack()) != 0)) {
 						typeM = typeMove.MERGE;
 					}else {
 						int verify = (fromSQ >>> 3) - (toSQ >> 3);
@@ -90,7 +96,9 @@ public class ConverterMove implements ConverterSignal {
 					}
 			}
 		}
-		return new DipoleMove(fromBit, toBit, type, !Main.blackPlayer, typeM, dist);
+		DipoleMove moves = new DipoleMove(fromBit, toBit, type, !Main.blackPlayer, typeM, dist);
+		System.out.println(moves.toString());
+		return moves;
 	}
 
 }
