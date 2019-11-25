@@ -31,14 +31,11 @@ public class DipoleConf implements Conf, Cloneable {
 	// Configurazione inzio partita
 	public DipoleConf(boolean black) {
 
-//		this.pieces[11] = 0x1000000000000008L;
-//		this.pRed = 0x8L;
-//		this.pBlack = 0x1000000000000000L;
-		this.pieces[1] = 0x1000000L;
-		this.pieces[2] = 0x100L;
-		this.pRed = 0x100L;
-		this.pBlack = 0x1000000L;
-		this.black = black;
+
+		this.pieces[11] = 0x1000000000000008L;
+		this.pRed = 0x8L;
+		this.pBlack = 0x1000000000000000L;
+		this.black = false;
 
 	}
 
@@ -134,8 +131,9 @@ public class DipoleConf implements Conf, Cloneable {
 		long nord = sud;
 		long tmp = 0;
 		int cont = 0;
-		type += 1;
-		while (cont < type) {
+
+		int typecond = type + 1;
+		while (cont < typecond) {
 			ovest ^= ovest & Board.b_l;
 			est ^= est & Board.b_r;
 			sud ^= sud & Board.b_d;
@@ -329,13 +327,16 @@ public class DipoleConf implements Conf, Cloneable {
 				int selectType = 0;
 				int death = 0;
 
-				/*
-				 * while (selectType < 12) { if ((pawn & pieces[selectType]) != 0) { break; }
-				 * selectType++; }
-				 */
+
+				while (selectType < 12) {
+					if ((pawn & pieces[selectType]) != 0) {
+						break;
+					}
+					selectType++;
+				}
 
 				// ritorniamo il tipo della pedina
-				selectType = getType(pawn);
+				// selectType = getType(pawn);
 				allMoves2(pawn, pBlack, pRed, selectType, pieces, Board.movingBook);
 				// allMoves(pawn, pBlack, pRed, selectType, pieces);
 
@@ -484,13 +485,15 @@ public class DipoleConf implements Conf, Cloneable {
 				int selectType = 0;
 				int death = 0;
 
-				/*
-				 * while (selectType < 12) { if ((pawn & pieces[selectType]) != 0) { break; }
-				 * selectType++; }
-				 */
+				while (selectType < 12) {
+					if ((pawn & pieces[selectType]) != 0) {
+						break;
+					}
+					selectType++;
+				}
 
 				// ritorniamo il tipo della pedina
-				selectType = getType(pawn);
+				// selectType = getType(pawn);
 				allMoves2(pawn, pBlack, pRed, selectType, pieces, Board.movingBook);
 				sqPawn = Board.getSquare(pawn);
 				// allMoves(pawn, pBlack, pRed, selectType, pieces);

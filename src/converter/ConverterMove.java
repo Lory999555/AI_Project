@@ -29,9 +29,17 @@ public class ConverterMove implements ConverterSignal {
 					}
 				}
 			} else {
-
+				
+			}
+			if(fromSQ.charAt(0) == toSQ.charAt(0)) {
+				if(fromSQ.charAt(1) > toSQ.charAt(1)) {
+					return "MOVE "+fromSQ + "," + "W" + "," + move.getDist();
+				}else {
+					return "MOVE "+fromSQ + "," + "E" + "," + move.getDist();
+				}
+			}else {
 				if (fromSQ.charAt(1) > toSQ.charAt(1)) {
-					return "MOVE "+fromSQ + "," + "SO" + "," + move.getDist();
+					return "MOVE "+fromSQ + "," + "SW" + "," + move.getDist();
 				} else {
 					if (fromSQ.charAt(1) < toSQ.charAt(1)) {
 						return "MOVE "+fromSQ + "," + "SE" + "," + move.getDist();

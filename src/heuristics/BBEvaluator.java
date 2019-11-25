@@ -10,10 +10,10 @@ public class BBEvaluator implements HeuristicInterface {
 	private int val[] = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 }; // valore delle pedine
 	private double valPositionR[] = { 2, 1.75, 1.50, 1.25, 1, 0.6, 0.3, 0 }; // valore della posizione in base alla riga
 	private double valPositionB[] = { 0, 0.3, 0.6, 1, 1.25, 1.50, 1.75, 2 };
-	
+
 	private double valPosition2R[] = { 2, 2, 4, 5, 4, 2, 1, 0 }; // valore della posizione in base alla riga
 	private double valPosition2B[] = { 0, 1, 2, 4, 5, 4, 2, 2 };
-	
+
 	private int mobilityB;
 	private int backAttackB;
 	private int frontAttackB;
@@ -23,16 +23,31 @@ public class BBEvaluator implements HeuristicInterface {
 	private long pRed;
 	private long pBlack;
 
-	//sarebbe utile sapere che pedina è sotto attacco
+	// sarebbe utile sapere che pedina è sotto attacco
 	//
-	public int evaluate(Conf c) {
+	public int evaluate_R(Conf c) {
 		DipoleConf dc = (DipoleConf) c;
 		pRed = dc.getpRed();
 		pBlack = dc.getpBlack();
 		numberMovesBlack(dc);
 		numberMovesRed(dc);
-		double eval = (materialR(dc) + mobilityR + 1.5*frontAttackR + 2 * backAttackR)
-				- (materialB(dc) + mobilityB + 1.5*frontAttackB + 2 * backAttackB);
+		
+		
+		double eval = (materialR(dc) + mobilityR + 1.5 * frontAttackR + 2 * backAttackR)
+				- (materialB(dc) + mobilityB + 1.5 * frontAttackB + 2 * backAttackB);
+		return (int) Math.round(eval);
+	}
+	
+	public int evaluate_B(Conf c) {
+		DipoleConf dc = (DipoleConf) c;
+		pRed = dc.getpRed();
+		pBlack = dc.getpBlack();
+		numberMovesBlack(dc);
+		numberMovesRed(dc);
+		
+		
+		double eval = - (materialR(dc) + mobilityR + 1.5 * frontAttackR + 2 * backAttackR)
+				+ (materialB(dc) + mobilityB + 1.5 * frontAttackB + 2 * backAttackB);
 		return (int) Math.round(eval);
 	}
 
@@ -121,7 +136,7 @@ public class BBEvaluator implements HeuristicInterface {
 			pieces ^= pawn;
 			square = Board.getSquare(pawn);
 			type = c.getType(pawn);
-			assert(type < 12);
+			assert (type < 12);
 			material += (val[type] * valPositionB[square >>> 3]);
 		} // while
 		return material;
@@ -139,7 +154,7 @@ public class BBEvaluator implements HeuristicInterface {
 			pieces ^= pawn;
 			square = Board.getSquare(pawn);
 			type = c.getType(pawn);
-			assert(type < 12);
+			assert (type < 12);
 			material += (val[type] * valPositionR[square >>> 3]);
 		} // while
 		return material;

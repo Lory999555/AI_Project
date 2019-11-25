@@ -4,7 +4,7 @@ public class Board {
 	
 	public enum File {H,G,F,E,D,C,B,A};
 	public enum directionNS {S,P,N};
-	public enum directionEO {E,P,O};
+	public enum directionEO {E,P,W};
 	
 	public static final long b_d = 0x00000000000000ffL; // down
 	public static final long b_u = 0xff00000000000000L; // up
