@@ -88,8 +88,8 @@ public class BBEvaluator implements HeuristicInterface {
 	 *         frontAttack
 	 */
 	private int numberMovesBlack(DipoleConf c) {
-		long pB = c.flip180(pBlack);
-		long pR = c.flip180(pRed);
+		long pB = Board.flip180(pBlack);
+		long pR = Board.flip180(pRed);
 		mobilityB = 0;
 		backAttackB = 0;
 		frontAttackB = 0;
@@ -119,7 +119,7 @@ public class BBEvaluator implements HeuristicInterface {
 		while (pieces != 0) {
 			pawn = pieces & -pieces;
 			pieces ^= pawn;
-			square = c.getSquare(pawn);
+			square = Board.getSquare(pawn);
 			type = c.getType(pawn);
 			assert(type < 12);
 			material += (val[type] * valPositionB[square >>> 3]);
@@ -137,7 +137,7 @@ public class BBEvaluator implements HeuristicInterface {
 		while (pieces != 0) {
 			pawn = pieces & -pieces;
 			pieces ^= pawn;
-			square = c.getSquare(pawn);
+			square = Board.getSquare(pawn);
 			type = c.getType(pawn);
 			assert(type < 12);
 			material += (val[type] * valPositionR[square >>> 3]);

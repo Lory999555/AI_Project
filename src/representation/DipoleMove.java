@@ -415,4 +415,12 @@ public class DipoleMove implements Move {
 		this.dist = dist;
 	}
 
+	public boolean isBlack() {
+		return black;
+	}
+
+	public void setBlack(boolean black) {
+		this.black = black;
+	}
+
 }

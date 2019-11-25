@@ -31,12 +31,13 @@ public class DipoleConf implements Conf, Cloneable {
 	// Configurazione inzio partita
 	public DipoleConf(boolean black) {
 
-		this.pieces[11] = 0x1000000000000008L;
-		this.pRed = 0x8L;
-		this.pBlack = 0x1000000000000000L;
-//		this.pieces[11] = 0x20000810200400L;
-//		this.pRed = 0x0L;
-//		this.pBlack = 0x20000810200400L;
+//		this.pieces[11] = 0x1000000000000008L;
+//		this.pRed = 0x8L;
+//		this.pBlack = 0x1000000000000000L;
+		this.pieces[1] = 0x1000000L;
+		this.pieces[2] = 0x100L;
+		this.pRed = 0x100L;
+		this.pBlack = 0x1000000L;
 		this.black = black;
 
 	}
@@ -133,7 +134,7 @@ public class DipoleConf implements Conf, Cloneable {
 		long nord = sud;
 		long tmp = 0;
 		int cont = 0;
-		type+=1;
+		type += 1;
 		while (cont < type) {
 			ovest ^= ovest & Board.b_l;
 			est ^= est & Board.b_r;
@@ -327,17 +328,17 @@ public class DipoleConf implements Conf, Cloneable {
 				mines ^= pawn;
 				int selectType = 0;
 				int death = 0;
-				
+
 				/*
 				 * while (selectType < 12) { if ((pawn & pieces[selectType]) != 0) { break; }
 				 * selectType++; }
 				 */
-				
+
 				// ritorniamo il tipo della pedina
 				selectType = getType(pawn);
 				allMoves2(pawn, pBlack, pRed, selectType, pieces, Board.movingBook);
 				// allMoves(pawn, pBlack, pRed, selectType, pieces);
-				
+
 				long temp;
 				while (backAttack != 0) {
 					temp = backAttack & -backAttack;
@@ -373,7 +374,7 @@ public class DipoleConf implements Conf, Cloneable {
 							Math.abs((Board.getSquare(pawn) >>> 3) - (Board.getSquare(temp) >>> 3))));
 
 				}
-				death = Board.deathNote[Board.getSquare(pawn)];
+				death = Board.deathNoteRed[Board.getSquare(pawn)];
 				if (death <= selectType + 1) {
 					for (int i = death; i < selectType + 1; i++) {
 						// generiamo una mossa per ogni morte che abbiamo. Es se la morte minima è 3 e
@@ -401,11 +402,15 @@ public class DipoleConf implements Conf, Cloneable {
 				pawn = mines & -mines;
 				mines ^= pawn;
 				int selectType = 0;
-				/*
-				 * while (selectType < 12) { if ((pawn & pieces[selectType]) != 0) { break; }
-				 * selectType++; }
-				 */
-				selectType = getType180(pawn);
+
+				while (selectType < 12) {
+					if ((pawn & pieces180[selectType]) != 0) {
+						break;
+					}
+					selectType++;
+				}
+
+				// selectType = getType180(pawn);
 				allMoves2(pawn, pRed180, pBlack180, selectType, pieces180, Board.movingBook);
 				// allMoves(pawn, pRed, pBlack, selectType, pieces);
 				backAttack = Board.flip180(backAttack);
@@ -443,7 +448,7 @@ public class DipoleConf implements Conf, Cloneable {
 					actions.add(new DipoleMove(pawn, temp, selectType, black, typeMove.MERGE,
 							Math.abs((Board.getSquare(pawn) >>> 3) - (Board.getSquare(temp) >>> 3))));
 				}
-				death = Board.deathNote[Board.getSquare(pawn)];
+				death = Board.deathNoteBlack[Board.getSquare(pawn)];
 				if (death <= selectType + 1) {
 					for (int i = death; i < selectType + 1; i++) {
 						// generiamo una mossa per ogni morte che abbiamo. Es se la morte minima è 3 e
@@ -523,7 +528,7 @@ public class DipoleConf implements Conf, Cloneable {
 				// Per la gestione della morte utilizziamo una struttura precalcolata dove
 				// inseriamo la minima morte che si
 				// ha prendendo in considerazione quella casella
-				death = Board.deathNote[sqPawn];
+				death = Board.deathNoteRed[sqPawn];
 				if (death <= selectType + 1) {
 					for (int i = death; i < selectType + 1; i++) {
 						// generiamo una mossa per ogni morte che abbiamo. Es se la morte minima è 3 e
@@ -557,7 +562,7 @@ public class DipoleConf implements Conf, Cloneable {
 				int selectType = 0;
 				int death = 0;
 				// ritorniamo il tipo della pedina
-				
+
 				while (selectType < 12) {
 					if ((pawn & pieces180[selectType]) != 0) {
 						break;
@@ -606,7 +611,7 @@ public class DipoleConf implements Conf, Cloneable {
 					actions.add(mossa.encodingMove(Board.getSquare(pawn), Board.getSquare(temp), selectType, black,
 							typeMove.MERGE));
 				}
-				death = Board.deathNote[sqPawn];
+				death = Board.deathNoteBlack[sqPawn];
 				if (death <= selectType + 1) {
 					for (int i = death; i < selectType + 1; i++) {
 						actions.add(mossa.encodingMove(sqPawn, 0, i, selectType, black, typeMove.DEATH));

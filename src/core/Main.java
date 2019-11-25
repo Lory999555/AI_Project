@@ -2,6 +2,7 @@ package core;
 
 import java.util.Calendar;
 import java.util.Date;
+import java.util.LinkedList;
 import java.util.List;
 
 import algorithms.*;
@@ -24,9 +25,19 @@ public class Main {
 
 	public static void main(String[] args) throws InvalidActionException, CloneNotSupportedException {
 		LAVORAMU();
-		startServer();
-
-
+		ConverterMove cm = new ConverterMove();
+		Conf f = new DipoleConf(true);
+		DipoleMove move = new DipoleMove(137438953472L,0,9,false, typeMove.DEATH,4);
+		System.out.println(cm.generatePacket(move));
+		//startServer();
+		
+//		Conf f = new DipoleConf(true);
+//		LinkedList<Move> moves= new LinkedList<Move>();
+//		moves= (LinkedList<Move>) f.getActions();
+//		for(int i=0;i<moves.size();i++) {
+//			System.out.println(moves.get(i).toString());
+//		}
+		/*
 		Move choise;
 		Conf state;
 
