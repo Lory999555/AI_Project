@@ -29,7 +29,7 @@ public class DipoleConf implements Conf, Cloneable {
 	static long blackSquare = 0x55aa55aa55aa55aaL;
 
 	// Configurazione inzio partita
-	public DipoleConf(boolean black) {
+	public DipoleConf() {
 
 
 		this.pieces[11] = 0x1000000000000008L;
