@@ -177,6 +177,7 @@ public class DipoleConf implements Conf, Cloneable {
 	// le sole mosse possibili e infine divide la rosa nei differenti tipi di
 	// movimento
 	public void allMoves2(long x, long opponent, long mines, int type, long[] pieces, long[][] possibleMove) {
+		assert(type < 12);
 		if (type > 6)
 			type = 6;
 		int sq = Board.getSquare(x);
@@ -314,7 +315,7 @@ public class DipoleConf implements Conf, Cloneable {
 	public List<Move> getActions() {
 		long pawn;
 		long mines;
-		List<Move> actions = new LinkedList<Move>();
+		LinkedList<Move> actions = new LinkedList<Move>();
 		if (!black) {
 			mines = pRed;
 			while (mines != 0) {
@@ -423,27 +424,27 @@ public class DipoleConf implements Conf, Cloneable {
 					assert (Math.abs(Board.getSquare(pawn) - (Board.getSquare(temp))) > 0);
 					int dist = Math.abs((Board.getSquare(pawn) >>> 3) - (Board.getSquare(temp) >>> 3));
 					if (dist != 0)
-						actions.add(new DipoleMove(pawn, temp, selectType, black, typeMove.BACKATTACK, dist));
+						actions.addFirst(new DipoleMove(pawn, temp, selectType, black, typeMove.BACKATTACK, dist));
 					else
-						actions.add(new DipoleMove(pawn, temp, selectType, black, typeMove.BACKATTACK,
+						actions.addFirst(new DipoleMove(pawn, temp, selectType, black, typeMove.BACKATTACK,
 								Math.abs(Board.getSquare(pawn) - (Board.getSquare(temp)))));
 				}
 				while (frontAttack != 0) {
 					temp = frontAttack & -frontAttack;
 					frontAttack ^= temp;
-					actions.add(new DipoleMove(pawn, temp, selectType, black, typeMove.FRONTATTACK,
+					actions.addFirst(new DipoleMove(pawn, temp, selectType, black, typeMove.FRONTATTACK,
 							Math.abs((Board.getSquare(pawn) >>> 3) - (Board.getSquare(temp) >>> 3))));
 				}
 				while (quietMove != 0) {
 					temp = quietMove & -quietMove;
 					quietMove ^= temp;
-					actions.add(new DipoleMove(pawn, temp, selectType, black, typeMove.QUIETMOVE,
+					actions.addFirst(new DipoleMove(pawn, temp, selectType, black, typeMove.QUIETMOVE,
 							Math.abs((Board.getSquare(pawn) >>> 3) - (Board.getSquare(temp) >>> 3))));
 				}
 				while (merge != 0) {
 					temp = merge & -merge;
 					merge ^= temp;
-					actions.add(new DipoleMove(pawn, temp, selectType, black, typeMove.MERGE,
+					actions.addFirst(new DipoleMove(pawn, temp, selectType, black, typeMove.MERGE,
 							Math.abs((Board.getSquare(pawn) >>> 3) - (Board.getSquare(temp) >>> 3))));
 				}
 //				death = Board.deathNote[Board.getSquare(pawn)];
@@ -923,10 +924,11 @@ public class DipoleConf implements Conf, Cloneable {
 	// ritorna il tipo della pedina passata. utilizzato in caso la pedina sia
 	// ruotata di 180
 	public int getType180(long pawn) {
-		Board.flip180(pawn);
+//		Board.flip180(pawn);
+		long[] pieces180=this.getPieces180();
 		int selectType = 0;
 		while (selectType < 12) {
-			if ((pawn & pieces[selectType]) != 0) {
+			if ((pawn & pieces180[selectType]) != 0) {
 				break;
 			}
 			selectType++;

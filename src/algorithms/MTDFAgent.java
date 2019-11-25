@@ -9,6 +9,7 @@ import memory.TranspositionTable;
 import memory.ZobristGen;
 import representation.Move;
 import representation.Conf;
+import representation.Conf.Status;
 import representation.InvalidActionException;
 
 import java.util.ArrayList;
@@ -74,13 +75,12 @@ public class MTDFAgent implements AlgorithmInterface {
 	private static int MAX_SEARCH_DEPTH = 50;
 	private static int MAX_RECORD = 5000;
 	private static long MAX_RUN_TIME = 1000; // maximum runtime in milliseconds
+
 	// private HashMap<Long, TransEntry> transTable;
 	private Map<Long, NodeInfo> transpositionTable;
 	private long searchCutoff;
 	private ZobristGen zg;
 	private HeuristicInterface h;
-	private static int debug_max = 5; // it used to iterate in debug mode
-	private static int debug = 0; // it used to iterate in debug mode
 	private boolean blackPlayer;
 	private ArrayList equalValueMoves;
 
@@ -318,6 +318,11 @@ public class MTDFAgent implements AlgorithmInterface {
 //			System.out.println(
 //					"valuto: " + prec + " || valore =" + h.evaluate_R(conf) + "\n configurazione: \n" + conf + "\n");
 			return new MoveValue(prec, h.evaluate_R(conf));
+		} else if (conf.getStatus() == Status.BlackWon) {
+			return new MoveValue(prec, -5000);
+
+		} else if(conf.getStatus()==Status.RedWon) {
+			return new MoveValue(prec, 5000);
 		}
 
 		// trans table lookup
@@ -365,11 +370,11 @@ public class MTDFAgent implements AlgorithmInterface {
 		} else { // min step
 			value = Integer.MAX_VALUE;
 			b = beta; // save original beta
-			Move childm;
-			LinkedList<Move> tmpList = (LinkedList<Move>) conf.getActions();
-			while(!tmpList.isEmpty()) {
-			//for (Move childm : conf.getActions()) {
-				childm = tmpList.pop();
+//			Move childm;
+//			LinkedList<Move> tmpList = (LinkedList<Move>) conf.getActions();
+//			while(!tmpList.isEmpty()) {
+			for (Move childm : conf.getActions()) {
+//				childm = tmpList.pop();
 				try {
 					tmp = childm.applyTo(conf);
 					// System.out.println("analizzo la mossa: "+ childm+" || tmp: \n"+tmp+"\n");
@@ -386,7 +391,7 @@ public class MTDFAgent implements AlgorithmInterface {
 				if (alpha >= beta)
 					break; // prune
 			}
-			tmpList = null;
+//			tmpList = null;
 		}
 
 //		
@@ -432,6 +437,11 @@ public class MTDFAgent implements AlgorithmInterface {
 //			System.out.println(
 //					"valuto: " + prec + " || valore =" + h.evaluate_B(conf) + "\nconfigurazione: \n" + conf + "\n");
 			return new MoveValue(prec, h.evaluate_B(conf));
+		} else if (conf.getStatus() == Status.BlackWon) {
+			return new MoveValue(prec, +5000);
+
+		} else if(conf.getStatus()==Status.RedWon) {
+			return new MoveValue(prec, -5000);
 		}
 
 		// trans table lookup
@@ -452,11 +462,11 @@ public class MTDFAgent implements AlgorithmInterface {
 			value = Integer.MIN_VALUE;
 			a = alpha; // save original alpha
 			// for (ChildMove child : children(move, Ply.MAX, false)) {
-			Move childm;
-			LinkedList<Move> tmpList = (LinkedList<Move>) conf.getActions();
-			while(!tmpList.isEmpty()) {
-//			for (Move childm : ((LinkedList<Move>)conf.getActions())) {
-				childm = tmpList.pop();
+//			Move childm;
+//			LinkedList<Move> tmpList = (LinkedList<Move>) conf.getActions();
+//			while(!tmpList.isEmpty()) {
+			for (Move childm : ((LinkedList<Move>) conf.getActions())) {
+//				childm = tmpList.getFirst();
 				try {
 					tmp = childm.applyTo(conf); // MI DA ERRORE PERCHè NON C'è L'APPLY TO
 					// System.out.println("analizzo la mossa: "+ childm+" || tmp: \n"+tmp+"\n");
@@ -474,8 +484,8 @@ public class MTDFAgent implements AlgorithmInterface {
 				if (alpha >= beta)
 					break; // prune
 			}
-			//dovrebbe preoccuparsene il garbage collector
-			tmpList=null;
+			// dovrebbe preoccuparsene il garbage collector
+//			tmpList=null;
 		} else { // min step
 			value = Integer.MAX_VALUE;
 			b = beta; // save original beta

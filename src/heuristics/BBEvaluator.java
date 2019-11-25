@@ -4,6 +4,7 @@ import java.util.LinkedList;
 
 import representation.Board;
 import representation.Conf;
+import representation.Conf.Status;
 import representation.DipoleConf;
 
 public class BBEvaluator implements HeuristicInterface {
