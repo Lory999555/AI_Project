@@ -112,6 +112,7 @@ public class Board {
 												1, 0, 3, 0, 4, 0, 2, 0
 												};
 
+
 	
 	
 	// ritorna il numero della casella in cui è posizionato il pedone

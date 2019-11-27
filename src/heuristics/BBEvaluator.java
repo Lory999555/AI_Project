@@ -9,11 +9,14 @@ import representation.DipoleConf;
 
 public class BBEvaluator implements HeuristicInterface {
 	private int val[] = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 }; // valore delle pedine
-	private double valPositionR[] = { 2, 1.75, 1.50, 1.25, 1, 0.6, 0.3, 0 }; // valore della posizione in base alla riga
-	private double valPositionB[] = { 0, 0.3, 0.6, 1, 1.25, 1.50, 1.75, 2 };
+//	private double valPositionR[] = { 2, 1.75, 1.50, 1.25, 1, 0.6, 0.3, 0 }; // valore della posizione in base alla riga
+//	private double valPositionB[] = { 0, 0.3, 0.6, 1, 1.25, 1.50, 1.75, 2 };
 
-	private double valPosition2R[] = { 2, 2, 4, 5, 4, 2, 1, 0 }; // valore della posizione in base alla riga
-	private double valPosition2B[] = { 0, 1, 2, 4, 5, 4, 2, 2 };
+//	private double valPositionR[] = { 2, 2, 4, 5, 4, 2, 1, 0 }; // valore della posizione in base alla riga
+//	private double valPositionB[] = { 0, 1, 2, 4, 5, 4, 2, 2 };
+	
+	private double valPositionR[] = { 2, 2, 3, 3.5, 2.5, 1.5, 1, 0 }; // valore della posizione in base alla riga
+	private double valPositionB[] = { 0, 1, 1.5, 2.5, 3.5, 3, 2, 2 };
 
 	private int mobilityB;
 	private int backAttackB;

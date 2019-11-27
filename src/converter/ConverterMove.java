@@ -20,7 +20,7 @@ public class ConverterMove implements ConverterSignal {
 		} else {
 			if (fromSQ.charAt(0) > toSQ.charAt(0)) {
 				if (fromSQ.charAt(1) > toSQ.charAt(1)) {
-					return "MOVE "+fromSQ + "," + "NO" + "," + move.getDist();
+					return "MOVE "+fromSQ + "," + "NW" + "," + move.getDist();
 				} else {
 					if (fromSQ.charAt(1) < toSQ.charAt(1)) {
 						return "MOVE "+fromSQ + "," + "NE" + "," + move.getDist();
