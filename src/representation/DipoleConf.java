@@ -950,4 +950,41 @@ public class DipoleConf implements Conf, Cloneable {
 		return pieces180;
 	}
 
+	public int evalFA() {	//ritorna la somma dei valori delle pedine nemiche attaccate
+		int val = 0;
+		long pawn;
+		long fa = frontAttack;
+		while (fa != 0) {
+			pawn = fa & -fa;
+			fa ^= pawn;
+			val += (getType(pawn)+1);
+//			System.out.println("front di "+pawn+"\n");
+		}
+		
+//		if(val != 0)
+//			System.out.println("val = "+val);
+		
+		
+		return val;
+	}
+
+	public int evalBA() {
+		int val = 0;
+		long pawn;
+		long ba = backAttack;
+		while (ba != 0) {
+			pawn = ba & -ba;
+			ba ^= pawn;
+			val += (getType(pawn)+1);
+//			System.out.println("Back di "+pawn+" = "+ba+"\n");
+		}
+		
+		
+//		if(val != 0)
+//			System.out.println("val = "+val);
+		
+		
+		return val;
+	}
+
 }
