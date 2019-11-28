@@ -4,6 +4,7 @@ import java.awt.print.PrinterException;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.Scanner;
 
 import algorithms.*;
 import heuristics.*;
@@ -23,6 +24,7 @@ import representation.Conf.Status;
 public class Main {
 
 	private static HeuristicInterface hi;
+	private static HeuristicInterface hi2;
 	private static AlgorithmInterface ai_R;
 	private static AlgorithmInterface ai_B;
 
@@ -35,13 +37,16 @@ public class Main {
 	public static boolean blackPlayer;
 
 	public static void main(String[] args) throws InvalidActionException, CloneNotSupportedException, PrinterException {
-		boolean server = true;
+		boolean server = false;
 
 		// potrei dividere l'euristica in modo da evitare di splittare gli algoritmi.
 		hi = new BBEvaluator();
+		hi2 = new BBEvaluator2();
 		ai_R = new MTDFAgent(hi, false);
 		ai_B = new MTDFAgent(hi, true);
 		state = new DipoleConf();
+		
+		localPlay();
 
 		if (server) {
 			startServer();
@@ -92,7 +97,48 @@ public class Main {
 		}
 
 	}
-
+	public static void localPlay() throws InvalidActionException, CloneNotSupportedException {
+		  ConverterMove cm = new ConverterMove();
+		  System.out.println("Inserisci il colore del giocatore scelto (RED/BLACK): ");
+		  Scanner scan = new Scanner(System.in);
+		  String player= scan.nextLine();
+		  if(player.equals("RED")) {
+		   blackPlayer=true;
+		  }else {
+		   blackPlayer=false;
+		  }
+		  while (true) {
+		   if(blackPlayer) {
+		    System.out.println(state.toString());
+		    System.out.println("Inserisci mossa (ES:  H5,N,2)");
+		    String mossa= scan.nextLine();
+		    move_B = cm.unpacking(mossa, state);
+		    System.out.println(move_B.toString());
+		    state = move_B.applyTo(state);
+		    System.out.println(state.toString());
+		    
+		    move_B = ai_B.compute(state);
+		    state = move_B.applyTo(state);
+		    System.out.println(cm.generatePacket(move_B));
+		    
+		   } else {
+		    System.out.println(state.toString());
+		    
+		    move_R = ai_R.compute(state);
+		    state = move_R.applyTo(state);
+		    System.out.println(cm.generatePacket(move_R));
+		    
+		    System.out.println(state.toString());
+		    
+		    System.out.println("Inserisci mossa (ES:  H5,N,2)");
+		    String mossa= scan.nextLine();
+		    
+		    move_R = cm.unpacking(mossa, state);
+		    state = move_R.applyTo(state);
+		   }
+		  }
+		 }
+	
 	public static void startServer() throws InvalidActionException, CloneNotSupportedException {
 		// blackPlayer = false;
 		SenderReceiver sr = new SenderReceiver();
