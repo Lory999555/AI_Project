@@ -451,7 +451,7 @@ public class DipoleConf implements Conf, Cloneable {
 				}
 				death = Board.deathNoteBlack[Board.getSquare(pawn)];
 				if (death <= selectType + 1) {
-					for (int i = death; i < selectType + 1; i++) {
+					for (int i = death; i <= selectType + 1; i++) {
 						// generiamo una mossa per ogni morte che abbiamo. Es se la morte minima è 3 e
 						// la mia pedina è di tipo 6
 						// vado a creare la mossa morte 3,4,5,6.
