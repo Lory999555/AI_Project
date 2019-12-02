@@ -23,6 +23,7 @@ import representation.Conf.Status;
 public class Main {
 
 	private static HeuristicInterface hi;
+	private static HeuristicInterface hi2;
 	private static AlgorithmInterface ai_R;
 	private static AlgorithmInterface ai_B;
 
