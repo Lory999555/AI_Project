@@ -13,7 +13,7 @@ public interface Move {
 	 * @throws InvalidActionException Some Actions can't be applied to some States.
 	 * @throws CloneNotSupportedException 
 	 */
-	public Conf applyTo(Conf input) throws InvalidActionException, CloneNotSupportedException;
+	public Conf applyTo(Conf input);
 	
 	/**
 	 * 

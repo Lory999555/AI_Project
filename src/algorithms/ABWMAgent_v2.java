@@ -27,26 +27,25 @@ public class ABWMAgent_v2 implements AlgorithmInterface {
 		float lowerbound = MIN_VAL, upperbound = MAX_VAL;
 	}
 
-	private static final boolean ITERATIVE_DEEPENING = false;
+	private static final boolean ITERATIVE_DEEPENING = true;
 
-	private static final boolean DEBUG = true;
+	private static final boolean DEBUG = false;
 
 	private HashMap<Conf, SearchNode> transpositionTable;
 	private boolean blackPlayer;
 
-	// Time we have to compute a move in seconds
-	private int searchTime;
 
 	// Time we have left to search
 	private long startTimeMillis;
 	private HeuristicInterface hi;
+	private static long MAX_RUN_TIME = 1000; // maximum runtime in milliseconds
+
 
 	private int maxSearchDepth;
 
 	public ABWMAgent_v2(HeuristicInterface hi, boolean blackPlayer, int maxSearchDepth) {
 		this.hi = hi;
 		this.blackPlayer = blackPlayer;
-		searchTime = 1;
 		this.maxSearchDepth = maxSearchDepth;
 	}
 
@@ -88,7 +87,7 @@ public class ABWMAgent_v2 implements AlgorithmInterface {
 			}
 
 			Collections.sort(actions, Collections.reverseOrder());
-			System.out.println("Best Action: " + actions.get(0));
+			//System.out.println("Best Action: " + actions.get(0));
 			if (DEBUG) {
 				if (ITERATIVE_DEEPENING)
 					GraphVizPrinter.printGraphToFileWDeepening(d);
@@ -132,7 +131,10 @@ public class ABWMAgent_v2 implements AlgorithmInterface {
 	 * @return true if we need to stop searching, false otherwise
 	 */
 	private boolean times_up() {
-		return (System.currentTimeMillis() - startTimeMillis) > 1000 * searchTime;
+		if (java.lang.management.ManagementFactory.getRuntimeMXBean().getInputArguments().toString()
+				.indexOf("-agentlib:jdwp") > 0)
+			return false;
+		return (System.currentTimeMillis() - startTimeMillis) >= MAX_RUN_TIME - 30;
 	}
 
 	/**
@@ -169,7 +171,7 @@ public class ABWMAgent_v2 implements AlgorithmInterface {
 			beta = beta < node.upperbound ? beta : node.upperbound;
 		}
 
-		if (d == 0 || conf.getStatus() != Status.Ongoing) {
+		if (d == 0 || conf.getStatus() != Status.Ongoing || times_up()) {
 			g = hi.evaluate_R(conf);
 		} else {
 			List<Move> actions = conf.getActions();
