@@ -38,16 +38,17 @@ public class Main {
 
 	public static void main(String[] args) throws InvalidActionException, CloneNotSupportedException, PrinterException {
 		boolean server = true;
+		LAVORAMU();
 
 		// potrei dividere l'euristica in modo da evitare di splittare gli algoritmi.
 		hi = new BBEvaluator();
 		hi2= new BBEvaluator2();
-//		ai_R = new MTDFAgent(hi, false);
-		ai_B = new MMAgent(hi, true);
-//		ai_R=new ABAgent(hi, false);
-		ai_R = new MMAgent(hi2, false);
 
 
+
+		ai_R = new ABWMAgent_v2(hi, false, 5);
+
+		ai_B = new ABAgent(hi, true, 6);
 		state = new DipoleConf();
 		
 //		localPlay();

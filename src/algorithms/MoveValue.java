@@ -9,13 +9,6 @@ public class MoveValue implements Comparable<MoveValue> {
 	MoveValue principalVariation;
 	int value, previousValue;
 	
-	public MoveValue() {
-		this.move = null;
-		this.value = -1;		//non so se va bene -1
-		this.previousValue = 0;
-		this.principalVariation = null;
-	}
-	
 	public MoveValue(Move a, int v) {
 		this.move = a;
 		this.value = v;

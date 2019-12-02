@@ -38,18 +38,19 @@ public class ABWMAgent implements AlgorithmInterface {
 
 	private int searchednodes = 0;
 	private int evaluatednodes = 0;
-	private int maxdepth = MAX_SEARCH_DEPTH;
+	private int maxDepth;
+
 	private HeuristicInterface hi;
 	private boolean blackPlayer;
 	private long searchCutoff;
 	private static long MAX_RUN_TIME = 1000; // maximum runtime in milliseconds
-	private static int MAX_SEARCH_DEPTH = 200;
 
 	private HashMap<Long, TransEntry> transTable;
 	private long[][] zobristTable;
 
-	public ABWMAgent(HeuristicInterface hi, boolean blackPlayer) {
+	public ABWMAgent(HeuristicInterface hi, boolean blackPlayer,int maxDepth) {
 		// init zobrist table
+		this.maxDepth=maxDepth;
 		this.hi = hi;
 		this.blackPlayer = blackPlayer;
 		Random prng = new Random();
@@ -67,37 +68,25 @@ public class ABWMAgent implements AlgorithmInterface {
 	private long zobristHash(long[] pieces) {
 		long key = 0;
 		int i = 0;
-		long tmp,bit;
-		while(i < 12) {
-			
-			tmp=pieces[i];	
-			while(tmp!=0) {
-				bit=pieces[i] & -pieces[i];
-				tmp^=bit;
-				key^=zobristTable[Board.getSquare(bit)][i];
+		long tmp, bit;
+		while (i < 12) {
+
+			tmp = pieces[i];
+			while (tmp != 0) {
+				bit = tmp & -tmp;
+				tmp ^= bit;
+				key ^= zobristTable[Board.getSquare(bit)][i];
 			}
-			
+
 			i++;
 		}
-		
-//		for (int i = 0; i < 64; ++i) {
-//			key ^= zobristTable[i][state[i]];
-//		}
 		return key;
 	}
 
-
 	private MoveValue alphaBetaWithMemory_R(Conf conf, Move move, int alpha, int beta, int depth, Ply step) {
-		
-		if(timeUp()) {
-			return new MoveValue(move, hi.evaluate_R(conf));
-		}
-		
-		if (depth < maxdepth)
-			maxdepth = depth;
+
 		searchednodes++;
-		
-		
+
 		TransEntry trans;
 		long hash = zobristHash(conf.getForHash());
 
@@ -121,7 +110,7 @@ public class ABWMAgent implements AlgorithmInterface {
 		MoveValue searchResult = null;
 		int value;
 		// base case
-		if ((depth == 0) || conf.getStatus() != Status.Ongoing) {
+		if ((depth == 0)) {
 			evaluatednodes++;
 			return new MoveValue(move, hi.evaluate_R(conf));
 		} else if (conf.getStatus() == Status.BlackWon) {
@@ -138,12 +127,13 @@ public class ABWMAgent implements AlgorithmInterface {
 			value = Integer.MIN_VALUE;
 			for (Move childmv : conf.getActions()) {
 				try {
-					searchResult = alphaBetaWithMemory_R(childmv.applyTo(conf),childmv, alpha, beta, depth - 1, Ply.MIN);
+					searchResult = alphaBetaWithMemory_R(childmv.applyTo(conf), childmv, alpha, beta, depth - 1,
+							Ply.MIN);
 				} catch (InvalidActionException | CloneNotSupportedException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-				if (searchResult.value >= value) {
+				if (searchResult.value > value) {
 					value = searchResult.value;
 					bestMove = childmv;
 				}
@@ -155,12 +145,13 @@ public class ABWMAgent implements AlgorithmInterface {
 			value = Integer.MAX_VALUE;
 			for (Move childmv : conf.getActions()) {
 				try {
-					searchResult = alphaBetaWithMemory_R(childmv.applyTo(conf),childmv, alpha, beta, depth - 1, Ply.MAX);
+					searchResult = alphaBetaWithMemory_R(childmv.applyTo(conf), childmv, alpha, beta, depth - 1,
+							Ply.MAX);
 				} catch (InvalidActionException | CloneNotSupportedException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-				if (searchResult.value <= value) {
+				if (searchResult.value < value) {
 					value = searchResult.value;
 					bestMove = childmv;
 				}
@@ -170,6 +161,7 @@ public class ABWMAgent implements AlgorithmInterface {
 			}
 		}
 
+		// if (!strongTimeUp()) {
 		// store trans table values
 		trans = transTable.getOrDefault(hash, new TransEntry());
 
@@ -190,19 +182,16 @@ public class ABWMAgent implements AlgorithmInterface {
 			trans.depth = depth;
 			transTable.put(hash, trans);
 		}
+//		}
 
 		return new MoveValue(bestMove, value);
+
 	}
-	
+
 	private MoveValue alphaBetaWithMemory_B(Conf conf, Move move, int alpha, int beta, int depth, Ply step) {
-		if(timeUp()) {
-			return new MoveValue(move, hi.evaluate_B(conf));
-		}
-		
-		if (depth < maxdepth)
-			maxdepth = depth;
+
 		searchednodes++;
-		
+
 		TransEntry trans;
 		long hash = zobristHash(conf.getForHash());
 
@@ -222,12 +211,12 @@ public class ABWMAgent implements AlgorithmInterface {
 		}
 
 		// base case
-		
+
 		Move bestMove = null;
 		MoveValue searchResult = null;
 		int value;
 		// base case
-		if ((depth == 0) || conf.getStatus() != Status.Ongoing) {
+		if ((depth == 0) || timeUp()) {
 			evaluatednodes++;
 			return new MoveValue(move, hi.evaluate_B(conf));
 		} else if (conf.getStatus() == Status.BlackWon) {
@@ -244,12 +233,13 @@ public class ABWMAgent implements AlgorithmInterface {
 			value = Integer.MIN_VALUE;
 			for (Move childmv : conf.getActions()) {
 				try {
-					searchResult = alphaBetaWithMemory_B(childmv.applyTo(conf),childmv, alpha, beta, depth - 1, Ply.MIN);
+					searchResult = alphaBetaWithMemory_B(childmv.applyTo(conf), childmv, alpha, beta, depth - 1,
+							Ply.MIN);
 				} catch (InvalidActionException | CloneNotSupportedException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-				if (searchResult.value >= value) {
+				if (searchResult.value > value) {
 					value = searchResult.value;
 					bestMove = childmv;
 				}
@@ -261,12 +251,13 @@ public class ABWMAgent implements AlgorithmInterface {
 			value = Integer.MAX_VALUE;
 			for (Move childmv : conf.getActions()) {
 				try {
-					searchResult = alphaBetaWithMemory_B(childmv.applyTo(conf),childmv, alpha, beta, depth - 1, Ply.MAX);
+					searchResult = alphaBetaWithMemory_B(childmv.applyTo(conf), childmv, alpha, beta, depth - 1,
+							Ply.MAX);
 				} catch (InvalidActionException | CloneNotSupportedException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-				if (searchResult.value <= value) {
+				if (searchResult.value < value) {
 					value = searchResult.value;
 					bestMove = childmv;
 				}
@@ -276,6 +267,7 @@ public class ABWMAgent implements AlgorithmInterface {
 			}
 		}
 
+//		if (!strongTimeUp()) {
 		// store trans table values
 		trans = transTable.getOrDefault(hash, new TransEntry());
 
@@ -296,6 +288,7 @@ public class ABWMAgent implements AlgorithmInterface {
 			trans.depth = depth;
 			transTable.put(hash, trans);
 		}
+//		}
 
 		return new MoveValue(bestMove, value);
 	}
@@ -303,18 +296,19 @@ public class ABWMAgent implements AlgorithmInterface {
 	public Move compute(Conf conf) {
 		this.evaluatednodes = 0;
 		this.searchednodes = 0;
-		this.maxdepth = MAX_SEARCH_DEPTH;
 		int alpha = Integer.MIN_VALUE;
 		int beta = Integer.MAX_VALUE;
-		int depth = MAX_SEARCH_DEPTH;
 		MoveValue best;
+		long searchCutoff_old = System.currentTimeMillis();
 		this.searchCutoff = new Date().getTime() + MAX_RUN_TIME;
-		if(!this.blackPlayer)
-			best = alphaBetaWithMemory_R(conf, null, alpha, beta, depth, Ply.MAX);
+		if (!this.blackPlayer)
+			best = alphaBetaWithMemory_R(conf, null, alpha, beta, maxDepth, Ply.MAX);
 		else
-			best = alphaBetaWithMemory_B(conf, null, alpha, beta, depth, Ply.MAX);
-		
-		System.out.println("\nEvaluatedNodes: " + evaluatednodes + "\nSearchedNodes :" + searchednodes+ "\nMaxDepth: "+(MAX_SEARCH_DEPTH-maxdepth));
+			best = alphaBetaWithMemory_B(conf, null, alpha, beta, maxDepth, Ply.MAX);
+
+		System.out.println("\nEvaluatedNodes: " + evaluatednodes + "\nSearchedNodes :" + searchednodes);
+		System.out.println("tempo totale: " + (System.currentTimeMillis() - searchCutoff_old));
+		assert (best.move != null);
 
 		return best.move;
 	}
@@ -323,6 +317,13 @@ public class ABWMAgent implements AlgorithmInterface {
 		if (java.lang.management.ManagementFactory.getRuntimeMXBean().getInputArguments().toString()
 				.indexOf("-agentlib:jdwp") > 0)
 			return false;
-		return (new Date().getTime() > searchCutoff - 30);
+		return (new Date().getTime() > (searchCutoff - 100));
 	}
+
+//	private boolean strongTimeUp() {
+//		if (java.lang.management.ManagementFactory.getRuntimeMXBean().getInputArguments().toString()
+//				.indexOf("-agentlib:jdwp") > 0)
+//			return false;
+//		return (new Date().getTime() > (searchCutoff - 30));
+//	}
 }
