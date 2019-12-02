@@ -27,7 +27,7 @@ public class MMAgent implements AlgorithmInterface {
 	private boolean blackPlayer;
 	private long searchCutoff;
 	private static long MAX_RUN_TIME = 1000; // maximum runtime in milliseconds
-	private static int MAX_SEARCH_DEPTH = 200;
+	private static int MAX_SEARCH_DEPTH = 5;
 
 	public MMAgent(HeuristicInterface hi, boolean blackPlayer) {
 		this.hi = hi;

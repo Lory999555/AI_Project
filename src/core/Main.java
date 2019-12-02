@@ -37,24 +37,20 @@ public class Main {
 	public static boolean blackPlayer;
 
 	public static void main(String[] args) throws InvalidActionException, CloneNotSupportedException, PrinterException {
-		boolean server = false;
+		boolean server = true;
 
 		// potrei dividere l'euristica in modo da evitare di splittare gli algoritmi.
 		hi = new BBEvaluator();
-<<<<<<< HEAD
-		hi2 = new BBEvaluator2();
-		ai_R = new MTDFAgent(hi, false);
-		ai_B = new MTDFAgent(hi, true);
-=======
+		hi2= new BBEvaluator2();
 //		ai_R = new MTDFAgent(hi, false);
-		ai_B = new ABWMAgent(hi, true);
+		ai_B = new MMAgent(hi, true);
 //		ai_R=new ABAgent(hi, false);
-		ai_R = new MMAgent(hi, false);
+		ai_R = new MMAgent(hi2, false);
 
->>>>>>> branch 'master' of https://github.com/Lory999555/AI-Project.git
+
 		state = new DipoleConf();
 		
-		localPlay();
+//		localPlay();
 
 		if (server) {
 			startServer();
