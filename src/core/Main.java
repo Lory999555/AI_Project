@@ -19,8 +19,6 @@ import java.util.concurrent.Semaphore;
 
 import javax.swing.JTextPane;
 
-import com.sun.org.apache.bcel.internal.generic.GOTO;
-
 import representation.Conf.Status;
 
 public class Main {
@@ -46,9 +44,8 @@ public class Main {
 		hi = new BBEvaluator();
 		hi2 = new BBEvaluator2();
 
-		ai_R = new ABAgent(hi, false, 5);
-
-		ai_B = new ABAgent(hi, true, 6);
+		ai_R = new ABAgent(hi, false, 30);
+		ai_B = new ABAgent(hi2, true, 30);
 		state = new DipoleConf();
 
 		localPlay();

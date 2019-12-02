@@ -7,6 +7,8 @@ import java.util.Date;
 import heuristics.HeuristicInterface;
 import representation.Conf;
 import representation.Move;
+import representation.TimeOutException;
+import sun.awt.Symbol;
 import representation.Conf.Status;
 import representation.InvalidActionException;
 
@@ -19,6 +21,7 @@ public class ABAgent implements AlgorithmInterface {
 
 	private int searchednodes = 0;
 	private int evaluatednodes = 0;
+	private boolean ibreak;
 	private int maxDepth;
 	private HeuristicInterface hi;
 	private boolean blackPlayer;
@@ -30,20 +33,24 @@ public class ABAgent implements AlgorithmInterface {
 	};
 
 	public ABAgent(HeuristicInterface hi, boolean blackPlayer, int maxDepth) {
-		this.maxDepth=maxDepth;
+		this.maxDepth = maxDepth;
 		this.hi = hi;
 		this.blackPlayer = blackPlayer;
 
 	}
 
-	private MoveValue alphaBeta_R(Conf conf, Move move, int alpha, int beta, int depth, Ply step) {
+	private MoveValue alphaBeta_R(Conf conf, Move move, int alpha, int beta, int depth, Ply step)
+			throws TimeOutException {
 
 		searchednodes++;
 		Move bestMove = null;
 		MoveValue searchResult = null;
 		int value;
 		// base case
-		if ((depth == 0) || timeUp()) {
+		if (timeUp()) {
+			this.ibreak = true;
+			return null;
+		} else if ((depth == 0)) {
 			evaluatednodes++;
 			return new MoveValue(move, hi.evaluate_R(conf));
 		} else if (conf.getStatus() == Status.BlackWon) {
@@ -57,12 +64,12 @@ public class ABAgent implements AlgorithmInterface {
 		if (step == Ply.MAX) { // max step
 			value = Integer.MIN_VALUE;
 			for (Move childmv : conf.getActions()) {
-				try {
-					searchResult = alphaBeta_R(childmv.applyTo(conf), childmv, alpha, beta, depth - 1, Ply.MIN);
-				} catch (InvalidActionException | CloneNotSupportedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
+
+				searchResult = alphaBeta_R(childmv.applyTo(conf), childmv, alpha, beta, depth - 1, Ply.MIN);
+				
+				if(searchResult==null)
+					return null;
+
 				if (searchResult.value > value) {
 					value = searchResult.value;
 					bestMove = childmv;
@@ -74,12 +81,11 @@ public class ABAgent implements AlgorithmInterface {
 		} else { // min step
 			value = Integer.MAX_VALUE;
 			for (Move childmv : conf.getActions()) {
-				try {
-					searchResult = alphaBeta_R(childmv.applyTo(conf), childmv, alpha, beta, depth - 1, Ply.MAX);
-				} catch (InvalidActionException | CloneNotSupportedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
+				searchResult = alphaBeta_R(childmv.applyTo(conf), childmv, alpha, beta, depth - 1, Ply.MAX);
+				
+				if(searchResult==null)
+					return null;
+
 				if (searchResult.value < value) {
 					value = searchResult.value;
 					bestMove = childmv;
@@ -100,7 +106,12 @@ public class ABAgent implements AlgorithmInterface {
 		MoveValue searchResult = null;
 		int value;
 		// base case
-		if ((depth == 0) || timeUp()) {
+
+		// per invalidare l'ultima iterazione perchè potenzialmente errata
+		if (timeUp()) {
+			this.ibreak = true;
+			return null;
+		} else if ((depth == 0)) {
 			evaluatednodes++;
 			return new MoveValue(move, hi.evaluate_B(conf));
 		} else if (conf.getStatus() == Status.BlackWon) {
@@ -115,12 +126,11 @@ public class ABAgent implements AlgorithmInterface {
 		if (step == Ply.MAX) { // max step
 			value = Integer.MIN_VALUE;
 			for (Move childmv : conf.getActions()) {
-				try {
-					searchResult = alphaBeta_B(childmv.applyTo(conf), childmv, alpha, beta, depth - 1, Ply.MIN);
-				} catch (InvalidActionException | CloneNotSupportedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
+				searchResult = alphaBeta_B(childmv.applyTo(conf), childmv, alpha, beta, depth - 1, Ply.MIN);
+				
+				if(searchResult==null)
+					return null;
+
 				if (searchResult.value > value) {
 					value = searchResult.value;
 					bestMove = childmv;
@@ -132,12 +142,11 @@ public class ABAgent implements AlgorithmInterface {
 		} else { // min step
 			value = Integer.MAX_VALUE;
 			for (Move childmv : conf.getActions()) {
-				try {
-					searchResult = alphaBeta_B(childmv.applyTo(conf), childmv, alpha, beta, depth - 1, Ply.MAX);
-				} catch (InvalidActionException | CloneNotSupportedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
+				searchResult = alphaBeta_B(childmv.applyTo(conf), childmv, alpha, beta, depth - 1, Ply.MAX);
+				
+				if(searchResult==null)
+					return null;
+
 				if (searchResult.value < value) {
 					value = searchResult.value;
 					bestMove = childmv;
@@ -152,27 +161,39 @@ public class ABAgent implements AlgorithmInterface {
 	}
 
 	public Move compute(Conf conf) {
+		this.ibreak = false;
 		this.evaluatednodes = 0;
 		this.searchednodes = 0;
 		int alpha = Integer.MIN_VALUE;
 		int beta = Integer.MAX_VALUE;
-		MoveValue best;
-		this.searchCutoff = new Date().getTime() + MAX_RUN_TIME;
-		if (!this.blackPlayer)
-			best = alphaBeta_R(conf, null, alpha, beta, maxDepth, Ply.MAX);
-		else
-			best = alphaBeta_B(conf, null, alpha, beta, maxDepth, Ply.MAX);
-		
-		
-		System.out.println("\nEvaluatedNodes: " + evaluatednodes + "\nSearchedNodes :" + searchednodes);
+		MoveValue newBest = null;
+		MoveValue oldBest = null;
+		this.searchCutoff = System.currentTimeMillis() + MAX_RUN_TIME;
+		int d = 4;
+		while (!timeUp() && d < maxDepth) {
+			oldBest = newBest;
+			if (!this.blackPlayer)
+				newBest = alphaBeta_R(conf, null, alpha, beta, d, Ply.MAX);
+			else
+				newBest = alphaBeta_B(conf, null, alpha, beta, d, Ply.MAX);
+			d++;
 
-		return best.move;
+		}
+
+		System.out
+				.println("\nEvaluatedNodes: " + evaluatednodes + "\nSearchedNodes :" + searchednodes + "\ndepth :" + d);
+
+		if (this.ibreak)
+			return oldBest.move;
+		else
+			return newBest.move;
+
 	}
 
 	private boolean timeUp() {
 		if (java.lang.management.ManagementFactory.getRuntimeMXBean().getInputArguments().toString()
 				.indexOf("-agentlib:jdwp") > 0)
 			return false;
-		return (new Date().getTime() > searchCutoff - 30);
+		return (System.currentTimeMillis() > searchCutoff - 30);
 	}
 }
