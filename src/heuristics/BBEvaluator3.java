@@ -35,10 +35,10 @@ public class BBEvaluator3 implements HeuristicInterface {
 		numberMovesRed(dc);
 		double eval;
 		if (c.isBlack()) {
-			eval = (materialR(dc) + mobilityR + 1.5 * frontAttackR + 2 * backAttackR)
+			eval = (100*materialR(dc) + mobilityR + 1.5 * frontAttackR + 2 * backAttackR)
 					- (materialB(dc) + mobilityB + frontAttackB + 1.2 * backAttackB);
 		} else {
-			eval = (materialR(dc) + mobilityR + frontAttackR + 1.2 * backAttackR)
+			eval = (100*materialR(dc) + mobilityR + frontAttackR + 1.2 * backAttackR)
 					- (materialB(dc) + mobilityB + 1.5 * frontAttackB + 2 * backAttackB);
 		}
 //		System.out.println("evalR_____mobR="+mobilityR+" fronR= "+frontAttackR+" backR= "+ backAttackR+"\n"+"mobB="+mobilityB+" fronB= "+frontAttackB+" backB= "+ backAttackB+"\n");

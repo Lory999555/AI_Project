@@ -19,6 +19,8 @@ import java.util.concurrent.Semaphore;
 
 import javax.swing.JTextPane;
 
+import com.sun.org.apache.bcel.internal.generic.GOTO;
+
 import representation.Conf.Status;
 
 public class Main {
@@ -37,21 +39,19 @@ public class Main {
 	public static boolean blackPlayer;
 
 	public static void main(String[] args) throws InvalidActionException, CloneNotSupportedException, PrinterException {
-		boolean server = true;
+		boolean server = false;
 		LAVORAMU();
 
 		// potrei dividere l'euristica in modo da evitare di splittare gli algoritmi.
 		hi = new BBEvaluator();
-		hi2= new BBEvaluator2();
+		hi2 = new BBEvaluator2();
 
-
-
-		ai_R = new ABWMAgent_v2(hi, false, 5);
+		ai_R = new ABAgent(hi, false, 5);
 
 		ai_B = new ABAgent(hi, true, 6);
 		state = new DipoleConf();
-		
-//		localPlay();
+
+		localPlay();
 
 		if (server) {
 			startServer();
@@ -101,48 +101,70 @@ public class Main {
 		}
 
 	}
+
 	public static void localPlay() throws InvalidActionException, CloneNotSupportedException {
-		  ConverterMove cm = new ConverterMove();
-		  System.out.println("Inserisci il colore del giocatore scelto (RED/BLACK): ");
-		  Scanner scan = new Scanner(System.in);
-		  String player= scan.nextLine();
-		  if(player.equals("RED")) {
-		   blackPlayer=true;
-		  }else {
-		   blackPlayer=false;
-		  }
-		  while (true) {
-		   if(blackPlayer) {
-		    System.out.println(state.toString());
-		    System.out.println("Inserisci mossa (ES:  H5,N,2)");
-		    String mossa= scan.nextLine();
-		    move_B = cm.unpacking(mossa, state);
-		    System.out.println(move_B.toString());
-		    state = move_B.applyTo(state);
-		    System.out.println(state.toString());
-		    
-		    move_B = ai_B.compute(state);
-		    state = move_B.applyTo(state);
-		    System.out.println(cm.generatePacket(move_B));
-		    
-		   } else {
-		    System.out.println(state.toString());
-		    
-		    move_R = ai_R.compute(state);
-		    state = move_R.applyTo(state);
-		    System.out.println(cm.generatePacket(move_R));
-		    
-		    System.out.println(state.toString());
-		    
-		    System.out.println("Inserisci mossa (ES:  H5,N,2)");
-		    String mossa= scan.nextLine();
-		    
-		    move_R = cm.unpacking(mossa, state);
-		    state = move_R.applyTo(state);
-		   }
-		  }
-		 }
-	
+		
+		boolean mannaiaLaMiseria = false;
+		
+		ConverterMove cm = new ConverterMove();
+		System.out.println("Inserisci il colore del giocatore scelto (RED/BLACK): ");
+		Scanner scan = new Scanner(System.in);
+		String player = scan.nextLine().toUpperCase();
+		if (player.equals("RED")||player.equals("R")) {
+			blackPlayer = true;
+		} else if (player.equals("BLACK")||player.equals("B")) {
+			blackPlayer = false;
+		}else {
+			mannaiaLaMiseria = true;
+			System.out.println("Che giocatore è quello??? hai sbagliato, ADDIO!");
+		}
+		while (true && !mannaiaLaMiseria) {			
+			if (blackPlayer) {
+				System.out.println(state.toString());
+				System.out.println("Inserisci mossa (ES:  H5,N,2)");
+				String mossa = scan.nextLine();
+				move_B = cm.unpacking(mossa, state);
+				System.out.println(move_B.toString());
+				try {
+					state = move_B.applyTo(state);
+				}catch (Exception e) {
+					System.out.println("HAI SBAGLIATO!!! ULTIMA POSSIBILITA'");
+					mossa = scan.nextLine();
+					move_B = cm.unpacking(mossa, state);
+					System.out.println(move_B.toString());
+					state = move_B.applyTo(state);
+				}
+				System.out.println(state.toString());
+
+				move_B = ai_B.compute(state);
+				state = move_B.applyTo(state);
+				System.out.println(cm.generatePacket(move_B));
+
+			} else if (!blackPlayer){
+				System.out.println(state.toString());
+
+				move_R = ai_R.compute(state);
+				state = move_R.applyTo(state);
+				System.out.println(cm.generatePacket(move_R));
+
+				System.out.println(state.toString());
+
+				System.out.println("Inserisci mossa (ES:  H5,N,2)");
+				String mossa = scan.nextLine();
+
+				move_R = cm.unpacking(mossa, state);
+				try {
+					state = move_B.applyTo(state);
+				}catch (Exception e) {
+					System.out.println("HAI SBAGLIATO!!! ULTIMA POSSIBILITA'");
+					mossa = scan.nextLine();
+					move_R = cm.unpacking(mossa, state);
+					state = move_B.applyTo(state);
+				}
+			}
+		}
+	}
+
 	public static void startServer() throws InvalidActionException, CloneNotSupportedException {
 		// blackPlayer = false;
 		SenderReceiver sr = new SenderReceiver();
