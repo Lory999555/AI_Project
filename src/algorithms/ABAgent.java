@@ -19,38 +19,36 @@ public class ABAgent implements AlgorithmInterface {
 
 	private int searchednodes = 0;
 	private int evaluatednodes = 0;
-	private int maxdepth = MAX_SEARCH_DEPTH;
-	private HeuristicInterface h;
+	private int maxDepth;
+	private HeuristicInterface hi;
 	private boolean blackPlayer;
 	private long searchCutoff;
 	private static long MAX_RUN_TIME = 1000; // maximum runtime in milliseconds
-	private static int MAX_SEARCH_DEPTH = 200;
 
 	static enum Ply {
 		MAX, MIN
 	};
 
-	public ABAgent(HeuristicInterface h, boolean blackPlayer) {
-		this.h = h;
+	public ABAgent(HeuristicInterface hi, boolean blackPlayer, int maxDepth) {
+		this.maxDepth=maxDepth;
+		this.hi = hi;
 		this.blackPlayer = blackPlayer;
 
 	}
 
 	private MoveValue alphaBeta_R(Conf conf, Move move, int alpha, int beta, int depth, Ply step) {
-		if (depth < maxdepth)
-			maxdepth = depth;
+
 		searchednodes++;
 		Move bestMove = null;
 		MoveValue searchResult = null;
 		int value;
 		// base case
-		if ((depth == 0) || conf.getStatus() != Status.Ongoing || timeUp()) {
+		if ((depth == 0) || timeUp()) {
 			evaluatednodes++;
-			return new MoveValue(move, h.evaluate_R(conf));
+			return new MoveValue(move, hi.evaluate_R(conf));
 		} else if (conf.getStatus() == Status.BlackWon) {
 			evaluatednodes++;
 			return new MoveValue(move, -5000);
-
 		} else if (conf.getStatus() == Status.RedWon) {
 			evaluatednodes++;
 			return new MoveValue(move, 5000);
@@ -65,7 +63,7 @@ public class ABAgent implements AlgorithmInterface {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-				if (searchResult.value >= value) {
+				if (searchResult.value > value) {
 					value = searchResult.value;
 					bestMove = childmv;
 				}
@@ -75,14 +73,14 @@ public class ABAgent implements AlgorithmInterface {
 			}
 		} else { // min step
 			value = Integer.MAX_VALUE;
-			for ( Move childmv : conf.getActions()) {
+			for (Move childmv : conf.getActions()) {
 				try {
-					searchResult = alphaBeta_R(childmv.applyTo(conf),childmv, alpha, beta, depth - 1, Ply.MAX);
+					searchResult = alphaBeta_R(childmv.applyTo(conf), childmv, alpha, beta, depth - 1, Ply.MAX);
 				} catch (InvalidActionException | CloneNotSupportedException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-				if (searchResult.value <= value) {
+				if (searchResult.value < value) {
 					value = searchResult.value;
 					bestMove = childmv;
 				}
@@ -94,18 +92,17 @@ public class ABAgent implements AlgorithmInterface {
 
 		return new MoveValue(bestMove, value);
 	}
-	
+
 	private MoveValue alphaBeta_B(Conf conf, Move move, int alpha, int beta, int depth, Ply step) {
-		if (depth < maxdepth)
-			maxdepth = depth;
+
 		searchednodes++;
 		Move bestMove = null;
 		MoveValue searchResult = null;
 		int value;
 		// base case
-		if ((depth == 0) || conf.getStatus() != Status.Ongoing || timeUp()) {
+		if ((depth == 0) || timeUp()) {
 			evaluatednodes++;
-			return new MoveValue(move, h.evaluate_B(conf));
+			return new MoveValue(move, hi.evaluate_B(conf));
 		} else if (conf.getStatus() == Status.BlackWon) {
 			evaluatednodes++;
 			return new MoveValue(move, 5000);
@@ -124,7 +121,7 @@ public class ABAgent implements AlgorithmInterface {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-				if (searchResult.value >= value) {
+				if (searchResult.value > value) {
 					value = searchResult.value;
 					bestMove = childmv;
 				}
@@ -134,14 +131,14 @@ public class ABAgent implements AlgorithmInterface {
 			}
 		} else { // min step
 			value = Integer.MAX_VALUE;
-			for ( Move childmv : conf.getActions()) {
+			for (Move childmv : conf.getActions()) {
 				try {
-					searchResult = alphaBeta_B(childmv.applyTo(conf),childmv, alpha, beta, depth - 1, Ply.MAX);
+					searchResult = alphaBeta_B(childmv.applyTo(conf), childmv, alpha, beta, depth - 1, Ply.MAX);
 				} catch (InvalidActionException | CloneNotSupportedException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-				if (searchResult.value <= value) {
+				if (searchResult.value < value) {
 					value = searchResult.value;
 					bestMove = childmv;
 				}
@@ -154,23 +151,21 @@ public class ABAgent implements AlgorithmInterface {
 		return new MoveValue(bestMove, value);
 	}
 
-
 	public Move compute(Conf conf) {
-		this.evaluatednodes=0;
-		this.searchednodes=0;
-		this.maxdepth=MAX_SEARCH_DEPTH;
+		this.evaluatednodes = 0;
+		this.searchednodes = 0;
 		int alpha = Integer.MIN_VALUE;
 		int beta = Integer.MAX_VALUE;
-		int depth = MAX_SEARCH_DEPTH;
 		MoveValue best;
 		this.searchCutoff = new Date().getTime() + MAX_RUN_TIME;
-		if(!this.blackPlayer)
-			best = alphaBeta_R(conf, null, alpha, beta, depth, Ply.MAX);
+		if (!this.blackPlayer)
+			best = alphaBeta_R(conf, null, alpha, beta, maxDepth, Ply.MAX);
 		else
-			best = alphaBeta_B(conf, null, alpha, beta, depth, Ply.MAX);
-		System.out.println("\nEvaluatedNodes: " + evaluatednodes + "\nSearchedNodes :" + searchednodes+ "\nMaxDepth: "+(MAX_SEARCH_DEPTH-maxdepth));
+			best = alphaBeta_B(conf, null, alpha, beta, maxDepth, Ply.MAX);
 		
 		
+		System.out.println("\nEvaluatedNodes: " + evaluatednodes + "\nSearchedNodes :" + searchednodes);
+
 		return best.move;
 	}
 

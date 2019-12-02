@@ -35,14 +35,20 @@ public class Main {
 	public static boolean blackPlayer;
 
 	public static void main(String[] args) throws InvalidActionException, CloneNotSupportedException, PrinterException {
+		LAVORAMU();
+
 		boolean server = true;
 
 		// potrei dividere l'euristica in modo da evitare di splittare gli algoritmi.
 		hi = new BBEvaluator();
 //		ai_R = new MTDFAgent(hi, false);
-		ai_B = new ABWMAgent(hi, true);
 //		ai_R=new ABAgent(hi, false);
-		ai_R = new MMAgent(hi, false);
+
+		// fare un bel refactor per mettere la depth dentro il costruttore
+//		ai_R = new MMAgent_v2(hi, false,6);
+		ai_R = new ABWMAgent_v2(hi, false, 5);
+
+		ai_B = new ABAgent(hi, true, 6);
 
 		state = new DipoleConf();
 
@@ -88,8 +94,6 @@ public class Main {
 			 */
 
 			System.out.println("FINITA\n");
-
-			LAVORAMU();
 
 		}
 

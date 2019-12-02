@@ -17,15 +17,15 @@ import java.util.LinkedList;
 
 public class MTDFAgent implements AlgorithmInterface {
 
-	static class NodeInfo {
+	static class TransEntry {
 		public int depth;
 		public int upperbound;
 		public int lowerbound;
 
-		public NodeInfo() {
+		public TransEntry() {
 			this.depth = 0;
-			this.upperbound = 200;
-			this.lowerbound = -200;
+			this.upperbound = Integer.MAX_VALUE;
+			this.lowerbound = Integer.MIN_VALUE;
 		}
 	}
 
@@ -36,26 +36,28 @@ public class MTDFAgent implements AlgorithmInterface {
 	// for testing purpose
 	private int searchednodes = 0;
 	private int evaluatednodes = 0;
+	private int maxDepth;
 
-	private static int MAX_SEARCH_DEPTH = 50;
 	private static int MAX_RECORD = 5000;
 	private static long MAX_RUN_TIME = 1000; // maximum runtime in milliseconds
 
 	// private HashMap<Long, TransEntry> transTable;
-	private Map<Long, NodeInfo> transpositionTable;
+	private Map<Long, TransEntry> transpositionTable;
 	private long searchCutoff;
 	private ZobristGen zg;
 	private HeuristicInterface h;
 	private boolean blackPlayer;
 	private ArrayList equalValueMoves;
 
-	public MTDFAgent(HeuristicInterface h, boolean blackPlayer) {
+	public MTDFAgent(HeuristicInterface h, boolean blackPlayer, int maxDepth) {
+		
+		this.maxDepth=maxDepth;
 		// init zobrist table
 		zg = new ZobristGen();
 
 		// init transposition table
 		// transTable = new HashMap<Long, TransEntry>();
-		transpositionTable = new TranspositionTable<Long, MTDFAgent.NodeInfo>(MAX_RECORD);
+		transpositionTable = new TranspositionTable<Long,TransEntry>(MAX_RECORD);
 
 		// init heuristic function
 		this.h = h;
@@ -92,12 +94,13 @@ public class MTDFAgent implements AlgorithmInterface {
 
 			this.searchCutoff = new Date().getTime() + MAX_RUN_TIME;
 //		best = MTDF(root, guess, depth);
-			while ((depth < MAX_SEARCH_DEPTH) && !timeUp() /** || debug < debug_max */
+			while ((depth < maxDepth) && !timeUp() /** || debug < debug_max */
 			) {
 				// debug++;
 //			depth++;
+				++depth;
 				best = MTDF_B(root, guess, depth);
-				depth+=2;
+
 				guess = best.value;
 
 				// System.out.println("\n-------------- "+depth+" ---------------\n");
@@ -112,12 +115,11 @@ public class MTDFAgent implements AlgorithmInterface {
 		} else {
 			this.searchCutoff = new Date().getTime() + MAX_RUN_TIME;
 //			best = MTDF(root, guess, depth);
-			while ((depth < MAX_SEARCH_DEPTH) && !timeUp() /** || debug < debug_max */
+			while ((depth < maxDepth) && !timeUp() /** || debug < debug_max */
 			) {
 				// debug++;
-//				depth++;
+				++depth;
 				best = MTDF_R(root, guess, depth);
-				depth+=2;
 				guess = best.value;
 
 				// System.out.println("\n-------------- "+depth+" ---------------\n");
@@ -141,7 +143,7 @@ public class MTDFAgent implements AlgorithmInterface {
 	 */
 	private MoveValue MTDF_R(Conf state, int f, int depth) {
 		int value, upperbound, lowerbound, beta;
-		MoveValue mv = new MoveValue();
+		MoveValue mv = null;
 
 		value = f;
 		upperbound = Integer.MAX_VALUE;
@@ -163,7 +165,7 @@ public class MTDFAgent implements AlgorithmInterface {
 
 	private MoveValue MTDF_B(Conf state, int f, int depth) {
 		int value, upperbound, lowerbound, beta;
-		MoveValue mv = new MoveValue();
+		MoveValue mv = null;
 
 		value = f;
 		upperbound = Integer.MAX_VALUE;
@@ -198,12 +200,12 @@ public class MTDFAgent implements AlgorithmInterface {
 		int a, b, value = 0;
 		Move bestMove = null;
 		MoveValue searchResult;
-		NodeInfo trans;
+//		NodeInfo trans;
 		Conf tmp = null;
-		long hash = zg.zobristHash(conf.getForHash());
+//		long hash = zg.zobristHash(conf.getForHash());
 
 		// base case
-		if ((depth == 0) || conf.getStatus() != Conf.Status.Ongoing || timeUp()) {
+		if ((depth == 0) || timeUp()) {
 			evaluatednodes++;
 //			System.out.println(
 //					"valuto: " + prec + " || valore =" + h.evaluate_R(conf) + "\n configurazione: \n" + conf + "\n");
@@ -251,7 +253,7 @@ public class MTDFAgent implements AlgorithmInterface {
 //				la mossa con un indice random), aggiunta in coda e clear/reset che siano costanti per far ciò
 
 				searchResult = alphaBetaWithMemory_R(tmp, childm, a, beta, depth - 1, Ply.MIN);
-				if (searchResult.value >= value) {
+				if (searchResult.value > value) {
 					value = searchResult.value;
 					bestMove = childm;
 				}
@@ -275,7 +277,7 @@ public class MTDFAgent implements AlgorithmInterface {
 					e.printStackTrace();
 				}
 				searchResult = alphaBetaWithMemory_R(tmp, childm, alpha, b, depth - 1, Ply.MAX);
-				if (searchResult.value <= value) {
+				if (searchResult.value < value) {
 					value = searchResult.value;
 					bestMove = childm;
 				}
@@ -321,12 +323,12 @@ public class MTDFAgent implements AlgorithmInterface {
 		int a, b, value = 0;
 		Move bestMove = null;
 		MoveValue searchResult;
-		NodeInfo trans;
+//		NodeInfo trans;
 		Conf tmp = null;
-		long hash = zg.zobristHash(conf.getForHash());
+//		long hash = zg.zobristHash(conf.getForHash());
 
 		// base case
-		if ((depth == 0) || conf.getStatus() != Conf.Status.Ongoing || timeUp()) {
+		if ((depth == 0) || timeUp()) {
 			evaluatednodes++;
 //			System.out.println(
 //					"valuto: " + prec + " || valore =" + h.evaluate_B(conf) + "\nconfigurazione: \n" + conf + "\n");
@@ -372,7 +374,7 @@ public class MTDFAgent implements AlgorithmInterface {
 					e.printStackTrace();
 				}
 				searchResult = alphaBetaWithMemory_B(tmp, childm, a, beta, depth - 1, Ply.MIN);
-				if (searchResult.value >= value) {
+				if (searchResult.value > value) {
 					value = searchResult.value;
 					bestMove = childm;
 				}
@@ -394,7 +396,7 @@ public class MTDFAgent implements AlgorithmInterface {
 					e.printStackTrace();
 				}
 				searchResult = alphaBetaWithMemory_B(tmp, childm, alpha, b, depth - 1, Ply.MAX);
-				if (searchResult.value <= value) {
+				if (searchResult.value < value) {
 					value = searchResult.value;
 					bestMove = childm;
 				}

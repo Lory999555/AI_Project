@@ -31,7 +31,6 @@ public class DipoleConf implements Conf, Cloneable {
 	// Configurazione inzio partita
 	public DipoleConf() {
 
-
 		this.pieces[11] = 0x1000000000000008L;
 		this.pRed = 0x8L;
 		this.pBlack = 0x1000000000000000L;
@@ -179,7 +178,7 @@ public class DipoleConf implements Conf, Cloneable {
 	// le sole mosse possibili e infine divide la rosa nei differenti tipi di
 	// movimento
 	public void allMoves2(long x, long opponent, long mines, int type, long[] pieces, long[][] possibleMove) {
-		assert(type < 12);
+		assert (type < 12);
 		if (type > 6)
 			type = 6;
 		int sq = Board.getSquare(x);
@@ -328,7 +327,6 @@ public class DipoleConf implements Conf, Cloneable {
 				int selectType = 0;
 				int death = 0;
 
-
 				while (selectType < 12) {
 					if ((pawn & pieces[selectType]) != 0) {
 						break;
@@ -377,14 +375,22 @@ public class DipoleConf implements Conf, Cloneable {
 
 				}
 				death = Board.deathNoteRed[Board.getSquare(pawn)];
-				if (death <= selectType + 1) {
-					for (int i = death; i <= selectType + 1; i++) {
-						// generiamo una mossa per ogni morte che abbiamo. Es se la morte minima è 3 e
-						// la mia pedina è di tipo 6
-						// vado a creare la mossa morte 3,4,5,6.
-						actions.add(new DipoleMove(pawn, 0, selectType, black, typeMove.DEATH, i));
-					}
+//				if (death <= selectType + 1) {
+//					for (int i = death; i <= selectType + 1; i++) {
+//						// generiamo una mossa per ogni morte che abbiamo. Es se la morte minima è 3 e
+//						// la mia pedina è di tipo 6
+//						// vado a creare la mossa morte 3,4,5,6.
+//						actions.add(new DipoleMove(pawn, 0, selectType, black, typeMove.DEATH, i));
+//					}
+//				}
+				if (death < selectType + 1) {
+					actions.add(new DipoleMove(pawn, 0, selectType, black, typeMove.DEATH, death));
+					actions.add(new DipoleMove(pawn, 0, selectType, black, typeMove.DEATH, selectType + 1));
+				} else if (death == selectType + 1) {
+					actions.add(new DipoleMove(pawn, 0, selectType, black, typeMove.DEATH, death));
+
 				}
+
 			}
 			return actions;
 		} else {
@@ -451,13 +457,21 @@ public class DipoleConf implements Conf, Cloneable {
 							Math.abs((Board.getSquare(pawn) >>> 3) - (Board.getSquare(temp) >>> 3))));
 				}
 				death = Board.deathNoteBlack[Board.getSquare(pawn)];
-				if (death <= selectType + 1) {
-					for (int i = death; i <= selectType + 1; i++) {
-						// generiamo una mossa per ogni morte che abbiamo. Es se la morte minima è 3 e
-						// la mia pedina è di tipo 6
-						// vado a creare la mossa morte 3,4,5,6.
-						actions.add(new DipoleMove(pawn, 0, selectType, black, typeMove.DEATH, i));
-					}
+//				if (death <= selectType + 1) {
+//					for (int i = death; i <= selectType + 1; i++) {
+//						// generiamo una mossa per ogni morte che abbiamo. Es se la morte minima è 3 e
+//						// la mia pedina è di tipo 6
+//						// vado a creare la mossa morte 3,4,5,6.
+//						actions.add(new DipoleMove(pawn, 0, selectType, black, typeMove.DEATH, i));
+//					}
+//				}
+
+				if (death < selectType + 1) {
+					actions.add(new DipoleMove(pawn, 0, selectType, black, typeMove.DEATH, death));
+					actions.add(new DipoleMove(pawn, 0, selectType, black, typeMove.DEATH, selectType + 1));
+				} else if (death == selectType + 1) {
+					actions.add(new DipoleMove(pawn, 0, selectType, black, typeMove.DEATH, death));
+
 				}
 			}
 			return actions;
@@ -626,11 +640,6 @@ public class DipoleConf implements Conf, Cloneable {
 		}
 	}
 
-	@Override
-	public float heuristic() {
-		// TODO Auto-generated method stub
-		return 0;
-	}
 
 	// aggiornare lo stato mettendo le mosse massime (60 mosse);
 	@Override
@@ -645,24 +654,6 @@ public class DipoleConf implements Conf, Cloneable {
 		}
 		return Status.RedWon;
 
-	}
-
-	@Override
-	public Conf getParentState() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public float heuristic2() {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-	@Override
-	public String identifier() {
-		// TODO Auto-generated method stub
-		return null;
 	}
 
 	public long[] getConf() {
@@ -928,7 +919,7 @@ public class DipoleConf implements Conf, Cloneable {
 	// ruotata di 180
 	public int getType180(long pawn) {
 //		Board.flip180(pawn);
-		long[] pieces180=this.getPieces180();
+		long[] pieces180 = this.getPieces180();
 		int selectType = 0;
 		while (selectType < 12) {
 			if ((pawn & pieces180[selectType]) != 0) {
