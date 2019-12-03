@@ -45,11 +45,11 @@ public class Main {
 		hi2 = new BBEvaluator2();
 
 		ai_R = new ABAgent(hi, false, 30);
-		ai_B = new ABAgent(hi2, true, 30);
+		ai_B = new ABAgent(hi, true, 30);
 
 		state = new DipoleConf();
 
-//		localPlay();
+		//localPlay();
 
 		if (server) {
 			startServer();
