@@ -26,6 +26,10 @@ public class BBEvaluator3 implements HeuristicInterface {
 	private int frontAttackR;
 	private long pRed;
 	private long pBlack;
+	private int maxMat = 35;
+	private int maxMob = 30;
+	private int maxFA = 13;
+	private int maxBA = 13;
 
 	public int evaluate_R(Conf c) {
 		DipoleConf dc = (DipoleConf) c;
@@ -35,11 +39,11 @@ public class BBEvaluator3 implements HeuristicInterface {
 		numberMovesRed(dc);
 		double eval;
 		if (c.isBlack()) {
-			eval = (100*materialR(dc) + mobilityR + 1.5 * frontAttackR + 2 * backAttackR)
-					- (materialB(dc) + mobilityB + frontAttackB + 1.2 * backAttackB);
+			eval = (calculatePercentage(materialR(dc), maxMat) + calculatePercentage(mobilityR, maxMob)  + calculatePercentage(frontAttackR, maxFA) * 1.5  + calculatePercentage(backAttackR, maxBA)*2 )
+					- (calculatePercentage(materialB(dc), maxMat) + calculatePercentage(mobilityB, maxMob) + calculatePercentage(frontAttackB, maxFA) + 1.2 * calculatePercentage(backAttackB, maxBA));
 		} else {
-			eval = (100*materialR(dc) + mobilityR + frontAttackR + 1.2 * backAttackR)
-					- (materialB(dc) + mobilityB + 1.5 * frontAttackB + 2 * backAttackB);
+			eval = (calculatePercentage(materialR(dc), maxMat) + calculatePercentage(mobilityR, maxMob) + calculatePercentage(frontAttackR, maxFA) + 1.2 * calculatePercentage(backAttackR, maxBA))
+					- (calculatePercentage(materialB(dc), maxMat) + calculatePercentage(mobilityB, maxMob) + 1.5 * calculatePercentage(frontAttackB, maxFA) + 2 * calculatePercentage(backAttackB, maxBA));
 		}
 //		System.out.println("evalR_____mobR="+mobilityR+" fronR= "+frontAttackR+" backR= "+ backAttackR+"\n"+"mobB="+mobilityB+" fronB= "+frontAttackB+" backB= "+ backAttackB+"\n");
 		return (int) Math.round(eval);
@@ -53,11 +57,11 @@ public class BBEvaluator3 implements HeuristicInterface {
 		numberMovesRed(dc);
 		double eval;
 		if (c.isBlack()) {
-			eval = (materialB(dc) + mobilityB + 1.5 * frontAttackB + 2 * backAttackB)
-					- (materialR(dc) + mobilityR + frontAttackR + 1.2 * backAttackR);
+			eval = (calculatePercentage(materialB(dc), maxMat) + calculatePercentage(mobilityB, maxMob) + 1.5 * calculatePercentage(frontAttackB, maxFA) + 2 * calculatePercentage(backAttackB, maxBA))
+					- (calculatePercentage(materialR(dc), maxMat) + calculatePercentage(mobilityR, maxMob) + calculatePercentage(frontAttackR, maxFA) + 1.2 * calculatePercentage(backAttackR, maxBA));
 		} else {
-			eval = (materialB(dc) + mobilityB + frontAttackB + 1.2 * backAttackB)
-					- (materialR(dc) + mobilityR + 1.5 * frontAttackR + 2 * backAttackR);
+			eval = (calculatePercentage(materialB(dc), maxMat) + calculatePercentage(mobilityB, maxMob) + calculatePercentage(frontAttackB, maxFA) + 1.2 * calculatePercentage(backAttackB, maxBA))
+					- (calculatePercentage(materialR(dc), maxMat) + calculatePercentage(mobilityR, maxMob)  + calculatePercentage(frontAttackR, maxFA) * 1.5  + calculatePercentage(backAttackR, maxBA)*2 );
 		}
 //		System.out.println("evalB_____mobR="+mobilityR+" fronR= "+frontAttackR+" backR= "+ backAttackR+"\n"+"mobB="+mobilityB+" fronB= "+frontAttackB+" backB= "+ backAttackB+"\n");
 		return (int) Math.round(eval);
@@ -168,4 +172,8 @@ public class BBEvaluator3 implements HeuristicInterface {
 		return material;
 	}
 
+	public double calculatePercentage(double obtained, double total) {
+		if(obtained == 0)return 0;
+        return obtained * 100 / total;
+    }
 }

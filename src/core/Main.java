@@ -25,6 +25,7 @@ public class Main {
 
 	private static HeuristicInterface hi;
 	private static HeuristicInterface hi2;
+	private static HeuristicInterface hi3;
 	private static AlgorithmInterface ai_R;
 	private static AlgorithmInterface ai_B;
 
@@ -43,9 +44,10 @@ public class Main {
 		// potrei dividere l'euristica in modo da evitare di splittare gli algoritmi.
 		hi = new BBEvaluator();
 		hi2 = new BBEvaluator2();
-
+		hi3 = new BBEvaluator3();
+		
 		ai_R = new ABAgent(hi, false, 30);
-		ai_B = new ABAgent(hi2, true, 30);
+		ai_B = new ABAgent(hi3, true, 30);
 		state = new DipoleConf();
 
 		localPlay();
@@ -117,44 +119,57 @@ public class Main {
 		}
 		while (true && !mannaiaLaMiseria) {			
 			if (blackPlayer) {
-				System.out.println(state.toString());
-				System.out.println("Inserisci mossa (ES:  H5,N,2)");
-				String mossa = scan.nextLine();
-				move_B = cm.unpacking(mossa, state);
-				System.out.println(move_B.toString());
 				try {
-					state = move_B.applyTo(state);
-				}catch (Exception e) {
-					System.out.println("HAI SBAGLIATO!!! ULTIMA POSSIBILITA'");
-					mossa = scan.nextLine();
+					System.out.println(state.toString());
+					System.out.println("Inserisci mossa (ES:  H5,N,2)");
+					String mossa = scan.nextLine();
 					move_B = cm.unpacking(mossa, state);
 					System.out.println(move_B.toString());
 					state = move_B.applyTo(state);
+					System.out.println(state.toString());
+	
+					move_B = ai_B.compute(state);
+					state = move_B.applyTo(state);
+					System.out.println(cm.generatePacket(move_B));
+				}catch (Exception e) {
+					System.out.println("HAI SBAGLIATO!!! ULTIMA POSSIBILITA");
+					System.out.println("Inserisci mossa (ES:  H5,N,2)");
+					String mossa = scan.nextLine();
+					move_B = cm.unpacking(mossa, state);
+					System.out.println(move_B.toString());
+					state = move_B.applyTo(state);
+					System.out.println(state.toString());
+	
+					move_B = ai_B.compute(state);
+					state = move_B.applyTo(state);
+					System.out.println(cm.generatePacket(move_B));
 				}
-				System.out.println(state.toString());
-
-				move_B = ai_B.compute(state);
-				state = move_B.applyTo(state);
-				System.out.println(cm.generatePacket(move_B));
-
 			} else if (!blackPlayer){
-				System.out.println(state.toString());
-
-				move_R = ai_R.compute(state);
-				state = move_R.applyTo(state);
-				System.out.println(cm.generatePacket(move_R));
-
-				System.out.println(state.toString());
-
-				System.out.println("Inserisci mossa (ES:  H5,N,2)");
-				String mossa = scan.nextLine();
-
-				move_R = cm.unpacking(mossa, state);
 				try {
+					System.out.println(state.toString());
+	
+					move_R = ai_R.compute(state);
+					state = move_R.applyTo(state);
+					System.out.println(cm.generatePacket(move_R));
+	
+					System.out.println(state.toString());
+	
+					System.out.println("Inserisci mossa (ES:  H5,N,2)");
+					String mossa = scan.nextLine();
+	
+					move_R = cm.unpacking(mossa, state);
 					state = move_B.applyTo(state);
 				}catch (Exception e) {
-					System.out.println("HAI SBAGLIATO!!! ULTIMA POSSIBILITA'");
-					mossa = scan.nextLine();
+					System.out.println("HAI SBAGLIATO!!! ULTIMA POSSIBILITA");
+					move_R = ai_R.compute(state);
+					state = move_R.applyTo(state);
+					System.out.println(cm.generatePacket(move_R));
+
+					System.out.println(state.toString());
+
+					System.out.println("Inserisci mossa (ES:  H5,N,2)");
+					String mossa = scan.nextLine();
+
 					move_R = cm.unpacking(mossa, state);
 					state = move_B.applyTo(state);
 				}
