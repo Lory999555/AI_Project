@@ -25,6 +25,7 @@ public class Main {
 
 	private static HeuristicInterface hi;
 	private static HeuristicInterface hi2;
+	private static HeuristicInterface hi3;
 	private static AlgorithmInterface ai_R;
 	private static AlgorithmInterface ai_B;
 
@@ -43,7 +44,8 @@ public class Main {
 		// potrei dividere l'euristica in modo da evitare di splittare gli algoritmi.
 		hi = new BBEvaluator();
 		hi2 = new BBEvaluator2();
-
+		hi3 = new BBEvaluator3();
+		
 		ai_R = new ABAgent(hi, false, 30);
 		ai_B = new ABAgent(hi, true, 30);
 
