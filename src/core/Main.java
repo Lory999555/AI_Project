@@ -49,42 +49,45 @@ public class Main {
 
 		// potrei dividere l'euristica in modo da evitare di splittare gli algoritmi.
 
+		hi = new BBEvaluator();
+		hi2 = new BBEvaluator2();
+		
 //		ai_R = new MTDFAgent(hi, false);
-		ai_B = new ABWMAgent(hi, true);
+		ai_B = new MMAgent(hi, true);
 //		ai_R=new ABAgent(hi, false);
 		ai_R = new MMAgent(hi, false);
 
 		state = new DipoleConf();
 		
-		localPlay();
+//		localPlay();
 		
-//		if (server) {
-//			startServer();
-//		} else {
-//
-//			while (state.getStatus() == Status.Ongoing) {
-//				System.out.println("\n\n---------------------------------------------------------------");
-//				System.out.println(state);
-//				System.out.println("---------------------------------------------------------------\n\n");
-//
-//				move_R = ai_R.compute(state);
-//				System.out.println("\n\n---------------------------------------------------------------");
-//				System.out.println(move_R);
-//				System.out.println("---------------------------------------------------------------\n\n");
-//
-//				state = move_R.applyTo(state);
-//				System.out.println("\n\n---------------------------------------------------------------");
-//				System.out.println(state);
-//				System.out.println("---------------------------------------------------------------\n\n");
-//
-//				move_B = ai_B.compute(state);
-//				System.out.println("\n\n---------------------------------------------------------------");
-//				System.out.println(move_B);
-//				System.out.println("---------------------------------------------------------------\n\n");
-//
-//				state = move_B.applyTo(state);
-//
-//			}
+		if (server) {
+			startServer();
+		} else {
+
+			while (state.getStatus() == Status.Ongoing) {
+				System.out.println("\n\n---------------------------------------------------------------");
+				System.out.println(state);
+				System.out.println("---------------------------------------------------------------\n\n");
+
+				move_R = ai_R.compute(state);
+				System.out.println("\n\n---------------------------------------------------------------");
+				System.out.println(move_R);
+				System.out.println("---------------------------------------------------------------\n\n");
+
+				state = move_R.applyTo(state);
+				System.out.println("\n\n---------------------------------------------------------------");
+				System.out.println(state);
+				System.out.println("---------------------------------------------------------------\n\n");
+
+				move_B = ai_B.compute(state);
+				System.out.println("\n\n---------------------------------------------------------------");
+				System.out.println(move_B);
+				System.out.println("---------------------------------------------------------------\n\n");
+
+				state = move_B.applyTo(state);
+
+			}
 
 			/**
 			 * avviare il server (abbiamo un ogetto converter e si fa c.start) root
@@ -98,13 +101,13 @@ public class Main {
 			 * 
 			 * 
 			 */
-//
-//			System.out.println("FINITA\n");
-//			
-//			LAVORAMU();
-//
-//
-//		}
+
+			System.out.println("FINITA\n");
+			
+			LAVORAMU();
+
+
+		}
 
 	}
 
