@@ -107,11 +107,12 @@ public class GraphVizPrinter {
 	}
 	
 	private static String getId(Conf s) {
-		StringBuilder sb = new StringBuilder();
-		sb.append(s.identifier());
-		if (s.getParentState() != null) {
-			sb.append(s.getParentState().identifier());
-		}
-		return sb.toString();
+//		StringBuilder sb = new StringBuilder();
+//		sb.append(s.identifier());
+//		if (s.getParentState() != null) {
+//			sb.append(s.getParentState().identifier());
+//		}
+//		return sb.toString();
+		return s.toString();
 	}
 }

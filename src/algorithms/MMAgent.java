@@ -21,28 +21,26 @@ public class MMAgent implements AlgorithmInterface {
 	// for testing purpose
 	private int searchednodes = 0;
 	private int evaluatednodes = 0;
-	private int maxdepth=MAX_SEARCH_DEPTH;
+	private int maxDepth;
 
 	private HeuristicInterface hi;
 	private boolean blackPlayer;
 	private long searchCutoff;
 	private static long MAX_RUN_TIME = 1000; // maximum runtime in milliseconds
-	private static int MAX_SEARCH_DEPTH = 200;
 
-	public MMAgent(HeuristicInterface hi, boolean blackPlayer) {
+	public MMAgent(HeuristicInterface hi, boolean blackPlayer,int maxDepth) {
+		this.maxDepth=maxDepth;
 		this.hi = hi;
 		this.blackPlayer = blackPlayer;
 	}
 
 	private MoveValue minimax_R(Conf conf, Move move, int depth, Ply step) {
-		if(depth < maxdepth)
-			maxdepth=depth;
 		searchednodes++;
 		Move bestMove = null;
 		MoveValue searchResult = null;
 		int value;
 		// base case
-		if ((depth == 0) || conf.getStatus() != Status.Ongoing || timeUp()) {
+		if ((depth == 0) || timeUp()) {
 			evaluatednodes++;
 			return new MoveValue(move, hi.evaluate_R(conf));
 		} else if (conf.getStatus() == Status.BlackWon) {
@@ -57,13 +55,9 @@ public class MMAgent implements AlgorithmInterface {
 		if (step == Ply.MAX) { // max step
 			value = Integer.MIN_VALUE;
 			for (Move childmv : conf.getActions()) {
-				try {
 					searchResult = minimax_R(childmv.applyTo(conf), childmv, depth - 1, Ply.MIN);
-				} catch (InvalidActionException | CloneNotSupportedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-				if (searchResult.value >= value) {
+					
+				if (searchResult.value > value) {
 					value = searchResult.value;
 					bestMove = childmv;
 				}
@@ -71,13 +65,9 @@ public class MMAgent implements AlgorithmInterface {
 		} else { // min step
 			value = Integer.MAX_VALUE;
 			for (Move childmv : conf.getActions()) {
-				try {
 					searchResult = minimax_R(childmv.applyTo(conf), childmv, depth - 1, Ply.MAX);
-				} catch (InvalidActionException | CloneNotSupportedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-				if (searchResult.value <= value) {
+					
+				if (searchResult.value < value) {
 					value = searchResult.value;
 					bestMove = childmv;
 				}
@@ -88,14 +78,12 @@ public class MMAgent implements AlgorithmInterface {
 	}
 
 	private MoveValue minimax_B(Conf conf, Move move, int depth, Ply step) {
-		if(depth < maxdepth)
-			maxdepth=depth;
 		searchednodes++;
 		Move bestMove = null;
 		MoveValue searchResult = null;
 		int value;
 		// base case
-		if ((depth == 0) || conf.getStatus() != Status.Ongoing || timeUp()) {
+		if ((depth == 0) || timeUp()) {
 			evaluatednodes++;
 			return new MoveValue(move, hi.evaluate_B(conf));
 		} else if (conf.getStatus() == Status.BlackWon) {
@@ -111,13 +99,9 @@ public class MMAgent implements AlgorithmInterface {
 		if (step == Ply.MAX) { // max step
 			value = Integer.MIN_VALUE;
 			for (Move childmv : conf.getActions()) {
-				try {
 					searchResult = minimax_B(childmv.applyTo(conf), childmv, depth - 1, Ply.MIN);
-				} catch (InvalidActionException | CloneNotSupportedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-				if (searchResult.value >= value) {
+					
+				if (searchResult.value > value) {
 					value = searchResult.value;
 					bestMove = childmv;
 				}
@@ -125,13 +109,9 @@ public class MMAgent implements AlgorithmInterface {
 		} else { // min step
 			value = Integer.MAX_VALUE;
 			for (Move childmv : conf.getActions()) {
-				try {
 					searchResult = minimax_B(childmv.applyTo(conf), childmv, depth - 1, Ply.MAX);
-				} catch (InvalidActionException | CloneNotSupportedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-				if (searchResult.value <= value) {
+					
+				if (searchResult.value < value) {
 					value = searchResult.value;
 					bestMove = childmv;
 				}
@@ -142,17 +122,16 @@ public class MMAgent implements AlgorithmInterface {
 	}
 
 	public Move compute(Conf conf) {
-		this.evaluatednodes=0;
-		this.searchednodes=0;
-		this.maxdepth=MAX_SEARCH_DEPTH;
+		this.evaluatednodes = 0;
+		this.searchednodes = 0;
 		MoveValue best;
 		this.searchCutoff = new Date().getTime() + MAX_RUN_TIME;
 		if (!this.blackPlayer)
-			best = minimax_R(conf, null, MAX_SEARCH_DEPTH, Ply.MAX);
+			best = minimax_R(conf, null, maxDepth, Ply.MAX);
 		else
-			best = minimax_B(conf, null, MAX_SEARCH_DEPTH, Ply.MAX);
+			best = minimax_B(conf, null, maxDepth, Ply.MAX);
 
-		System.out.println("\nEvaluatedNodes: " + evaluatednodes + "\nSearchedNodes :" + searchednodes+ "\nMaxDepth: "+(MAX_SEARCH_DEPTH-maxdepth));
+		System.out.println("\nEvaluatedNodes: " + evaluatednodes + "\nSearchedNodes :" + searchednodes);
 		return best.move;
 	}
 

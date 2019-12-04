@@ -84,13 +84,13 @@ public class Board {
 													"NE","","NE", "","NW","","NW", "",
 													"","NE","", "NE","","NW","", "NW", 
 													"NE","","NE", "","NW","","NW", "",
-													"","NE","", "NW","","NW","", "NW",
+													"","NE","", "NE","","NW","", "NW",
 													"NE","","NE", "","NW","","NW", "",
-													"","N","", "N","","N","", "NW",
-													"N","","N", "","N","","N", "",
+													"","NE","", "NE","","NW","", "NW",
+													"NE","","NE", "","NW","","NW", "",
 													};
 	
-	public static final String[] deathNoteBDirection = {"","S","", "S","","S","", "S",
+	public static final String[] deathNoteBDirection = {"","SE","", "SE","","SE","", "SE",
 													"SE","","S", "","S","","S", "",
 													"","SE","", "SE","","SW","", "SW", 
 													"SE","","SE", "","SE","","SW", "",

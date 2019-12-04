@@ -80,10 +80,16 @@ public class DipoleMove implements Move {
 
 	@Override
 
-	public Conf applyTo(Conf input) throws InvalidActionException, CloneNotSupportedException {
+	public Conf applyTo(Conf input){
 		assert(input != null);
 		DipoleConf tmp = (DipoleConf) input;
-		DipoleConf res = tmp.clone();
+		DipoleConf res=null;
+		try {
+			res = tmp.clone();
+		} catch (CloneNotSupportedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		res.setBlack(!input.isBlack());
 		int cont;
 		assert(type < 12);
