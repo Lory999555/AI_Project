@@ -46,8 +46,8 @@ public class Main {
 		hi2 = new BBEvaluator2();
 		hi3 = new BBEvaluator3();
 		
-		ai_R = new ABAgent(hi, false, 30);
-		ai_B = new ABAgent(hi, true, 30);
+		ai_R = new ABAgent(hi3, false, 30);
+		ai_B = new ABAgent(hi3, true, 30);
 
 		state = new DipoleConf();
 
@@ -115,7 +115,7 @@ public class Main {
 		while (true) {
 			if (blackPlayer) {
 				System.out.println(state.toString());
-				System.out.println("Inserisci mossa (ES:  H5,N,2)");
+				System.out.println("Inserisci mossa  :");
 				String mossa = scan.nextLine();
 				move_B = cm.unpacking(mossa, state);
 				System.out.println(move_B.toString());
@@ -135,7 +135,7 @@ public class Main {
 
 				System.out.println(state.toString());
 
-				System.out.println("Inserisci mossa (ES:  H5,N,2)");
+				System.out.println("Inserisci mossa :");
 				String mossa = scan.nextLine();
 
 				move_R = cm.unpacking(mossa, state);

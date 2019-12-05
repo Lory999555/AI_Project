@@ -47,10 +47,11 @@ public class ABWMAgent implements AlgorithmInterface {
 
 	private HashMap<Long, TransEntry> transTable;
 	private long[][] zobristTable;
+	private boolean ibreak = false;
 
-	public ABWMAgent(HeuristicInterface hi, boolean blackPlayer,int maxDepth) {
+	public ABWMAgent(HeuristicInterface hi, boolean blackPlayer, int maxDepth) {
 		// init zobrist table
-		this.maxDepth=maxDepth;
+		this.maxDepth = maxDepth;
 		this.hi = hi;
 		this.blackPlayer = blackPlayer;
 		Random prng = new Random();
@@ -105,84 +106,85 @@ public class ABWMAgent implements AlgorithmInterface {
 			}
 		}
 
-		// base case
 		Move bestMove = null;
 		MoveValue searchResult = null;
 		int value;
-		// base case
-		if ((depth == 0)) {
-			evaluatednodes++;
-			return new MoveValue(move, hi.evaluate_R(conf));
-		} else if (conf.getStatus() == Status.BlackWon) {
-			evaluatednodes++;
-			return new MoveValue(move, -5000);
 
-		} else if (conf.getStatus() == Status.RedWon) {
-			evaluatednodes++;
-			return new MoveValue(move, 5000);
-		}
+		if (timeUp()) {
+			this.ibreak = true;
+			return null;
 
-		// recursive
-		if (step == Ply.MAX) { // max step
-			value = Integer.MIN_VALUE;
-			for (Move childmv : conf.getActions()) {
-				try {
+			if ((depth == 0)) {
+				evaluatednodes++;
+				return new MoveValue(move, hi.evaluate_R(conf));
+			} else if (conf.getStatus() == Status.BlackWon) {
+				evaluatednodes++;
+				return new MoveValue(move, -5000);
+
+			} else if (conf.getStatus() == Status.RedWon) {
+				evaluatednodes++;
+				return new MoveValue(move, 5000);
+			}
+
+			// recursive
+			if (step == Ply.MAX) { // max step
+				value = Integer.MIN_VALUE;
+				for (Move childmv : conf.getActions()) {
 					searchResult = alphaBetaWithMemory_R(childmv.applyTo(conf), childmv, alpha, beta, depth - 1,
 							Ply.MIN);
-				} catch (InvalidActionException | CloneNotSupportedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+
+					if (searchResult == null)
+						return null;
+
+					if (searchResult.value > value) {
+						value = searchResult.value;
+						bestMove = childmv;
+					}
+					alpha = Math.max(alpha, value);
+					if (alpha >= beta)
+						break; // pruning
 				}
-				if (searchResult.value > value) {
-					value = searchResult.value;
-					bestMove = childmv;
-				}
-				alpha = Math.max(alpha, value);
-				if (alpha >= beta)
-					break; // pruning
-			}
-		} else { // min step
-			value = Integer.MAX_VALUE;
-			for (Move childmv : conf.getActions()) {
-				try {
+			} else { // min step
+				value = Integer.MAX_VALUE;
+				for (Move childmv : conf.getActions()) {
 					searchResult = alphaBetaWithMemory_R(childmv.applyTo(conf), childmv, alpha, beta, depth - 1,
 							Ply.MAX);
-				} catch (InvalidActionException | CloneNotSupportedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-				if (searchResult.value < value) {
-					value = searchResult.value;
-					bestMove = childmv;
-				}
-				beta = Math.min(beta, value);
-				if (alpha >= beta)
-					break;
-			}
-		}
 
-		// if (!strongTimeUp()) {
-		// store trans table values
-		trans = transTable.getOrDefault(hash, new TransEntry());
+					if (searchResult == null)
+						return null;
 
-		if (trans.depth <= depth) {
-			// fail low implies an upper bound
-			if (value <= alpha) {
-				trans.upperbound = value;
+					if (searchResult.value < value) {
+						value = searchResult.value;
+						bestMove = childmv;
+					}
+					beta = Math.min(beta, value);
+					if (alpha >= beta)
+						break;
+				}
 			}
-			// fail high implies a lower bound
-			else if (value >= beta) {
-				trans.lowerbound = value;
+
+			// if (!strongTimeUp()) {
+			// store trans table values
+			trans = transTable.getOrDefault(hash, new TransEntry());
+
+			if (trans.depth <= depth) {
+				// fail low implies an upper bound
+				if (value <= alpha) {
+					trans.upperbound = value;
+				}
+				// fail high implies a lower bound
+				else if (value >= beta) {
+					trans.lowerbound = value;
+				}
+				// accurate minimax value
+				else {
+					trans.lowerbound = value;
+					trans.upperbound = value;
+				}
+				trans.depth = depth;
+				transTable.put(hash, trans);
 			}
-			// accurate minimax value
-			else {
-				trans.lowerbound = value;
-				trans.upperbound = value;
-			}
-			trans.depth = depth;
-			transTable.put(hash, trans);
-		}
-//		}
+		
 
 		return new MoveValue(bestMove, value);
 
@@ -232,13 +234,8 @@ public class ABWMAgent implements AlgorithmInterface {
 		if (step == Ply.MAX) { // max step
 			value = Integer.MIN_VALUE;
 			for (Move childmv : conf.getActions()) {
-				try {
-					searchResult = alphaBetaWithMemory_B(childmv.applyTo(conf), childmv, alpha, beta, depth - 1,
-							Ply.MIN);
-				} catch (InvalidActionException | CloneNotSupportedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
+				searchResult = alphaBetaWithMemory_B(childmv.applyTo(conf), childmv, alpha, beta, depth - 1, Ply.MIN);
+
 				if (searchResult.value > value) {
 					value = searchResult.value;
 					bestMove = childmv;
@@ -250,13 +247,9 @@ public class ABWMAgent implements AlgorithmInterface {
 		} else { // min step
 			value = Integer.MAX_VALUE;
 			for (Move childmv : conf.getActions()) {
-				try {
-					searchResult = alphaBetaWithMemory_B(childmv.applyTo(conf), childmv, alpha, beta, depth - 1,
-							Ply.MAX);
-				} catch (InvalidActionException | CloneNotSupportedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
+
+				searchResult = alphaBetaWithMemory_B(childmv.applyTo(conf), childmv, alpha, beta, depth - 1, Ply.MAX);
+
 				if (searchResult.value < value) {
 					value = searchResult.value;
 					bestMove = childmv;

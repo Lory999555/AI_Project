@@ -52,6 +52,7 @@ public class ConverterMove implements ConverterSignal {
 		}
 		
 	}
+	
 
 	public Move unpacking(String packet, Conf c) {
 		DipoleConf move = (DipoleConf) c;
