@@ -35,7 +35,7 @@ public class DipoleMove implements Move {
 	 * @param toSq
 	 * @param type
 	 * @param black
-	 * @param tp
+	 * @param tp 0 backAttack; 1 frontattack; 2 quietmove; 3 merge; 4 death;
 	 * @return int
 	 */
 	public int encodingMove(int fromSq, int toSq, int type, boolean black, typeMove tp) {
@@ -47,7 +47,7 @@ public class DipoleMove implements Move {
 	}
 
 	// distanza utilizzata dalle mosse death e dalle mosse back attack in quanto la
-	// distnza gliela passiamo da parametri
+	// distapnza gliela passiamo da parametri
 	public int encodingMove(int fromSq, int toSq, int dist, int type, boolean black, typeMove tp) {
 		System.out.println("f " + fromSq + ", to " + toSq + " = "
 				+ (Math.abs((fromSq >> 3) - (toSq >> 3)) + " -> " + (Math.abs((fromSq >> 3) - (toSq >> 3)) << 8)));
@@ -55,6 +55,7 @@ public class DipoleMove implements Move {
 
 	}
 
+	//nella decodifica il toSQ/fromSQ corrisponde all'indice della casella e non ad una bitboard. 
 	public void decodingMove(int code) {
 		tP = typeMove.values()[code & 0x7];
 		black = (((code & 0x8) >>> 3) == 1 ? true : false);
@@ -243,6 +244,8 @@ public class DipoleMove implements Move {
 		DipoleConf res = tmp.clone();
 		res.setBlack(!input.isBlack());
 		decodingMove(code);
+		fromSq= Board.squareToBitboard((int)fromSq);
+		toSq= Board.squareToBitboard((int)toSq);
 
 		boolean allStack = (type - dist) == -1;
 
