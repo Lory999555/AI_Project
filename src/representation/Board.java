@@ -3,6 +3,7 @@ package representation;
 public class Board {
 	
 	public enum File {H,G,F,E,D,C,B,A};
+	public enum FileLocal {A,B,C,D,E,F,G,H};
 	public enum directionNS {S,P,N};
 	public enum directionEO {E,P,W};
 	
@@ -127,6 +128,11 @@ public class Board {
 	// partire da una bitboard
 	public static String DeBruijn(long position) {
 		return Board.SQUARE_NAMES[getSquare(position)];
+	}
+	
+	// ritorna l'indice di una casella della scacchiera a partire dalla stringa passata (utilizzata per giocare locale)
+	public static int localStringToSquare(String file,String rank) {
+		return  (Integer.parseInt(rank)-1)*8 + (7- FileLocal.valueOf(file).ordinal());
 	}
 	
 	// ritorna l'indice di una casella della scacchiera a partire dalla stringa passata

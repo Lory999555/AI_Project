@@ -8,7 +8,7 @@ import heuristics.HeuristicInterface;
 import representation.Conf;
 import representation.Move;
 import representation.TimeOutException;
-import sun.awt.Symbol;
+//import sun.awt.Symbol;
 import representation.Conf.Status;
 import representation.InvalidActionException;
 
