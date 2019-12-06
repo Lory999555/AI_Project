@@ -55,12 +55,8 @@ public class MMAgent implements AlgorithmInterface {
 		if (step == Ply.MAX) { // max step
 			value = Integer.MIN_VALUE;
 			for (Move childmv : conf.getActions()) {
-				try {
 					searchResult = minimax_R(childmv.applyTo(conf), childmv, depth - 1, Ply.MIN);
-				} catch (InvalidActionException | CloneNotSupportedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
+					
 				if (searchResult.value > value) {
 					value = searchResult.value;
 					bestMove = childmv;
@@ -69,12 +65,8 @@ public class MMAgent implements AlgorithmInterface {
 		} else { // min step
 			value = Integer.MAX_VALUE;
 			for (Move childmv : conf.getActions()) {
-				try {
 					searchResult = minimax_R(childmv.applyTo(conf), childmv, depth - 1, Ply.MAX);
-				} catch (InvalidActionException | CloneNotSupportedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
+					
 				if (searchResult.value < value) {
 					value = searchResult.value;
 					bestMove = childmv;
@@ -107,12 +99,8 @@ public class MMAgent implements AlgorithmInterface {
 		if (step == Ply.MAX) { // max step
 			value = Integer.MIN_VALUE;
 			for (Move childmv : conf.getActions()) {
-				try {
 					searchResult = minimax_B(childmv.applyTo(conf), childmv, depth - 1, Ply.MIN);
-				} catch (InvalidActionException | CloneNotSupportedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
+					
 				if (searchResult.value > value) {
 					value = searchResult.value;
 					bestMove = childmv;
@@ -121,12 +109,8 @@ public class MMAgent implements AlgorithmInterface {
 		} else { // min step
 			value = Integer.MAX_VALUE;
 			for (Move childmv : conf.getActions()) {
-				try {
 					searchResult = minimax_B(childmv.applyTo(conf), childmv, depth - 1, Ply.MAX);
-				} catch (InvalidActionException | CloneNotSupportedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
+					
 				if (searchResult.value < value) {
 					value = searchResult.value;
 					bestMove = childmv;

@@ -248,6 +248,10 @@ public class BBEvaluator implements HeuristicInterface {
 		mat = material; ///// si può eliminae
 		return material;
 	}
+	
+	public double calculatePercentage(double obtained, double total) {
+        return obtained * 100 / total;
+    }
 
 	@Override
 	public void print() {

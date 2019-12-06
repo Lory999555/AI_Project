@@ -16,6 +16,8 @@ import representation.*;
 import representation.DipoleMove.typeMove;
 
 import java.util.concurrent.Semaphore;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.swing.JTextPane;
 
@@ -99,65 +101,67 @@ public class Main {
 			 * 
 			 */
 
-			System.out.println("FINITA\n");
 
-			LAVORAMU();
 
 		}
 
 	}
 	
 	public static void localPlay() throws InvalidActionException, CloneNotSupportedException {
-	    ConverterMove cm = new ConverterMove();
-	    System.out.println("Inserisci il colore del giocatore scelto (RED/BLACK): ");
-	    Scanner scan = new Scanner(System.in);
-	    String player = scan.nextLine();
-	    if (player.equals("r")||player.equals("R")||player.equals("red")||player.equals("RED")) {
-	      blackPlayer = true;
-	    } else {
-	      blackPlayer = false;
-	    }
-	    while (true) {
-	      if (blackPlayer) {
-	        System.out.println(state.toString());
-	        System.out.println("Inserisci mossa  :");
-	        String mossa = scan.nextLine();
-	        move_B = cm.unpacking(mossa, state);
-	        System.out.println(move_B.toString());
-	        state = move_B.applyTo(state);
-	        System.out.println(state.toString());
-	        
+		ConverterMove cm = new ConverterMove();
+		System.out.println("Inserisci il colore del giocatore scelto (RED/BLACK): ");
+		Scanner scan = new Scanner(System.in);
+		String player = scan.nextLine();
+		Pattern p = Pattern.compile("[a-hA-H][1-8][,][a-h][1-8]");
+		if (player.equals("RED")) {
+			blackPlayer = true;
+		} else {
+			blackPlayer = false;
+		}
+		while (true) {
+			if (blackPlayer) {
+				System.out.println(state.toString());
 
-	        move_B = ai_B.compute(state);
-	        state = move_B.applyTo(state);
-	        System.out.println(cm.generatePacket(move_B));
-	        
-	        
-	        hi4.evaluate_B(state);//si può togliere
-	        hi4.print();
+				String mossa="a";
+				Matcher m = p.matcher(mossa);
+				while(!m.matches()) {
+					System.out.println("Inserisci mossa (ES:  H5,N,2)");
+					mossa = scan.nextLine();
+					m= p.matcher(mossa);
+				}
+				move_B = cm.unpackingLocal(mossa, state);
+				System.out.println(move_B.toString());
+				state = move_B.applyTo(state);
+				System.out.println(state.toString());
 
-	      } else {
-	    	
-	        System.out.println(state.toString());
+				move_B = ai_B.compute(state);
+				state = move_B.applyTo(state);
+				System.out.println(cm.generatePacket(move_B));
 
-	        move_R = ai_R.compute(state);
-	        state = move_R.applyTo(state);
-	        System.out.println(cm.generatePacket(move_R));
+			} else {
+				System.out.println(state.toString());
 
-	        System.out.println(state.toString());
+				move_R = ai_R.compute(state);
+				state = move_R.applyTo(state);
+				System.out.println(cm.generatePacket(move_R));
 
-	        System.out.println("Inserisci mossa :");
-	        String mossa = scan.nextLine();
+				System.out.println(state.toString());
 
-	        move_R = cm.unpacking(mossa, state);
-	        state = move_R.applyTo(state);
-	        
-	        
-	        hi4.evaluate_B(state);//si può togliere
-	        hi4.print();
-	      }
-	    }
-	  }
+
+				String mossa="a";
+				Matcher m = p.matcher(mossa);
+				while(!m.matches()) {
+					System.out.println("Inserisci mossa (ES:  H5,N,2)");
+					mossa = scan.nextLine();
+					m= p.matcher(mossa);
+				}
+
+				move_R = cm.unpackingLocal(mossa, state);
+				state = move_R.applyTo(state);
+			}
+		}
+	}
+
 
 	public static void startServer() throws InvalidActionException, CloneNotSupportedException {
 		// blackPlayer = false;
