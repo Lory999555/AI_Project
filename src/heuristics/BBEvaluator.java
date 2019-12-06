@@ -69,7 +69,6 @@ public class BBEvaluator implements HeuristicInterface {
 			eval = (materialR(dc) + mobilityR + frontAttackR + 1.2 * backAttackR)
 					- (materialB(dc) + mobilityB + 1.5 * frontAttackB + 2 * backAttackB);
 		}
-
 //		System.out.println(
 //				"mat=" + mat + " evalR_____mobR=" + mobilityR + " fronR= " + frontAttackR + " backR= " + backAttackR
 //						+ "\n" + "mobB=" + mobilityB + " fronB= " + frontAttackB + " backB= " + backAttackB + "\n");
@@ -91,7 +90,6 @@ public class BBEvaluator implements HeuristicInterface {
 			eval = (materialB(dc) + mobilityB + frontAttackB + 1.2 * backAttackB)
 					- (materialR(dc) + mobilityR + 1.5 * frontAttackR + 2 * backAttackR);
 		}
-
 //		System.out.println(
 //				"mat=" + mat + " evalB_____mobR=" + mobilityR + " fronR= " + frontAttackR + " backR= " + backAttackR
 //						+ "\n" + "mobB=" + mobilityB + " fronB= " + frontAttackB + " backB= " + backAttackB + "\n");
@@ -254,5 +252,11 @@ public class BBEvaluator implements HeuristicInterface {
 	public double calculatePercentage(double obtained, double total) {
         return obtained * 100 / total;
     }
+
+	@Override
+	public void print() {
+		// TODO Auto-generated method stub
+		
+	}
 
 }

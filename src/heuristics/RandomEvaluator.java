@@ -33,4 +33,11 @@ public class RandomEvaluator implements HeuristicInterface{
 		return 0;
 	}
 
+
+	@Override
+	public void print() {
+		// TODO Auto-generated method stub
+		
+	}
+
 }

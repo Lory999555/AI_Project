@@ -31,6 +31,7 @@ public class Main {
 	private static HeuristicInterface hi2;
 	private static HeuristicInterface hi3;
 	private static HeuristicInterface hi4;
+	private static HeuristicInterface hi5;
 	private static AlgorithmInterface ai_R;
 	private static AlgorithmInterface ai_B;
 
@@ -63,6 +64,8 @@ public class Main {
 		hi = new BBEvaluator();
 		hi2 = new BBEvaluator2();
 		hi3 = new BBEvaluator3();
+		hi4 = new BBEvaluator4();
+		hi5 = new BBEvaluator5();
 		
 
 		ai_B = new ABWMAgent(hi3, true, 4, 15);

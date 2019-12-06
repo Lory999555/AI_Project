@@ -882,7 +882,6 @@ public class DipoleConf implements Conf, Cloneable {
 					}
 			}
 		}
-
 		sb.insert(56, '\n');
 		sb.insert(48, '\n');
 		sb.insert(40, '\n');
@@ -977,5 +976,32 @@ public class DipoleConf implements Conf, Cloneable {
 		
 		return val;
 	}
+	
+	/***
+	 * return the pawns number
+	 * @param x
+	 * @return
+	 */
+	public int pawnCount(long x) {
+		long y;
+		int c = 0;
+		while (x != 0) {
+			y = x & (-x);
+			c+=(getType(y)+1);
+			x &= x - 1; // reset LS1B
+		}
+		return c;
+	}
+	
+//	public int pawnCount180(long x) {
+//		long y;
+//		int c = 0;
+//		while (x != 0) {
+//			y = x & (-x);
+//			c+=(getType180(y)+1);
+//			x &= x - 1; // reset LS1B
+//		}
+//		return c;
+//	}
 
 }

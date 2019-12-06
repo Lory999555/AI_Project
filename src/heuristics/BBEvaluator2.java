@@ -162,4 +162,10 @@ public class BBEvaluator2 implements HeuristicInterface {
 		return material;
 	}
 
+	@Override
+	public void print() {
+		// TODO Auto-generated method stub
+		
+	}
+
 }

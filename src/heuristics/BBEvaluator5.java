@@ -7,7 +7,7 @@ import representation.Conf;
 import representation.Conf.Status;
 import representation.DipoleConf;
 
-public class BBEvaluator3 implements HeuristicInterface {
+public class BBEvaluator5 implements HeuristicInterface {
 	private int val[] = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 }; // valore delle pedine
 //	private double valPositionR[] = { 2, 1.75, 1.50, 1.25, 1, 0.6, 0.4, 0.2 }; // valore della posizione in base alla riga
 //	private double valPositionB[] = { 0.2, 0.4, 0.6, 1, 1.25, 1.50, 1.75, 2 };
@@ -33,23 +33,42 @@ public class BBEvaluator3 implements HeuristicInterface {
 	private int maxFA = 13;
 	private int maxBA = 13;
 
-	public int evaluate_R(Conf c) {	//viene solo portato tutto allo "stesso livello" su base 100
+	private int percNum = 35;
+	private int percMat = 20;
+	private int percMob = 12;
+
+	private int percFa1 = 13;
+	private int percBa1 = 15;
+
+	private int percFa2 = 15;
+	private int percBa2 = 18;
+
+	private double nB; // number of black pawn
+	private double nR; // number of red pawn
+
+	public int evaluate_R(Conf c) {
 		DipoleConf dc = (DipoleConf) c;
 		pRed = dc.getpRed();
 		pBlack = dc.getpBlack();
-		calculateValBlack(dc);
-		calculateValRed(dc);
+//		calculateValBlack(dc);
+//		calculateValRed(dc);
 		materialR = materialR(dc);
 		materialB = materialB(dc);
+		nB = calculatePercentage(dc.pawnCount(pBlack), 12, percNum);
+		nR = calculatePercentage(dc.pawnCount(pRed), 12, percNum);
+
 		double eval;
 		if (c.isBlack()) {
-			eval = (materialR + mobilityR + frontAttackR * 1.5 + backAttackR * 2)
-					- (materialB + mobilityB + frontAttackB + backAttackB * 1.2);
+			calculateValBlack(dc, percFa1, percBa1);
+			calculateValRed(dc, percFa2, percBa2);
+			eval = (nR + materialR + mobilityR + frontAttackR + backAttackR)
+					- (nB + materialB + mobilityB + frontAttackB + backAttackB);
 		} else {
-			eval = (materialR + mobilityR + frontAttackR + backAttackR * 1.2)
-					- (materialB + mobilityB + frontAttackB * 1.5 + backAttackB * 2);
+			calculateValBlack(dc, percFa2, percBa2);
+			calculateValRed(dc, percFa1, percBa1);
+			eval = (nR + materialR + mobilityR + frontAttackR + backAttackR)
+					- (nB + materialB + mobilityB + frontAttackB + backAttackB);
 		}
-//		System.out.println("evalR_____mobR="+mobilityR+" fronR= "+frontAttackR+" backR= "+ backAttackR+"\n"+"mobB="+mobilityB+" fronB= "+frontAttackB+" backB= "+ backAttackB+"\n");
 		return (int) Math.round(eval);
 	}
 
@@ -57,47 +76,52 @@ public class BBEvaluator3 implements HeuristicInterface {
 		DipoleConf dc = (DipoleConf) c;
 		pRed = dc.getpRed();
 		pBlack = dc.getpBlack();
-		calculateValBlack(dc);
-		calculateValRed(dc);
+//		calculateValBlack(dc);
+//		calculateValRed(dc);
 		materialR = materialR(dc);
 		materialB = materialB(dc);
+		nB = calculatePercentage(dc.pawnCount(pBlack), 12, percNum);
+		nR = calculatePercentage(dc.pawnCount(pRed), 12, percNum);
 		double eval;
 		if (c.isBlack()) {
-			eval = (materialB + mobilityB + frontAttackB * 1.5 + backAttackB * 2)
-					- (materialR + mobilityR + frontAttackR + backAttackR * 1.2);
-		} else {	
-			eval = (materialB + mobilityB + frontAttackB + backAttackB * 1.2)
-					- (materialR + mobilityR + frontAttackR * 1.5 + backAttackR * 2);
+			calculateValBlack(dc, percFa2, percBa2);
+			calculateValRed(dc, percFa1, percBa1);
+			eval = (nB + materialB + mobilityB + frontAttackB + backAttackB)
+					- (nR + materialR + mobilityR + frontAttackR + backAttackR);
+		} else {
+			calculateValBlack(dc, percFa1, percBa1);
+			calculateValRed(dc, percFa2, percBa2);
+			eval = (nB + materialB + mobilityB + frontAttackB + backAttackB)
+					- (nR + materialR + mobilityR + frontAttackR + backAttackR);
 		}
-//		System.out.println("evalB_____mobR="+mobilityR+" fronR= "+frontAttackR+" backR= "+ backAttackR+"\n"+"mobB="+mobilityB+" fronB= "+frontAttackB+" backB= "+ backAttackB+"\n");
 		return (int) Math.round(eval);
 	}
 
 //	public double evaluateMob(Conf c) {
 //		DipoleConf dc = (DipoleConf) c;
-//		numberMovesBlack(dc);
-//		numberMovesRed(dc);
+//		calculateValBlack(dc);
+//		calculateValRed(dc);
 //		double eval = mobilityR - mobilityB;
 //		return eval;
 //	}
 //
 //	public double evaluateMat(Conf c) {
 //		DipoleConf dc = (DipoleConf) c;
-//		numberMovesBlack(dc);
-//		numberMovesRed(dc);
+//		calculateValBlack(dc);
+//		calculateValRed(dc);
 //		double eval = materialR(dc) - materialB(dc);
 //		return eval;
 //	}
 //
 //	public double evaluateAtt(Conf c) {
 //		DipoleConf dc = (DipoleConf) c;
-//		numberMovesBlack(dc);
-//		numberMovesRed(dc);
+//		calculateValBlack(dc);
+//		calculateValRed(dc);
 //		double eval = frontAttackR + 2 * backAttackR - frontAttackB - 2 * backAttackB;
 //		return eval;
 //	}
 
-	private void calculateValRed(DipoleConf c) {
+	private void calculateValRed(DipoleConf c, int percFa, int percBa) {
 		long pB = pBlack;
 		long pR = pRed;
 		mobilityR = 0;
@@ -112,17 +136,19 @@ public class BBEvaluator3 implements HeuristicInterface {
 			frontAttackR += c.evalFA();
 			backAttackR += c.evalBA();
 		}
-		mobilityR = calculatePercentage(mobilityR, maxMob);
-		frontAttackR = calculatePercentage(frontAttackR, maxFA);
-		backAttackR = calculatePercentage(backAttackR, maxBA);
+		mobilityR = calculatePercentage(mobilityR, maxMob, percMob);
+		frontAttackR = calculatePercentage(frontAttackR, maxFA, percFa);
+		backAttackR = calculatePercentage(backAttackR, maxBA, percBa);
 	}
 
 	/**
+	 * @param percBa12
+	 * @param percFa12
 	 * @param DipoleConf
 	 * @return number of mobility (quiet move), number of backAttack and number of
 	 *         frontAttack
 	 */
-	private void calculateValBlack(DipoleConf c) {
+	private void calculateValBlack(DipoleConf c, int percFa, int percBa) {
 		long pB = Board.flip180(pBlack);
 		long pR = Board.flip180(pRed);
 		mobilityB = 0;
@@ -139,16 +165,16 @@ public class BBEvaluator3 implements HeuristicInterface {
 			frontAttackB += c.evalFA();
 			backAttackB += c.evalBA();
 		}
-		mobilityB = calculatePercentage(mobilityB, maxMob);
-		frontAttackB = calculatePercentage(frontAttackB, maxFA);
-		backAttackB = calculatePercentage(backAttackB, maxBA);
+		mobilityB = calculatePercentage(mobilityB, maxMob, percMob);
+		frontAttackB = calculatePercentage(frontAttackB, maxFA, percFa);
+		backAttackB = calculatePercentage(backAttackB, maxBA, percBa);
 	}
 
 	/**
 	 * @param DipoleConf
 	 * @return returns the value of the pieces in relation to their position
 	 */
-	private double materialB(DipoleConf c) { // N.B. se l'euristica rimane così, posso richiamare il numberMove
+	private double materialB(DipoleConf c) { // N.B. se l'euristica rimane così, posso richiamare il calculateVal
 		// direttamente nel while presente in questa classe
 		double material = 0;
 		long pieces = pBlack;
@@ -163,7 +189,7 @@ public class BBEvaluator3 implements HeuristicInterface {
 			assert (type < 12);
 			material += (val[type] * valPositionB[square >>> 3]);
 		} // while
-		material = calculatePercentage(material, maxMat);
+		material = calculatePercentage(material, maxMat, percMat);
 		return material;
 	}
 
@@ -182,17 +208,25 @@ public class BBEvaluator3 implements HeuristicInterface {
 			assert (type < 12);
 			material += (val[type] * valPositionR[square >>> 3]);
 		} // while
-		material = calculatePercentage(material, maxMat);
+		material = calculatePercentage(material, maxMat, percMat);
 		return material;
 	}
 
-	public double calculatePercentage(double obtained, double total) {
-		if(obtained == 0)return 0;
-        return obtained * 100 / total;
-    }
+	public double calculatePercentage(double obtained, int total) {
+		if (obtained == 0)
+			return 0;
+		return obtained * 100 / total;
+	}
+
+	public double calculatePercentage(double obtained, int total, int percentage) {
+		if (obtained == 0)
+			return 0;
+		return obtained * percentage / total;
+	}
+
 	public void print() {
 		System.out.println("MatR = " + materialR + "   MatB = " + materialB + "\n MobR = " + mobilityR + "   MobB = "
 				+ mobilityB + "\n FatR = " + frontAttackR + "   FatB = " + frontAttackB + "\n BatR = " + backAttackR
-				+ "   BatB = " + backAttackB);
+				+ "   BatB = " + backAttackB + "\n nb = " + nB + "nr =" + nR);
 	}
 }
