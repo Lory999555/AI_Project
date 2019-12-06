@@ -39,11 +39,16 @@ public class BBEvaluator3 implements HeuristicInterface {
 		numberMovesRed(dc);
 		double eval;
 		if (c.isBlack()) {
-			eval = (calculatePercentage(materialR(dc), maxMat) + calculatePercentage(mobilityR, maxMob)  + calculatePercentage(frontAttackR, maxFA) * 1.5  + calculatePercentage(backAttackR, maxBA)*2 )
-					- (calculatePercentage(materialB(dc), maxMat) + calculatePercentage(mobilityB, maxMob) + calculatePercentage(frontAttackB, maxFA) + 1.2 * calculatePercentage(backAttackB, maxBA));
+			eval = (calculatePercentage(materialR(dc), maxMat) + calculatePercentage(mobilityR, maxMob)
+					+ calculatePercentage(frontAttackR, maxFA) * 1.5 + 2 * calculatePercentage(backAttackR, maxBA))
+					- (calculatePercentage(materialB(dc), maxMat) + calculatePercentage(mobilityB, maxMob)
+							+ calculatePercentage(frontAttackB, maxFA) + 1.2 * calculatePercentage(backAttackB, maxBA));
 		} else {
-			eval = (calculatePercentage(materialR(dc), maxMat) + calculatePercentage(mobilityR, maxMob) + calculatePercentage(frontAttackR, maxFA) + 1.2 * calculatePercentage(backAttackR, maxBA))
-					- (calculatePercentage(materialB(dc), maxMat) + calculatePercentage(mobilityB, maxMob) + 1.5 * calculatePercentage(frontAttackB, maxFA) + 2 * calculatePercentage(backAttackB, maxBA));
+			eval = (calculatePercentage(materialR(dc), maxMat) + calculatePercentage(mobilityR, maxMob)
+					+ calculatePercentage(frontAttackR, maxFA) + 1.2 * calculatePercentage(backAttackR, maxBA))
+					- (calculatePercentage(materialB(dc), maxMat) + calculatePercentage(mobilityB, maxMob)
+							+ 1.5 * calculatePercentage(frontAttackB, maxFA)
+							+ 2 * calculatePercentage(backAttackB, maxBA));
 		}
 //		System.out.println("evalR_____mobR="+mobilityR+" fronR= "+frontAttackR+" backR= "+ backAttackR+"\n"+"mobB="+mobilityB+" fronB= "+frontAttackB+" backB= "+ backAttackB+"\n");
 		return (int) Math.round(eval);
@@ -57,11 +62,16 @@ public class BBEvaluator3 implements HeuristicInterface {
 		numberMovesRed(dc);
 		double eval;
 		if (c.isBlack()) {
-			eval = (calculatePercentage(materialB(dc), maxMat) + calculatePercentage(mobilityB, maxMob) + 1.5 * calculatePercentage(frontAttackB, maxFA) + 2 * calculatePercentage(backAttackB, maxBA))
-					- (calculatePercentage(materialR(dc), maxMat) + calculatePercentage(mobilityR, maxMob) + calculatePercentage(frontAttackR, maxFA) + 1.2 * calculatePercentage(backAttackR, maxBA));
+			eval = (calculatePercentage(materialB(dc), maxMat) + calculatePercentage(mobilityB, maxMob)
+					+ calculatePercentage(frontAttackB, maxFA) + 1.2 * calculatePercentage(backAttackB, maxBA))
+					- (calculatePercentage(materialR(dc), maxMat) + calculatePercentage(mobilityR, maxMob)
+							+ 1.5 * calculatePercentage(frontAttackR, maxFA)
+							+ 2 * calculatePercentage(backAttackR, maxBA));
 		} else {
-			eval = (calculatePercentage(materialB(dc), maxMat) + calculatePercentage(mobilityB, maxMob) + calculatePercentage(frontAttackB, maxFA) + 1.2 * calculatePercentage(backAttackB, maxBA))
-					- (calculatePercentage(materialR(dc), maxMat) + calculatePercentage(mobilityR, maxMob)  + calculatePercentage(frontAttackR, maxFA) * 1.5  + calculatePercentage(backAttackR, maxBA)*2 );
+			eval = (calculatePercentage(materialB(dc), maxMat) + calculatePercentage(mobilityB, maxMob)
+					+ calculatePercentage(frontAttackB, maxFA) * 1.5 + 2 * calculatePercentage(backAttackB, maxBA))
+					- (calculatePercentage(materialR(dc), maxMat) + calculatePercentage(mobilityR, maxMob)
+							+ calculatePercentage(frontAttackR, maxFA) + 1.2 * calculatePercentage(backAttackR, maxBA));
 		}
 //		System.out.println("evalB_____mobR="+mobilityR+" fronR= "+frontAttackR+" backR= "+ backAttackR+"\n"+"mobB="+mobilityB+" fronB= "+frontAttackB+" backB= "+ backAttackB+"\n");
 		return (int) Math.round(eval);
@@ -173,7 +183,8 @@ public class BBEvaluator3 implements HeuristicInterface {
 	}
 
 	public double calculatePercentage(double obtained, double total) {
-		if(obtained == 0)return 0;
-        return obtained * 100 / total;
-    }
+		if (obtained == 0)
+			return 0;
+		return obtained * 100 / total;
+	}
 }

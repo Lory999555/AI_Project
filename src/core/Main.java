@@ -1,6 +1,8 @@
 package core;
 
 import java.awt.print.PrinterException;
+import java.io.FileNotFoundException;
+import java.io.PrintStream;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -28,6 +30,7 @@ public class Main {
 	private static HeuristicInterface hi;
 	private static HeuristicInterface hi2;
 	private static HeuristicInterface hi3;
+	private static HeuristicInterface hi4;
 	private static AlgorithmInterface ai_R;
 	private static AlgorithmInterface ai_B;
 
@@ -42,42 +45,62 @@ public class Main {
 	public static void main(String[] args) throws InvalidActionException, CloneNotSupportedException, PrinterException {
 		boolean server = true;
 		LAVORAMU();
+		
+		PrintStream fileOut;
+		
+		//serve per creare un log e non perdere nessuna info.
+		//il file deve già esistere senno probabilmente da errore!
+//		try {
+//			fileOut = new PrintStream("C:/Users/loren/Desktop/out.txt");
+//			System.setOut(fileOut);
+//		} catch (FileNotFoundException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+		
 
 		// potrei dividere l'euristica in modo da evitare di splittare gli algoritmi.
 		hi = new BBEvaluator();
 		hi2 = new BBEvaluator2();
 		hi3 = new BBEvaluator3();
 		
-		ai_R = new ABAgent(hi3, false, 30);
-		ai_B = new ABAgent(hi3, true, 30);
+
+		ai_B = new ABWMAgent(hi3, true, 4, 15);
+		ai_R = new ABAgent(hi3, false, 4, 15);
 
 		state = new DipoleConf();
-
-		//localPlay();
+		long time;
+		// localPlay();
 
 		if (server) {
 			startServer();
 		} else {
 
 			while (state.getStatus() == Status.Ongoing) {
-				System.out.println("\n\n---------------------------------------------------------------");
+				System.out.println("\n\n---------------------------RED------------------------------------");
 				System.out.println(state);
-				System.out.println("---------------------------------------------------------------\n\n");
-
+				System.out.println("----------------------------------RED-----------------------------\n\n");
+				
+				time=System.currentTimeMillis();
 				move_R = ai_R.compute(state);
-				System.out.println("\n\n---------------------------------------------------------------");
+				System.out.println(System.currentTimeMillis()-time);
+				
+				System.out.println("\n\n-----------------------------RED----------------------------------");
 				System.out.println(move_R);
-				System.out.println("---------------------------------------------------------------\n\n");
+				System.out.println("----------------------------------RED-----------------------------\n\n");
 
 				state = move_R.applyTo(state);
-				System.out.println("\n\n---------------------------------------------------------------");
+				System.out.println("\n\n------------------------------BLACK---------------------------------");
 				System.out.println(state);
-				System.out.println("---------------------------------------------------------------\n\n");
+				System.out.println("------------------------------------BLACK---------------------------\n\n");
 
+				time=System.currentTimeMillis();
 				move_B = ai_B.compute(state);
-				System.out.println("\n\n---------------------------------------------------------------");
+				System.out.println(System.currentTimeMillis()-time);
+
+				System.out.println("\n\n---------------------------------BLACK------------------------------");
 				System.out.println(move_B);
-				System.out.println("---------------------------------------------------------------\n\n");
+				System.out.println("---------------------------------------BLACK------------------------\n\n");
 
 				state = move_B.applyTo(state);
 
@@ -95,8 +118,6 @@ public class Main {
 			 * 
 			 * 
 			 */
-
-
 
 		}
 
@@ -117,12 +138,12 @@ public class Main {
 			if (blackPlayer) {
 				System.out.println(state.toString());
 
-				String mossa="a";
+				String mossa = "a";
 				Matcher m = p.matcher(mossa);
-				while(!m.matches()) {
+				while (!m.matches()) {
 					System.out.println("Inserisci mossa (ES:  H5,N,2)");
 					mossa = scan.nextLine();
-					m= p.matcher(mossa);
+					m = p.matcher(mossa);
 				}
 				move_B = cm.unpackingLocal(mossa, state);
 				System.out.println(move_B.toString());
@@ -142,13 +163,12 @@ public class Main {
 
 				System.out.println(state.toString());
 
-
-				String mossa="a";
+				String mossa = "a";
 				Matcher m = p.matcher(mossa);
-				while(!m.matches()) {
+				while (!m.matches()) {
 					System.out.println("Inserisci mossa (ES:  H5,N,2)");
 					mossa = scan.nextLine();
-					m= p.matcher(mossa);
+					m = p.matcher(mossa);
 				}
 
 				move_R = cm.unpackingLocal(mossa, state);
@@ -177,19 +197,27 @@ public class Main {
 					}
 				}
 
-				if (sr.getStatus().equals("YOUR_TURN")) {
+				else if (sr.getStatus().equals("YOUR_TURN")) {
 					if (Main.blackPlayer) {
 						move_B = ai_B.compute(state);
 						state = move_B.applyTo(state);
 						System.out.println(cm.generatePacket(move_B));
+						System.out.println(ai_B.getClass());
 						sr.setMove(cm.generatePacket(move_B));
 					} else {
 						move_R = ai_R.compute(state);
 						state = move_R.applyTo(state);
 						System.out.println(cm.generatePacket(move_R));
+						System.out.println(ai_R.getClass());
 						sr.setMove(cm.generatePacket(move_R));
 					}
 
+				}else if(sr.getStatus().equals("DEFEAT")) {
+					System.out.println("RIP!");
+					break;
+				}else if(sr.getStatus().equals("VICTORY")) {
+					System.out.println("SIUUUUUUUUUUUU");
+					break;
 				}
 
 				srSem.release();

@@ -1,16 +1,14 @@
 package algorithms;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
 
+
+import algorithms.ABWMAgent.Ply;
 import heuristics.HeuristicInterface;
 import representation.Conf;
 import representation.Move;
 import representation.TimeOutException;
-//import sun.awt.Symbol;
 import representation.Conf.Status;
-import representation.InvalidActionException;
+
 
 /**
  * Basic Alpha-Beta Pruning search for Mancala
@@ -23,16 +21,21 @@ public class ABAgent implements AlgorithmInterface {
 	private int evaluatednodes = 0;
 	private boolean ibreak;
 	private int maxDepth;
+	private int startDepth;
+	
 	private HeuristicInterface hi;
 	private boolean blackPlayer;
 	private long searchCutoff;
+	private int evaluatednodesold;
+	private int searchednodesold;
 	private static long MAX_RUN_TIME = 1000; // maximum runtime in milliseconds
 
 	static enum Ply {
 		MAX, MIN
 	};
 
-	public ABAgent(HeuristicInterface hi, boolean blackPlayer, int maxDepth) {
+	public ABAgent(HeuristicInterface hi, boolean blackPlayer , int startDepth, int maxDepth) {
+		this.startDepth=startDepth;
 		this.maxDepth = maxDepth;
 		this.hi = hi;
 		this.blackPlayer = blackPlayer;
@@ -164,13 +167,17 @@ public class ABAgent implements AlgorithmInterface {
 		this.ibreak = false;
 		this.evaluatednodes = 0;
 		this.searchednodes = 0;
+		this.evaluatednodesold = 0;
+		this.searchednodesold = 0;
 		int alpha = Integer.MIN_VALUE;
 		int beta = Integer.MAX_VALUE;
 		MoveValue newBest = null;
 		MoveValue oldBest = null;
 		this.searchCutoff = System.currentTimeMillis() + MAX_RUN_TIME;
-		int d = 4;
-		while (!timeUp() && d < maxDepth) {
+		int d = startDepth;
+		while (!timeUp() && d <= maxDepth) {
+			evaluatednodes = 0;
+			searchednodes = 0;
 			oldBest = newBest;
 			if (!this.blackPlayer)
 				newBest = alphaBeta_R(conf, null, alpha, beta, d, Ply.MAX);
@@ -178,15 +185,27 @@ public class ABAgent implements AlgorithmInterface {
 				newBest = alphaBeta_B(conf, null, alpha, beta, d, Ply.MAX);
 			d++;
 
+			if (!this.ibreak) {
+				evaluatednodesold = evaluatednodes;
+				searchednodesold = searchednodes;
+			}
+
 		}
 
-		System.out
-				.println("\nEvaluatedNodes: " + evaluatednodes + "\nSearchedNodes :" + searchednodes + "\ndepth :" + d);
 
-		if (this.ibreak)
+		
+
+		if (this.ibreak) {
+			System.out
+			.println("\nEvaluatedNodes: " + evaluatednodesold + "\nSearchedNodes :" + searchednodesold + "\ndepth :" + (d-2));
 			return oldBest.move;
-		else
+		}
+		else {
+			System.out
+			.println("\nEvaluatedNodes: " + evaluatednodes + "\nSearchedNodes :" + searchednodes + "\ndepth :" + (d--));
 			return newBest.move;
+
+		}
 
 	}
 

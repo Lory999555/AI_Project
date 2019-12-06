@@ -32,7 +32,7 @@ public class SenderReceiver extends Thread {
 		try {
 			addr = InetAddress.getLocalHost();
 			// creazione socket
-			socket = new Socket(addr, 8080);
+			socket = new Socket(addr, 51111);
 			// creazione stream di input da socket
 			InputStreamReader isr = new InputStreamReader(socket.getInputStream());
 			in = new BufferedReader(isr);
