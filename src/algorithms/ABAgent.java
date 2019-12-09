@@ -42,9 +42,7 @@ public class ABAgent implements AlgorithmInterface {
 
 	}
 
-	private MoveValue alphaBeta_R(Conf conf, Move move, int alpha, int beta, int depth, Ply step)
-			throws TimeOutException {
-
+	private MoveValue alphaBeta_R(Conf conf, Move move, int alpha, int beta, int depth, Ply step) {
 		searchednodes++;
 		Move bestMove = null;
 		MoveValue searchResult = null;

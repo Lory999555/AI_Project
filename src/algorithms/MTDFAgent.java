@@ -1,12 +1,14 @@
 package algorithms;
 
 import java.util.Map;
+import java.util.Random;
 
 import core.Main;
 import heuristics.HeuristicInterface;
 import memory.TranspositionTable;
 import memory.ZobristGen;
 import representation.Move;
+import representation.Board;
 import representation.Conf;
 import representation.Conf.Status;
 import representation.InvalidActionException;
@@ -37,89 +39,137 @@ public class MTDFAgent implements AlgorithmInterface {
 	// for testing purpose
 	private int searchednodes = 0;
 	private int evaluatednodes = 0;
+	private int searchednodesold;
+	private int evaluatednodesold;
 	private int maxDepth;
+	private int startDepth;
 
-	private static int MAX_RECORD = 5000;
+	private static int MAX_RECORD = 20000;
 	private static long MAX_RUN_TIME = 1000; // maximum runtime in milliseconds
 
 	// private HashMap<Long, TransEntry> transTable;
-	private Map<Long, TransEntry> transpositionTable;
+	private Map<Long, TransEntry> transTable;
 	private long searchCutoff;
-	private ZobristGen zg;
-	private HeuristicInterface h;
+	private long[][] zobristTable;
+	private HeuristicInterface hi;
 	private boolean blackPlayer;
-	private ArrayList equalValueMoves;
+	private boolean ibreak = false;
 
-	public MTDFAgent(HeuristicInterface h, boolean blackPlayer, int maxDepth) {
-
+	public MTDFAgent(HeuristicInterface hi, boolean blackPlayer, int startDepth, int maxDepth) {
+		this.startDepth = startDepth;
 		this.maxDepth = maxDepth;
-		// init zobrist table
-		zg = new ZobristGen();
-
-		// init transposition table
-		// transTable = new HashMap<Long, TransEntry>();
-		transpositionTable = new TranspositionTable<Long, TransEntry>(MAX_RECORD);
-
-		// init heuristic function
-		this.h = h;
-
+		this.hi = hi;
 		this.blackPlayer = blackPlayer;
+
+		Random prng = new Random();
+		zobristTable = new long[64][12];
+		for (int i = 0; i < 64; i++) {
+			for (int j = 0; j < 12; j++) {
+				zobristTable[i][j] = prng.nextLong();
+			}
+		}
+
+		transTable = new TranspositionTable<Long, TransEntry>(MAX_RECORD);
+
 	}
 
 	private boolean timeUp() {
 		if (java.lang.management.ManagementFactory.getRuntimeMXBean().getInputArguments().toString()
 				.indexOf("-agentlib:jdwp") > 0)
 			return false;
-		return (new Date().getTime() > searchCutoff - 30);
+		return (System.currentTimeMillis() > searchCutoff - 30);
 	}
 
-	private boolean check(long hash) {
+	private long zobristHash(long[] pieces) {
+		long key = 0;
+		int i = 0;
+		long tmp, bit;
+		while (i < 12) {
 
-		return transpositionTable.containsKey(hash);
+			tmp = pieces[i];
+			while (tmp != 0) {
+				bit = tmp & -tmp;
+				tmp ^= bit;
+				key ^= zobristTable[Board.getSquare(bit)][i];
+			}
 
+			i++;
+		}
+		return key;
 	}
 
 	public Move compute(Conf root) {
 		this.evaluatednodes = 0;
 		this.searchednodes = 0;
-		int depth = 1;
+		this.evaluatednodesold = 0;
+		this.searchednodesold = 0;
+		this.ibreak = false;
+		int depth = startDepth;
 		int guess = 0;
-		MoveValue best = null;
+		MoveValue newBest = null;
+		MoveValue oldBest = null;
 
-		// ChildMove state;
-
-		// The search must be initialised with an invalid "parent" move to avoid
-		// premature transposition table association
-		// state = new ChildMove(board);
 		if (this.blackPlayer) {
 
-			this.searchCutoff = new Date().getTime() + MAX_RUN_TIME;
-//		best = MTDF(root, guess, depth);
-			while (!timeUp() && (depth < maxDepth)) /** || debug < debug_max */
-			{
-				++depth;
-				best = MTDF_B(root, guess, depth);
-				guess = best.value;
+			this.searchCutoff = System.currentTimeMillis() + MAX_RUN_TIME;
+			while (!timeUp() && (depth < maxDepth)) {
+				evaluatednodes = 0;
+				searchednodes = 0;
+				oldBest = newBest;
+				newBest = MTDF_B(root, guess, depth);
+
+				if (!this.ibreak) {
+					evaluatednodesold = evaluatednodes;
+					searchednodesold = searchednodes;
+					guess = newBest.value;
+					++depth;
+				} else {
+					break;
+				}
+
 			}
-			System.out.println("\nEvaluatedNodes: " + evaluatednodes + "\nSearchedNodes :" + searchednodes);
-			System.out
-					.println("\n FINAL depth: -------------- " + depth + " --------------- MOVE : " + best.move + "\n");
-			return best.move;
+
+			if (this.ibreak) {
+				System.out.println("\nEvaluatedNodes: " + evaluatednodesold + "\nSearchedNodes :" + searchednodesold
+						+ "\ndepth :" + (depth - 2));
+				return oldBest.move;
+			} else {
+				System.out.println("\nEvaluatedNodes: " + evaluatednodes + "\nSearchedNodes :" + searchednodes
+						+ "\ndepth :" + (depth--));
+				return newBest.move;
+
+			}
 
 		} else {
-			this.searchCutoff = new Date().getTime() + MAX_RUN_TIME;
-			while (!timeUp() && (depth < maxDepth) /** || debug < debug_max */
-			) {
-				++depth;
-				best = MTDF_R(root, guess, depth);
-				guess = best.value;
+
+			this.searchCutoff = System.currentTimeMillis() + MAX_RUN_TIME;
+			while (!timeUp() && (depth < maxDepth)) {
+				evaluatednodes = 0;
+				searchednodes = 0;
+				oldBest = newBest;
+				newBest = MTDF_R(root, guess, depth);
+
+				if (!this.ibreak) {
+					evaluatednodesold = evaluatednodes;
+					searchednodesold = searchednodes;
+					guess = newBest.value;
+					++depth;
+				} else {
+					break;
+				}
 
 			}
-			assert (best.move != null);
-			System.out.println("\nEvaluatedNodes: " + evaluatednodes + "\nSearchedNodes :" + searchednodes);
-			System.out
-					.println("\n FINAL depth: -------------- " + depth + " --------------- MOVE : " + best.move + "\n");
-			return best.move;
+
+			if (this.ibreak) {
+				System.out.println("\nEvaluatedNodes: " + evaluatednodesold + "\nSearchedNodes :" + searchednodesold
+						+ "\ndepth :" + (depth - 2));
+				return oldBest.move;
+			} else {
+				System.out.println("\nEvaluatedNodes: " + evaluatednodes + "\nSearchedNodes :" + searchednodes
+						+ "\ndepth :" + (depth--));
+				return newBest.move;
+
+			}
 		}
 	}
 
@@ -138,16 +188,22 @@ public class MTDFAgent implements AlgorithmInterface {
 		value = f;
 		upperbound = Integer.MAX_VALUE;
 		lowerbound = Integer.MIN_VALUE;
-		do {
+		beta = Math.max(value, lowerbound + 1);
+		mv = alphaBetaWithMemory_R(state, null, beta - 1, beta, depth, Ply.MAX);
+		while ((lowerbound < upperbound) && !this.ibreak) {
 			beta = Math.max(value, lowerbound + 1);
 			mv = alphaBetaWithMemory_R(state, mv.move, beta - 1, beta, depth, Ply.MAX);
+
+			if (mv == null)
+				return null;
+
 			value = mv.value;
 			if (value < beta) {
 				upperbound = value;
 			} else {
 				lowerbound = value;
 			}
-		} while ((lowerbound < upperbound) && !timeUp());
+		}
 
 		return mv;
 
@@ -160,16 +216,23 @@ public class MTDFAgent implements AlgorithmInterface {
 		value = f;
 		upperbound = Integer.MAX_VALUE;
 		lowerbound = Integer.MIN_VALUE;
-		do {
+		beta = Math.max(value, lowerbound + 1);
+		mv = alphaBetaWithMemory_B(state, null, beta - 1, beta, depth, Ply.MAX);
+		while ((lowerbound < upperbound) && !this.ibreak) {
 			beta = Math.max(value, lowerbound + 1);
 			mv = alphaBetaWithMemory_B(state, mv.move, beta - 1, beta, depth, Ply.MAX);
+
+			if (mv == null)
+				return null;
+
 			value = mv.value;
 			if (value < beta) {
 				upperbound = value;
 			} else {
 				lowerbound = value;
 			}
-		} while ((lowerbound < upperbound) && !timeUp());
+		}
+		
 
 		return mv;
 
@@ -185,86 +248,86 @@ public class MTDFAgent implements AlgorithmInterface {
 	 * @param step  the current minimax step
 	 * @return the move corresponding to the minimax value
 	 */
-	private MoveValue alphaBetaWithMemory_R(Conf conf, Move prec, int alpha, int beta, int depth, Ply step) {
+	private MoveValue alphaBetaWithMemory_R(Conf conf, Move move, int alpha, int beta, int depth, Ply step) {
 		searchednodes++;
-		int a, b, value = 0;
-		Move bestMove = null;
-		MoveValue searchResult;
-//		NodeInfo trans;
-		Conf tmp = null;
-//		long hash = zg.zobristHash(conf.getForHash());
 
-		// base case
-		if ((depth == 0) || timeUp()) {
-			evaluatednodes++;
-//			System.out.println(
-//					"valuto: " + prec + " || valore =" + h.evaluate_R(conf) + "\n configurazione: \n" + conf + "\n");
-			return new MoveValue(prec, h.evaluate_R(conf));
-		} else if (conf.getStatus() == Status.BlackWon) {
-			evaluatednodes++;
-			return new MoveValue(prec, -5000);
-
-		} else if (conf.getStatus() == Status.RedWon) {
-			evaluatednodes++;
-			return new MoveValue(prec, 5000);
+		if (timeUp()) {
+			this.ibreak = true;
+			return null;
 		}
 
+		TransEntry trans;
+		long hash = zobristHash(conf.getForHash());
+
 		// trans table lookup
-		if (validEntry(move, hash)) {
+		if (transTable.containsKey(hash)) {
 			trans = transTable.get(hash);
 			if (trans.depth >= depth) {
 				if (trans.lowerbound >= beta) {
-					return new MoveScore(move.move, trans.lowerbound);
+					return new MoveValue(move, trans.lowerbound);
 				}
 				if (trans.upperbound <= alpha) {
-					return new MoveScore(move.move, trans.upperbound);
+					return new MoveValue(move, trans.upperbound);
 				}
 				alpha = Math.max(alpha, trans.lowerbound);
 				beta = Math.min(beta, trans.upperbound);
 			}
 		}
 
+		int a, b, value = 0;
+		Move bestMove = null;
+		MoveValue searchResult;
+
+		// base case
+		if ((depth == 0)) {
+			evaluatednodes++;
+			return new MoveValue(move, hi.evaluate_R(conf));
+		} else if (conf.getStatus() == Status.BlackWon) {
+			evaluatednodes++;
+			return new MoveValue(move, -5000);
+
+		} else if (conf.getStatus() == Status.RedWon) {
+			evaluatednodes++;
+			return new MoveValue(move, 5000);
+		}
+
 		// recursive
 		if (step == Ply.MAX) { // max step
 			value = Integer.MIN_VALUE;
 			a = alpha; // save original alpha
-			// for (ChildMove child : children(move, Ply.MAX, false)) {
-			for (Move childm : conf.getActions()) {
-				tmp = childm.applyTo(conf); // MI DA ERRORE PERCHè NON C'è L'APPLY TO
-				// System.out.println("analizzo la mossa: "+ childm+" || tmp: \n"+tmp+"\n");
-
-			}
-
+			for (Move childmv : conf.getActions()) {
 //				spesso potrebbero esserci mosse con ugual valore e vengono sovrascritte, si 
 //				potrebbe implementare una sorta di randomizzazzione mettendole in una lista.
 //				avevo pensato di fare un arrayList (serve na struttura che abbia accesso (per prendere
 //				la mossa con un indice random), aggiunta in coda e clear/reset che siano costanti per far ciò
 
-			searchResult = alphaBetaWithMemory_R(tmp, childm, a, beta, depth - 1, Ply.MIN);
-			if (searchResult.value > value) {
-				value = searchResult.value;
-				bestMove = childm;
+				searchResult = alphaBetaWithMemory_R(childmv.applyTo(conf), childmv, a, beta, depth - 1, Ply.MIN);
+
+				if (searchResult == null)
+					return null;
+
+				if (searchResult.value > value) {
+					value = searchResult.value;
+					bestMove = childmv;
+				}
+				a = Math.max(a, value);
+				if (alpha >= beta)
+					break; // prune
 			}
-			a = Math.max(a, value);
-			if (alpha >= beta)
-				break; // prune
 
-		} else
-
-		{ // min step
+		} else { // min step
 			value = Integer.MAX_VALUE;
 			b = beta; // save original beta
-//			Move childm;
-//			LinkedList<Move> tmpList = (LinkedList<Move>) conf.getActions();
-//			while(!tmpList.isEmpty()) {
-			for (Move childm : conf.getActions()) {
-//				childm = tmpList.pop();
-				tmp = childm.applyTo(conf);
+			for (Move childmv : conf.getActions()) {
 
-				searchResult = alphaBetaWithMemory_R(tmp, childm, alpha, b, depth - 1, Ply.MAX);
+				searchResult = alphaBetaWithMemory_R(childmv.applyTo(conf), childmv, alpha, b, depth - 1, Ply.MAX);
+
+				if (searchResult == null)
+					return null;
+
 				if (searchResult.value < value) {
 					value = searchResult.value;
-					bestMove = childm;
+					bestMove = childmv;
 				}
 				b = Math.min(b, value);
 				if (alpha >= beta)
@@ -275,11 +338,7 @@ public class MTDFAgent implements AlgorithmInterface {
 
 //		
 		// store trans table values
-		if (transpositionTable.containsKey(hash)) { // no getOrDefault in Java 1.5
-			trans = transpositionTable.get(hash);
-		} else {
-			trans = new NodeInfo();
-		}
+		trans = transTable.getOrDefault(hash, new TransEntry());
 
 		if (trans.depth <= depth) {
 			// fail low implies an upper bound
@@ -296,95 +355,103 @@ public class MTDFAgent implements AlgorithmInterface {
 				trans.upperbound = value;
 			}
 			trans.depth = depth;
-			transpositionTable.put(hash, trans);
-			//System.out.println("metto nella tt: "+hash+"\n"+conf);
+			transTable.put(hash, trans);
 		}
 
 		return new MoveValue(bestMove, value);
 	}
 
-	private MoveValue alphaBetaWithMemory_B(Conf conf, Move prec, int alpha, int beta, int depth, Ply step) {
+	private MoveValue alphaBetaWithMemory_B(Conf conf, Move move, int alpha, int beta, int depth, Ply step) {
 		searchednodes++;
-		int a, b, value = 0;
-		Move bestMove = null;
-		MoveValue searchResult;
-//		NodeInfo trans;
-		Conf tmp = null;
-//		long hash = zg.zobristHash(conf.getForHash());
 
-		// base case
-		if ((depth == 0) || timeUp()) {
-			evaluatednodes++;
-//			System.out.println(
-//					"valuto: " + prec + " || valore =" + h.evaluate_B(conf) + "\nconfigurazione: \n" + conf + "\n");
-			return new MoveValue(prec, h.evaluate_B(conf));
-		} else if (conf.getStatus() == Status.BlackWon) {
-			evaluatednodes++;
-			return new MoveValue(prec, +5000);
-
-		} else if (conf.getStatus() == Status.RedWon) {
-			evaluatednodes++;
-			return new MoveValue(prec, -5000);
+		if (timeUp()) {
+			this.ibreak = true;
+			return null;
 		}
-		
-		if (validEntry(move, hash)) {
+
+		TransEntry trans;
+		long hash = zobristHash(conf.getForHash());
+
+		// trans table lookup
+		if (transTable.containsKey(hash)) {
 			trans = transTable.get(hash);
 			if (trans.depth >= depth) {
 				if (trans.lowerbound >= beta) {
-					return new MoveScore(move.move, trans.lowerbound);
+					return new MoveValue(move, trans.lowerbound);
 				}
 				if (trans.upperbound <= alpha) {
-					return new MoveScore(move.move, trans.upperbound);
+					return new MoveValue(move, trans.upperbound);
 				}
 				alpha = Math.max(alpha, trans.lowerbound);
 				beta = Math.min(beta, trans.upperbound);
 			}
 		}
 
-		
+		int a, b, value = 0;
+		Move bestMove = null;
+		MoveValue searchResult;
+
+		// base case
+		if ((depth == 0)) {
+			evaluatednodes++;
+			return new MoveValue(move, hi.evaluate_B(conf));
+		} else if (conf.getStatus() == Status.BlackWon) {
+			evaluatednodes++;
+			return new MoveValue(move, 5000);
+
+		} else if (conf.getStatus() == Status.RedWon) {
+			evaluatednodes++;
+			return new MoveValue(move, -5000);
+		}
+
+		// recursive
 		if (step == Ply.MAX) { // max step
 			value = Integer.MIN_VALUE;
 			a = alpha; // save original alpha
-		
-			for (Move childm : ((LinkedList<Move>) conf.getActions())) {
-					tmp = childm.applyTo(conf); // MI DA ERRORE PERCHè NON C'è L'APPLY TO
+			for (Move childmv : conf.getActions()) {
+//				spesso potrebbero esserci mosse con ugual valore e vengono sovrascritte, si 
+//				potrebbe implementare una sorta di randomizzazzione mettendole in una lista.
+//				avevo pensato di fare un arrayList (serve na struttura che abbia accesso (per prendere
+//				la mossa con un indice random), aggiunta in coda e clear/reset che siano costanti per far ciò
 
-				
-				searchResult = alphaBetaWithMemory_B(tmp, childm, a, beta, depth - 1, Ply.MIN);
+				searchResult = alphaBetaWithMemory_B(childmv.applyTo(conf), childmv, a, beta, depth - 1, Ply.MIN);
+
+				if (searchResult == null)
+					return null;
+
 				if (searchResult.value > value) {
 					value = searchResult.value;
-					bestMove = childm;
+					bestMove = childmv;
 				}
 				a = Math.max(a, value);
 				if (alpha >= beta)
 					break; // prune
 			}
-			// dovrebbe preoccuparsene il garbage collector
-//			tmpList=null;
+
 		} else { // min step
 			value = Integer.MAX_VALUE;
 			b = beta; // save original beta
-			for (Move childm : conf.getActions()) {
-					tmp = childm.applyTo(conf);
-				
-				searchResult = alphaBetaWithMemory_B(tmp, childm, alpha, b, depth - 1, Ply.MAX);
+			for (Move childmv : conf.getActions()) {
+
+				searchResult = alphaBetaWithMemory_B(childmv.applyTo(conf), childmv, alpha, b, depth - 1, Ply.MAX);
+
+				if (searchResult == null)
+					return null;
+
 				if (searchResult.value < value) {
 					value = searchResult.value;
-					bestMove = childm;
+					bestMove = childmv;
 				}
 				b = Math.min(b, value);
 				if (alpha >= beta)
 					break; // prune
 			}
+//			tmpList = null;
 		}
 
 //		
 		// store trans table values
-		if (transpositionTable.containsKey(hash)) { // no getOrDefault in Java 1.5
-			trans = transpositionTable.get(hash);
-		} else {
-			trans = new NodeInfo();
-		}
+		trans = transTable.getOrDefault(hash, new TransEntry());
 
 		if (trans.depth <= depth) {
 			// fail low implies an upper bound
@@ -401,8 +468,7 @@ public class MTDFAgent implements AlgorithmInterface {
 				trans.upperbound = value;
 			}
 			trans.depth = depth;
-			transpositionTable.put(hash, trans);
-			//System.out.println("metto nella tt: "+hash+"\n"+conf);
+			transTable.put(hash, trans);
 		}
 
 		return new MoveValue(bestMove, value);

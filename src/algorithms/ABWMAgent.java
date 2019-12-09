@@ -36,6 +36,8 @@ public class ABWMAgent implements AlgorithmInterface {
 
 	private int searchednodes = 0;
 	private int evaluatednodes = 0;
+	private int searchednodesold;
+	private int evaluatednodesold;
 	private int maxDepth;
 	private int startDepth;
 
@@ -47,8 +49,7 @@ public class ABWMAgent implements AlgorithmInterface {
 	private TranspositionTable<Long, TransEntry> transTable;
 	private long[][] zobristTable;
 	private boolean ibreak = false;
-	private int searchednodesold;
-	private int evaluatednodesold;
+	
 
 	public ABWMAgent(HeuristicInterface hi, boolean blackPlayer, int startDepth, int maxDepth) {
 		// init zobrist table
@@ -335,6 +336,12 @@ public class ABWMAgent implements AlgorithmInterface {
 
 		}
 
+		
+		//controllare se è possibile togliere le cose per le versioni non old perchè
+		//forse non vengono mai usate in realtà!
+		
+		//vedere se è possibile tolgiere la maggior parte dei metodi timesUp andandoli
+		//a sostituire con il check di this.ibreak
 		if (this.ibreak) {
 			System.out.println("\nEvaluatedNodes: " + evaluatednodesold + "\nSearchedNodes :" + searchednodesold
 					+ "\ndepth :" + (d - 2));

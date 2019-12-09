@@ -68,8 +68,10 @@ public class Main {
 		hi5 = new BBEvaluator5();
 		
 
-		ai_B = new ABWMAgent(hi3, true, 4, 15);
-		ai_R = new ABAgent(hi3, false, 4, 15);
+		ai_B = new ABAgent(hi3, true, 5, 5);
+		
+		//true perchè è maximazer
+		ai_R = new NMWMAgent(hi3, true, 5);
 
 		state = new DipoleConf();
 		long time;
@@ -80,9 +82,9 @@ public class Main {
 		} else {
 
 			while (state.getStatus() == Status.Ongoing) {
-				System.out.println("\n\n---------------------------RED------------------------------------");
+				System.out.println("\n\n---------------------------------------------------------------");
 				System.out.println(state);
-				System.out.println("----------------------------------RED-----------------------------\n\n");
+				System.out.println("---------------------------------------------------------------\n\n");
 				
 				time=System.currentTimeMillis();
 				move_R = ai_R.compute(state);
@@ -93,9 +95,9 @@ public class Main {
 				System.out.println("----------------------------------RED-----------------------------\n\n");
 
 				state = move_R.applyTo(state);
-				System.out.println("\n\n------------------------------BLACK---------------------------------");
+				System.out.println("\n\n---------------------------------------------------------------");
 				System.out.println(state);
-				System.out.println("------------------------------------BLACK---------------------------\n\n");
+				System.out.println("---------------------------------------------------------------\n\n");
 
 				time=System.currentTimeMillis();
 				move_B = ai_B.compute(state);
