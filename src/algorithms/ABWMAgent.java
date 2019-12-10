@@ -1,17 +1,15 @@
 package algorithms;
 
 import java.util.HashMap;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
+
 import java.util.Random;
 
 import heuristics.HeuristicInterface;
+import memory.TranspositionTable;
 import representation.Board;
 import representation.Conf;
 import representation.Move;
 import representation.Conf.Status;
-import representation.InvalidActionException;
 
 /**
  * Alpha-Beta Pruning search with memory for Mancala
@@ -38,20 +36,25 @@ public class ABWMAgent implements AlgorithmInterface {
 
 	private int searchednodes = 0;
 	private int evaluatednodes = 0;
+	private int searchednodesold;
+	private int evaluatednodesold;
 	private int maxDepth;
+	private int startDepth;
 
 	private HeuristicInterface hi;
 	private boolean blackPlayer;
 	private long searchCutoff;
 	private static long MAX_RUN_TIME = 1000; // maximum runtime in milliseconds
 
-	private HashMap<Long, TransEntry> transTable;
+	private TranspositionTable<Long, TransEntry> transTable;
 	private long[][] zobristTable;
 	private boolean ibreak = false;
+	
 
-	public ABWMAgent(HeuristicInterface hi, boolean blackPlayer, int maxDepth) {
+	public ABWMAgent(HeuristicInterface hi, boolean blackPlayer, int startDepth, int maxDepth) {
 		// init zobrist table
 		this.maxDepth = maxDepth;
+		this.startDepth = startDepth;
 		this.hi = hi;
 		this.blackPlayer = blackPlayer;
 		Random prng = new Random();
@@ -63,7 +66,7 @@ public class ABWMAgent implements AlgorithmInterface {
 		}
 
 		// init transposition table
-		transTable = new HashMap<Long, TransEntry>();
+		transTable = new TranspositionTable<Long, TransEntry>(20000);
 	}
 
 	private long zobristHash(long[] pieces) {
@@ -88,6 +91,11 @@ public class ABWMAgent implements AlgorithmInterface {
 
 		searchednodes++;
 
+		if (timeUp()) {
+			this.ibreak = true;
+			return null;
+		}
+
 		TransEntry trans;
 		long hash = zobristHash(conf.getForHash());
 
@@ -96,9 +104,11 @@ public class ABWMAgent implements AlgorithmInterface {
 			trans = transTable.get(hash);
 			if (trans.depth >= depth) {
 				if (trans.lowerbound >= beta) {
+					evaluatednodes++;
 					return new MoveValue(move, trans.lowerbound);
 				}
 				if (trans.upperbound <= alpha) {
+					evaluatednodes++;
 					return new MoveValue(move, trans.upperbound);
 				}
 				alpha = Math.max(alpha, trans.lowerbound);
@@ -110,82 +120,77 @@ public class ABWMAgent implements AlgorithmInterface {
 		MoveValue searchResult = null;
 		int value;
 
-		if (timeUp()) {
-			this.ibreak = true;
-			return null;
+		if ((depth == 0)) {
+			evaluatednodes++;
+			return new MoveValue(move, hi.evaluate_R(conf));
+		} else if (conf.getStatus() == Status.BlackWon) {
+			evaluatednodes++;
+			return new MoveValue(move, -5000);
 		}
 
-			if ((depth == 0)) {
-				evaluatednodes++;
-				return new MoveValue(move, hi.evaluate_R(conf));
-			} else if (conf.getStatus() == Status.BlackWon) {
-				evaluatednodes++;
-				return new MoveValue(move, -5000);
+		} else if (conf.getStatus() == Status.RedWon) {
+			evaluatednodes++;
+			return new MoveValue(move, 5000);
+		}
 
-			} else if (conf.getStatus() == Status.RedWon) {
-				evaluatednodes++;
-				return new MoveValue(move, 5000);
+		// recursive
+		if (step == Ply.MAX) { // max step
+			value = Integer.MIN_VALUE;
+			for (Move childmv : conf.getActions()) {
+				searchResult = alphaBetaWithMemory_R(childmv.applyTo(conf), childmv, alpha, beta, depth - 1, Ply.MIN);
+
+				if (searchResult == null)
+					return null;
+
+				if (searchResult.value > value) {
+					value = searchResult.value;
+					bestMove = childmv;
+				}
+				alpha = Math.max(alpha, value);
+				if (alpha >= beta)
+					break; // pruning
 			}
+		} else { // min step
+			value = Integer.MAX_VALUE;
+			for (Move childmv : conf.getActions()) {
+				searchResult = alphaBetaWithMemory_R(childmv.applyTo(conf), childmv, alpha, beta, depth - 1, Ply.MAX);
 
-			// recursive
-			if (step == Ply.MAX) { // max step
-				value = Integer.MIN_VALUE;
-				for (Move childmv : conf.getActions()) {
-					searchResult = alphaBetaWithMemory_R(childmv.applyTo(conf), childmv, alpha, beta, depth - 1,
-							Ply.MIN);
+				if (searchResult == null)
+					return null;
 
-					if (searchResult == null)
-						return null;
-
-					if (searchResult.value > value) {
-						value = searchResult.value;
-						bestMove = childmv;
-					}
-					alpha = Math.max(alpha, value);
-					if (alpha >= beta)
-						break; // pruning
+				if (searchResult.value < value) {
+					value = searchResult.value;
+					bestMove = childmv;
 				}
-			} else { // min step
-				value = Integer.MAX_VALUE;
-				for (Move childmv : conf.getActions()) {
-					searchResult = alphaBetaWithMemory_R(childmv.applyTo(conf), childmv, alpha, beta, depth - 1,
-							Ply.MAX);
-
-					if (searchResult == null)
-						return null;
-
-					if (searchResult.value < value) {
-						value = searchResult.value;
-						bestMove = childmv;
-					}
-					beta = Math.min(beta, value);
-					if (alpha >= beta)
-						break;
-				}
+				beta = Math.min(beta, value);
+				if (alpha >= beta)
+					break;
 			}
+		}
 
-			// if (!strongTimeUp()) {
-			// store trans table values
-			trans = transTable.getOrDefault(hash, new TransEntry());
+		// if (!strongTimeUp()) {
+		// store trans table values
+		trans = transTable.getOrDefault(hash, new TransEntry());
 
-			if (trans.depth <= depth) {
-				// fail low implies an upper bound
-				if (value <= alpha) {
-					trans.upperbound = value;
-				}
-				// fail high implies a lower bound
-				else if (value >= beta) {
-					trans.lowerbound = value;
-				}
-				// accurate minimax value
-				else {
-					trans.lowerbound = value;
-					trans.upperbound = value;
-				}
-				trans.depth = depth;
-				transTable.put(hash, trans);
+		if (trans.depth <= depth) {
+			// fail low implies an upper bound
+			if (value <= alpha) {
+				trans.upperbound = value;
 			}
-		
+			// fail high implies a lower bound
+			else if (value >= beta) {
+				trans.lowerbound = value;
+			}
+			// accurate minimax value
+			else {
+				trans.lowerbound = value;
+				trans.upperbound = value;
+			}
+			trans.depth = depth;
+			transTable.put(hash, trans);
+		}
+
+		assert (System.currentTimeMillis() < searchCutoff);
 
 		return new MoveValue(bestMove, value);
 
@@ -195,6 +200,10 @@ public class ABWMAgent implements AlgorithmInterface {
 
 		searchednodes++;
 
+		if (timeUp()) {
+			this.ibreak = true;
+			return null;
+		}
 		TransEntry trans;
 		long hash = zobristHash(conf.getForHash());
 
@@ -203,9 +212,11 @@ public class ABWMAgent implements AlgorithmInterface {
 			trans = transTable.get(hash);
 			if (trans.depth >= depth) {
 				if (trans.lowerbound >= beta) {
+					evaluatednodes++;
 					return new MoveValue(move, trans.lowerbound);
 				}
 				if (trans.upperbound <= alpha) {
+					evaluatednodes++;
 					return new MoveValue(move, trans.upperbound);
 				}
 				alpha = Math.max(alpha, trans.lowerbound);
@@ -219,7 +230,8 @@ public class ABWMAgent implements AlgorithmInterface {
 		MoveValue searchResult = null;
 		int value;
 		// base case
-		if ((depth == 0) || timeUp()) {
+
+		if ((depth == 0)) {
 			evaluatednodes++;
 			return new MoveValue(move, hi.evaluate_B(conf));
 		} else if (conf.getStatus() == Status.BlackWon) {
@@ -237,6 +249,9 @@ public class ABWMAgent implements AlgorithmInterface {
 			for (Move childmv : conf.getActions()) {
 				searchResult = alphaBetaWithMemory_B(childmv.applyTo(conf), childmv, alpha, beta, depth - 1, Ply.MIN);
 
+				if (searchResult == null)
+					return null;
+
 				if (searchResult.value > value) {
 					value = searchResult.value;
 					bestMove = childmv;
@@ -250,6 +265,9 @@ public class ABWMAgent implements AlgorithmInterface {
 			for (Move childmv : conf.getActions()) {
 
 				searchResult = alphaBetaWithMemory_B(childmv.applyTo(conf), childmv, alpha, beta, depth - 1, Ply.MAX);
+
+				if (searchResult == null)
+					return null;
 
 				if (searchResult.value < value) {
 					value = searchResult.value;
@@ -284,34 +302,64 @@ public class ABWMAgent implements AlgorithmInterface {
 		}
 //		}
 
+		assert (System.currentTimeMillis() < searchCutoff);
+
 		return new MoveValue(bestMove, value);
 	}
 
 	public Move compute(Conf conf) {
 		this.evaluatednodes = 0;
 		this.searchednodes = 0;
+		this.evaluatednodesold = 0;
+		this.searchednodesold = 0;
+		this.ibreak = false;
 		int alpha = Integer.MIN_VALUE;
 		int beta = Integer.MAX_VALUE;
-		MoveValue best;
-		long searchCutoff_old = System.currentTimeMillis();
-		this.searchCutoff = new Date().getTime() + MAX_RUN_TIME;
-		if (!this.blackPlayer)
-			best = alphaBetaWithMemory_R(conf, null, alpha, beta, maxDepth, Ply.MAX);
-		else
-			best = alphaBetaWithMemory_B(conf, null, alpha, beta, maxDepth, Ply.MAX);
+		MoveValue newBest = null;
+		MoveValue oldBest = null;
+		this.searchCutoff = System.currentTimeMillis() + MAX_RUN_TIME;
 
-		System.out.println("\nEvaluatedNodes: " + evaluatednodes + "\nSearchedNodes :" + searchednodes);
-		System.out.println("tempo totale: " + (System.currentTimeMillis() - searchCutoff_old));
-		assert (best.move != null);
+		int d = startDepth;
+		while (!timeUp() && d <= maxDepth) {
+			evaluatednodes = 0;
+			searchednodes = 0;
+			oldBest = newBest;
+			if (!this.blackPlayer)
+				newBest = alphaBetaWithMemory_R(conf, null, alpha, beta, d, Ply.MAX);
+			else
+				newBest = alphaBetaWithMemory_B(conf, null, alpha, beta, d, Ply.MAX);
+			d++;
 
-		return best.move;
+			if (!this.ibreak) {
+				evaluatednodesold = evaluatednodes;
+				searchednodesold = searchednodes;
+			}
+
+		}
+
+		
+		//controllare se è possibile togliere le cose per le versioni non old perchè
+		//forse non vengono mai usate in realtà!
+		
+		//vedere se è possibile tolgiere la maggior parte dei metodi timesUp andandoli
+		//a sostituire con il check di this.ibreak
+		if (this.ibreak) {
+			System.out.println("\nEvaluatedNodes: " + evaluatednodesold + "\nSearchedNodes :" + searchednodesold
+					+ "\ndepth :" + (d - 2));
+			return oldBest.move;
+		} else {
+			System.out.println(
+					"\nEvaluatedNodes: " + evaluatednodes + "\nSearchedNodes :" + searchednodes + "\ndepth :" + (d--));
+			return newBest.move;
+
+		}
 	}
 
 	private boolean timeUp() {
-		if (java.lang.management.ManagementFactory.getRuntimeMXBean().getInputArguments().toString()
-				.indexOf("-agentlib:jdwp") > 0)
-			return false;
-		return (new Date().getTime() > (searchCutoff - 100));
+//		if (java.lang.management.ManagementFactory.getRuntimeMXBean().getInputArguments().toString()
+//				.indexOf("-agentlib:jdwp") > 0)
+//			return false;
+		return (System.currentTimeMillis() > searchCutoff - 30);
 	}
 
 //	private boolean strongTimeUp() {

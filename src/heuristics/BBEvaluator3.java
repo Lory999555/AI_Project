@@ -63,6 +63,12 @@ public class BBEvaluator3 implements HeuristicInterface {
 		materialB = materialB(dc);
 		double eval;
 		if (c.isBlack()) {
+<<<<<<< HEAD
+=======
+			eval = (materialB + mobilityB + frontAttackB * 1.5 + backAttackB * 2)
+					- (materialR + mobilityR + frontAttackR + backAttackR * 1.2);
+		} else {	
+>>>>>>> branch 'master' of https://github.com/Lory999555/AI-Project.git
 			eval = (materialB + mobilityB + frontAttackB + backAttackB * 1.2)
 					- (materialR + mobilityR + frontAttackR * 1.5 + backAttackR * 2);
 		} else {

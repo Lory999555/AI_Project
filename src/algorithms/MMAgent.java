@@ -1,16 +1,10 @@
 package algorithms;
 
-import java.util.HashMap;
-
 import heuristics.HeuristicInterface;
 import representation.Conf;
 import representation.Conf.Status;
-import representation.InvalidActionException;
 import representation.Move;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
 
 public class MMAgent implements AlgorithmInterface {
 
@@ -22,14 +16,17 @@ public class MMAgent implements AlgorithmInterface {
 	private int searchednodes = 0;
 	private int evaluatednodes = 0;
 	private int maxDepth;
+	private int startDepth;
 
 	private HeuristicInterface hi;
 	private boolean blackPlayer;
 	private long searchCutoff;
+	private boolean ibreak = false;
 	private static long MAX_RUN_TIME = 1000; // maximum runtime in milliseconds
 
-	public MMAgent(HeuristicInterface hi, boolean blackPlayer,int maxDepth) {
-		this.maxDepth=maxDepth;
+	public MMAgent(HeuristicInterface hi, boolean blackPlayer, int maxDepth,int startDepth) {
+		this.startDepth=startDepth;
+		this.maxDepth = maxDepth;
 		this.hi = hi;
 		this.blackPlayer = blackPlayer;
 	}
@@ -39,8 +36,12 @@ public class MMAgent implements AlgorithmInterface {
 		Move bestMove = null;
 		MoveValue searchResult = null;
 		int value;
+		if (timeUp()) {
+			this.ibreak = true;
+			return null;
+		}
 		// base case
-		if ((depth == 0) || timeUp()) {
+		else if ((depth == 0)) {
 			evaluatednodes++;
 			return new MoveValue(move, hi.evaluate_R(conf));
 		} else if (conf.getStatus() == Status.BlackWon) {
@@ -55,8 +56,11 @@ public class MMAgent implements AlgorithmInterface {
 		if (step == Ply.MAX) { // max step
 			value = Integer.MIN_VALUE;
 			for (Move childmv : conf.getActions()) {
-					searchResult = minimax_R(childmv.applyTo(conf), childmv, depth - 1, Ply.MIN);
-					
+				searchResult = minimax_R(childmv.applyTo(conf), childmv, depth - 1, Ply.MIN);
+
+				if (searchResult == null)
+					return null;	
+				
 				if (searchResult.value > value) {
 					value = searchResult.value;
 					bestMove = childmv;
@@ -65,8 +69,11 @@ public class MMAgent implements AlgorithmInterface {
 		} else { // min step
 			value = Integer.MAX_VALUE;
 			for (Move childmv : conf.getActions()) {
-					searchResult = minimax_R(childmv.applyTo(conf), childmv, depth - 1, Ply.MAX);
-					
+				searchResult = minimax_R(childmv.applyTo(conf), childmv, depth - 1, Ply.MAX);
+
+				if (searchResult == null)
+					return null;	
+				
 				if (searchResult.value < value) {
 					value = searchResult.value;
 					bestMove = childmv;
@@ -83,7 +90,11 @@ public class MMAgent implements AlgorithmInterface {
 		MoveValue searchResult = null;
 		int value;
 		// base case
-		if ((depth == 0) || timeUp()) {
+		if (timeUp()) {
+			this.ibreak = true;
+			return null;
+		}
+		else if ((depth == 0)) {
 			evaluatednodes++;
 			return new MoveValue(move, hi.evaluate_B(conf));
 		} else if (conf.getStatus() == Status.BlackWon) {
@@ -99,7 +110,10 @@ public class MMAgent implements AlgorithmInterface {
 		if (step == Ply.MAX) { // max step
 			value = Integer.MIN_VALUE;
 			for (Move childmv : conf.getActions()) {
-					searchResult = minimax_B(childmv.applyTo(conf), childmv, depth - 1, Ply.MIN);
+				searchResult = minimax_B(childmv.applyTo(conf), childmv, depth - 1, Ply.MIN);
+
+				if(searchResult==null)
+					return null;
 					
 				if (searchResult.value > value) {
 					value = searchResult.value;
@@ -109,8 +123,8 @@ public class MMAgent implements AlgorithmInterface {
 		} else { // min step
 			value = Integer.MAX_VALUE;
 			for (Move childmv : conf.getActions()) {
-					searchResult = minimax_B(childmv.applyTo(conf), childmv, depth - 1, Ply.MAX);
-					
+				searchResult = minimax_B(childmv.applyTo(conf), childmv, depth - 1, Ply.MAX);
+
 				if (searchResult.value < value) {
 					value = searchResult.value;
 					bestMove = childmv;
@@ -124,22 +138,32 @@ public class MMAgent implements AlgorithmInterface {
 	public Move compute(Conf conf) {
 		this.evaluatednodes = 0;
 		this.searchednodes = 0;
-		MoveValue best;
-		this.searchCutoff = new Date().getTime() + MAX_RUN_TIME;
-		if (!this.blackPlayer)
-			best = minimax_R(conf, null, maxDepth, Ply.MAX);
-		else
-			best = minimax_B(conf, null, maxDepth, Ply.MAX);
+		MoveValue newBest = null;
+		MoveValue oldBest = null;
+		this.searchCutoff = System.currentTimeMillis() + MAX_RUN_TIME;
 
+		int d = startDepth;
+		while (!timeUp() && d < maxDepth) {
+			oldBest = newBest;
+			if (!this.blackPlayer)
+				newBest = minimax_R(conf, null, d, Ply.MAX);
+			else
+				newBest = minimax_B(conf, null, d, Ply.MAX);
+			d++;
+
+		}
 		System.out.println("\nEvaluatedNodes: " + evaluatednodes + "\nSearchedNodes :" + searchednodes);
-		return best.move;
+		if (this.ibreak)
+			return oldBest.move;
+		else
+			return newBest.move;
 	}
 
 	private boolean timeUp() {
 		if (java.lang.management.ManagementFactory.getRuntimeMXBean().getInputArguments().toString()
 				.indexOf("-agentlib:jdwp") > 0)
 			return false;
-		return (new Date().getTime() > searchCutoff - 30);
+		return (System.currentTimeMillis() > searchCutoff - 30);
 	}
 
 }

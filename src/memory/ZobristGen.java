@@ -2,33 +2,38 @@ package memory;
 
 import java.util.Random;
 
+import representation.Board;
+
 public class ZobristGen {
 
-	private static int col = 60;
 
 	private long[][] zobristTable; // da controllare come viene implementata
 
 	public ZobristGen() {
 		Random prng = new Random();
-		zobristTable = new long[14][col];
-		for (int i = 0; i < 14; ++i) {
-			for (int j = 0; j < col; ++j) {
+		zobristTable = new long[64][12];
+		for (int i = 0; i < 64; i++) {
+			for (int j = 0; j < 12; j++) {
 				zobristTable[i][j] = prng.nextLong();
 			}
 		}
 
 	}
 	
-	/**
-	 * Calcuates a Zobrist hash of a game state.
-	 * 
-	 * @param ls the game state
-	 * @return the Zobrist hash of the state
-	 */
-	public long zobristHash(long[] ls) {	//rivederlo
+	public long zobristHash(long[] pieces) {
 		long key = 0;
-		for (int i = 0; i < ls.length; ++i) {
-			key ^= zobristTable[i][(int) ls[i] % col];
+		int i = 0;
+		long tmp, bit;
+		while (i < 12) {
+
+			tmp = pieces[i];
+			while (tmp != 0) {
+				bit = tmp & -tmp;
+				tmp ^= bit;
+				key ^= zobristTable[Board.getSquare(bit)][i];
+			}
+
+			i++;
 		}
 		return key;
 	}

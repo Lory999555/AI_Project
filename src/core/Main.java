@@ -45,6 +45,19 @@ public class Main {
 		boolean server = true;
 //		boolean server = false;
 		LAVORAMU();
+		
+		PrintStream fileOut;
+		
+		//serve per creare un log e non perdere nessuna info.
+		//il file deve già esistere senno probabilmente da errore!
+//		try {
+//			fileOut = new PrintStream("C:/Users/loren/Desktop/out.txt");
+//			System.setOut(fileOut);
+//		} catch (FileNotFoundException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+		
 
 		// potrei dividere l'euristica in modo da evitare di splittare gli algoritmi.
 		hi = new BBEvaluator();
@@ -53,10 +66,13 @@ public class Main {
 		hi4 = new BBEvaluator4();
 		hi5 = new BBEvaluator5();
 
-		ai_R = new ABWMAgent(hi5, false, 30);
-		ai_B = new ABWMAgent(hi4, true, 30);
+		ai_B = new ABAgent(hi3, true, 5, 5);
+
+		//true perchè è maximazer
+		ai_R = new NMWMAgent(hi3, true, 5);
 
 		state = new DipoleConf();
+		long time;
 //		localPlay();
 
 		if (server) {
