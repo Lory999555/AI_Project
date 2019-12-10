@@ -52,12 +52,11 @@ public class Main {
 		hi3 = new BBEvaluator3();
 		hi4 = new BBEvaluator4();
 		hi5 = new BBEvaluator5();
-		
-		ai_R = new ABAgent(hi4, false, 30);
-		ai_B = new ABAgent(hi3, true, 30);
-		
-		state = new DipoleConf();
 
+		ai_R = new ABWMAgent(hi5, false, 30);
+		ai_B = new ABWMAgent(hi4, true, 30);
+
+		state = new DipoleConf();
 //		localPlay();
 
 		if (server) {
@@ -101,11 +100,10 @@ public class Main {
 			 * 
 			 */
 
-
-
 		}
 
 	}
+	
 	
 	public static void localPlay() throws InvalidActionException, CloneNotSupportedException {
 		ConverterMove cm = new ConverterMove();
@@ -113,7 +111,8 @@ public class Main {
 		Scanner scan = new Scanner(System.in);
 		String player = scan.nextLine();
 		Pattern p = Pattern.compile("[a-hA-H][1-8][,][a-h][1-8]");
-		if (player.equals("RED")) {
+		Pattern c = Pattern.compile("[Z][,][a-hA-H][1-8][-][1-9]");
+		if (player.equals("RED")||player.equals("red")||player.equals("R")||player.equals("r")) {
 			blackPlayer = true;
 		} else {
 			blackPlayer = false;
@@ -122,12 +121,14 @@ public class Main {
 			if (blackPlayer) {
 				System.out.println(state.toString());
 
-				String mossa="a";
+				String mossa = "a";
 				Matcher m = p.matcher(mossa);
-				while(!m.matches()) {
+				Matcher s = c.matcher(mossa);
+				while (!m.matches() || !s.matches()) {
 					System.out.println("Inserisci mossa (ES:  H5,N,2)");
 					mossa = scan.nextLine();
-					m= p.matcher(mossa);
+					m = p.matcher(mossa);
+					s = c.matcher(mossa);
 				}
 				move_B = cm.unpackingLocal(mossa, state);
 				System.out.println(move_B.toString());
@@ -147,13 +148,14 @@ public class Main {
 
 				System.out.println(state.toString());
 
-
-				String mossa="a";
+				String mossa = "a";
+				Matcher s = c.matcher(mossa);
 				Matcher m = p.matcher(mossa);
-				while(!m.matches()) {
+				while (!m.matches() && !s.matches()) {
 					System.out.println("Inserisci mossa (ES:  H5,N,2)");
 					mossa = scan.nextLine();
-					m= p.matcher(mossa);
+					m = p.matcher(mossa);
+					s = c.matcher(mossa);
 				}
 
 				move_R = cm.unpackingLocal(mossa, state);
@@ -161,7 +163,6 @@ public class Main {
 			}
 		}
 	}
-
 
 	public static void startServer() throws InvalidActionException, CloneNotSupportedException {
 		// blackPlayer = false;
