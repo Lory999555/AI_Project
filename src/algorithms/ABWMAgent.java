@@ -113,6 +113,7 @@ public class ABWMAgent implements AlgorithmInterface {
 		if (timeUp()) {
 			this.ibreak = true;
 			return null;
+		}
 
 			if ((depth == 0)) {
 				evaluatednodes++;

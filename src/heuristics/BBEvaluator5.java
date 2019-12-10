@@ -37,8 +37,8 @@ public class BBEvaluator5 implements HeuristicInterface {
 	private int percMat = 20;
 	private int percMob = 12;
 
-	private int percFa1 = 13;
-	private int percBa1 = 15;
+	private int percFa1 = 10;
+	private int percBa1 = 13;
 
 	private int percFa2 = 15;
 	private int percBa2 = 18;
@@ -84,13 +84,13 @@ public class BBEvaluator5 implements HeuristicInterface {
 		nR = calculatePercentage(dc.pawnCount(pRed), 12, percNum);
 		double eval;
 		if (c.isBlack()) {
-			calculateValBlack(dc, percFa2, percBa2);
-			calculateValRed(dc, percFa1, percBa1);
+			calculateValBlack(dc, percFa1, percBa1);
+			calculateValRed(dc, percFa2, percBa2);
 			eval = (nB + materialB + mobilityB + frontAttackB + backAttackB)
 					- (nR + materialR + mobilityR + frontAttackR + backAttackR);
 		} else {
-			calculateValBlack(dc, percFa1, percBa1);
-			calculateValRed(dc, percFa2, percBa2);
+			calculateValBlack(dc, percFa2, percBa2);
+			calculateValRed(dc, percFa1, percBa1);
 			eval = (nB + materialB + mobilityB + frontAttackB + backAttackB)
 					- (nR + materialR + mobilityR + frontAttackR + backAttackR);
 		}
