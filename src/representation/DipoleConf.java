@@ -35,6 +35,12 @@ public class DipoleConf implements Conf, Cloneable {
 		this.pRed = 0x8L;
 		this.pBlack = 0x1000000000000000L;
 		this.black = false;
+//		this.pieces[1] = 0x1080000L;
+//		this.pieces[2] = 0x2000000008L;
+//		this.pieces[5] = 0x1000000000000000L;
+//		this.pRed = 0x2001000008L;
+//		this.pBlack = 0x1000000000080000L;
+//		this.black = true;
 
 	}
 

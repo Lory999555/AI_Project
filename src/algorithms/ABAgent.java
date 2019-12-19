@@ -1,14 +1,11 @@
 package algorithms;
 
-
-
 import algorithms.ABWMAgent.Ply;
 import heuristics.HeuristicInterface;
 import representation.Conf;
 import representation.Move;
 import representation.TimeOutException;
 import representation.Conf.Status;
-
 
 /**
  * Basic Alpha-Beta Pruning search for Mancala
@@ -22,7 +19,7 @@ public class ABAgent implements AlgorithmInterface {
 	private boolean ibreak;
 	private int maxDepth;
 	private int startDepth;
-	
+
 	private HeuristicInterface hi;
 	private boolean blackPlayer;
 	private long searchCutoff;
@@ -34,8 +31,8 @@ public class ABAgent implements AlgorithmInterface {
 		MAX, MIN
 	};
 
-	public ABAgent(HeuristicInterface hi, boolean blackPlayer , int startDepth, int maxDepth) {
-		this.startDepth=startDepth;
+	public ABAgent(HeuristicInterface hi, boolean blackPlayer, int startDepth, int maxDepth) {
+		this.startDepth = startDepth;
 		this.maxDepth = maxDepth;
 		this.hi = hi;
 		this.blackPlayer = blackPlayer;
@@ -51,15 +48,15 @@ public class ABAgent implements AlgorithmInterface {
 		if (timeUp()) {
 			this.ibreak = true;
 			return null;
-		} else if ((depth == 0)) {
-			evaluatednodes++;
-			return new MoveValue(move, hi.evaluate_R(conf));
 		} else if (conf.getStatus() == Status.BlackWon) {
 			evaluatednodes++;
 			return new MoveValue(move, -5000);
 		} else if (conf.getStatus() == Status.RedWon) {
 			evaluatednodes++;
 			return new MoveValue(move, 5000);
+		} else if ((depth == 0)) {
+			evaluatednodes++;
+			return new MoveValue(move, hi.evaluate_R(conf));
 		}
 		// recursive
 		if (step == Ply.MAX) { // max step
@@ -67,8 +64,8 @@ public class ABAgent implements AlgorithmInterface {
 			for (Move childmv : conf.getActions()) {
 
 				searchResult = alphaBeta_R(childmv.applyTo(conf), childmv, alpha, beta, depth - 1, Ply.MIN);
-				
-				if(searchResult==null)
+
+				if (searchResult == null)
 					return null;
 
 				if (searchResult.value > value) {
@@ -83,8 +80,8 @@ public class ABAgent implements AlgorithmInterface {
 			value = Integer.MAX_VALUE;
 			for (Move childmv : conf.getActions()) {
 				searchResult = alphaBeta_R(childmv.applyTo(conf), childmv, alpha, beta, depth - 1, Ply.MAX);
-				
-				if(searchResult==null)
+
+				if (searchResult == null)
 					return null;
 
 				if (searchResult.value < value) {
@@ -112,9 +109,6 @@ public class ABAgent implements AlgorithmInterface {
 		if (timeUp()) {
 			this.ibreak = true;
 			return null;
-		} else if ((depth == 0)) {
-			evaluatednodes++;
-			return new MoveValue(move, hi.evaluate_B(conf));
 		} else if (conf.getStatus() == Status.BlackWon) {
 			evaluatednodes++;
 			return new MoveValue(move, 5000);
@@ -122,14 +116,17 @@ public class ABAgent implements AlgorithmInterface {
 		} else if (conf.getStatus() == Status.RedWon) {
 			evaluatednodes++;
 			return new MoveValue(move, -5000);
+		} else if ((depth == 0)) {
+			evaluatednodes++;
+			return new MoveValue(move, hi.evaluate_B(conf));
 		}
 		// recursive
 		if (step == Ply.MAX) { // max step
 			value = Integer.MIN_VALUE;
 			for (Move childmv : conf.getActions()) {
 				searchResult = alphaBeta_B(childmv.applyTo(conf), childmv, alpha, beta, depth - 1, Ply.MIN);
-				
-				if(searchResult==null)
+
+				if (searchResult == null)
 					return null;
 
 				if (searchResult.value > value) {
@@ -144,8 +141,8 @@ public class ABAgent implements AlgorithmInterface {
 			value = Integer.MAX_VALUE;
 			for (Move childmv : conf.getActions()) {
 				searchResult = alphaBeta_B(childmv.applyTo(conf), childmv, alpha, beta, depth - 1, Ply.MAX);
-				
-				if(searchResult==null)
+
+				if (searchResult == null)
 					return null;
 
 				if (searchResult.value < value) {
@@ -190,17 +187,13 @@ public class ABAgent implements AlgorithmInterface {
 
 		}
 
-
-		
-
 		if (this.ibreak) {
-			System.out
-			.println("\nEvaluatedNodes: " + evaluatednodesold + "\nSearchedNodes :" + searchednodesold + "\ndepth :" + (d-2));
+			System.out.println("\nHeuristic: " + oldBest.value + "\nEvaluatedNodes: " + evaluatednodesold
+					+ "\nSearchedNodes :" + searchednodesold + "\ndepth :" + (d - 2));
 			return oldBest.move;
-		}
-		else {
-			System.out
-			.println("\nEvaluatedNodes: " + evaluatednodes + "\nSearchedNodes :" + searchednodes + "\ndepth :" + (d--));
+		} else {
+			System.out.println("\nHeuristic: " + newBest.value + "\nEvaluatedNodes: " + evaluatednodes
+					+ "\nSearchedNodes :" + searchednodes + "\ndepth :" + (d--));
 			return newBest.move;
 
 		}

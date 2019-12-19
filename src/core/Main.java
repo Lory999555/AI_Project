@@ -1,6 +1,7 @@
 package core;
 
 import java.awt.print.PrinterException;
+import java.io.PrintStream;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -64,12 +65,19 @@ public class Main {
 		hi2 = new BBEvaluator2();
 		hi3 = new BBEvaluator3();
 		hi4 = new BBEvaluator4();
+		BBEvaluator4NewVal hi4N = new BBEvaluator4NewVal();
 		hi5 = new BBEvaluator5();
-
-		ai_B = new ABAgent(hi3, true, 5, 5);
+		
+//		DipoleConf c = new DipoleConf();
+//		System.out.println(c.toString());
+//		System.out.println("hi4R: "+ hi4.evaluate_R(c));
+//		System.out.println("hi5R: "+hi5.evaluate_R(c));
+//		System.out.println("hi4B: "+ hi4.evaluate_B(c));
+//		System.out.println("hi5B: "+hi5.evaluate_B(c));
+		ai_B = new ABAgent(hi4N, true, 4, 15);
 
 		//true perchè è maximazer
-		ai_R = new NMWMAgent(hi3, true, 5);
+		ai_R = new ABAgent(hi4, false, 4, 15);
 
 		state = new DipoleConf();
 		long time;

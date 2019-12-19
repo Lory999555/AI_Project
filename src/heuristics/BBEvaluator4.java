@@ -52,16 +52,18 @@ public class BBEvaluator4 implements HeuristicInterface {
 		calculateValRed(dc);
 		materialR = materialR(dc);
 		materialB = materialB(dc);
-		nB = calculatePercentage(dc.pawnCount(pBlack), 12, percNum);
-		nR = calculatePercentage(dc.pawnCount(pRed), 12, percNum);
+//		nB = calculatePercentage(dc.pawnCount(pBlack), 12, percNum);
+//		nR = calculatePercentage(dc.pawnCount(pRed), 12, percNum);
+		nB = calculatePercentage(dc.pawnCount(pBlack), 12);
+		nR = calculatePercentage(dc.pawnCount(pRed), 12);
 
 		double eval = 0;
 		if (c.isBlack()) {
-			eval = (nR + materialR + mobilityR + frontAttackR + backAttackR)
-					- (nB + materialB + mobilityB + frontAttackB + backAttackB);
+			eval = (nR + materialR + mobilityR + frontAttackR*1.5 + backAttackR*2)
+					- (nB + materialB + mobilityB + frontAttackB + backAttackB*1.2);
 		} else {
-			eval = (nR + materialR + mobilityR + frontAttackR + backAttackR)
-					- (nB + materialB + mobilityB + frontAttackB + backAttackB);
+			eval = (nR + materialR + mobilityR + frontAttackR + backAttackR*1.2)
+					- (nB + materialB + mobilityB + frontAttackB*1.5 + backAttackB*2);
 		}
 		return (int) Math.round(eval);
 	}
@@ -74,15 +76,17 @@ public class BBEvaluator4 implements HeuristicInterface {
 		calculateValRed(dc);
 		materialR = materialR(dc);
 		materialB = materialB(dc);
-		nB = calculatePercentage(dc.pawnCount(pBlack), 12, percNum);
-		nR = calculatePercentage(dc.pawnCount(pRed), 12, percNum);
+//		nB = calculatePercentage(dc.pawnCount(pBlack), 12, percNum);
+//		nR = calculatePercentage(dc.pawnCount(pRed), 12, percNum);
+		nB = calculatePercentage(dc.pawnCount(pBlack), 12);
+		nR = calculatePercentage(dc.pawnCount(pRed), 12);
 		double eval;
 		if (c.isBlack()) {
-			eval = (nB + materialB + mobilityB + frontAttackB + backAttackB)
-					- (nR + materialR + mobilityR + frontAttackR + backAttackR);
+			eval = (nB + materialB + mobilityB + frontAttackB + backAttackB*1.2)
+					- (nR + materialR + mobilityR + frontAttackR*1.5 + backAttackR*2);
 		} else {
-			eval = (nB + materialB + mobilityB + frontAttackB + backAttackB)
-					- (nR + materialR + mobilityR + frontAttackR + backAttackR);
+			eval = (nB + materialB + mobilityB + frontAttackB*1.5 + backAttackB*2)
+					- (nR + materialR + mobilityR + frontAttackR + backAttackR*1.2);
 		}
 		return (int) Math.round(eval);
 	}
@@ -126,9 +130,12 @@ public class BBEvaluator4 implements HeuristicInterface {
 			frontAttackR += c.evalFA();
 			backAttackR += c.evalBA();
 		}
-		mobilityR = calculatePercentage(mobilityR, maxMob, percMob);
-		frontAttackR = calculatePercentage(frontAttackR, maxFA, percFa);
-		backAttackR = calculatePercentage(backAttackR, maxBA, percBa);
+//		mobilityR = calculatePercentage(mobilityR, maxMob, percMob);
+//		frontAttackR = calculatePercentage(frontAttackR, maxFA, percFa);
+//		backAttackR = calculatePercentage(backAttackR, maxBA, percBa);
+		mobilityR = calculatePercentage(mobilityR, maxMob);
+		frontAttackR = calculatePercentage(frontAttackR, maxFA);
+		backAttackR = calculatePercentage(backAttackR, maxBA);
 	}
 
 	/**
@@ -153,9 +160,12 @@ public class BBEvaluator4 implements HeuristicInterface {
 			frontAttackB += c.evalFA();
 			backAttackB += c.evalBA();
 		}
-		mobilityB = calculatePercentage(mobilityB, maxMob, percMob);
-		frontAttackB = calculatePercentage(frontAttackB, maxFA, percFa);
-		backAttackB = calculatePercentage(backAttackB, maxBA, percBa);
+//		mobilityB = calculatePercentage(mobilityB, maxMob, percMob);
+//		frontAttackB = calculatePercentage(frontAttackB, maxFA, percFa);
+//		backAttackB = calculatePercentage(backAttackB, maxBA, percBa);
+		mobilityB = calculatePercentage(mobilityB, maxMob);
+		frontAttackB = calculatePercentage(frontAttackB, maxFA);
+		backAttackB = calculatePercentage(backAttackB, maxBA);
 	}
 
 	/**
@@ -177,7 +187,8 @@ public class BBEvaluator4 implements HeuristicInterface {
 			assert (type < 12);
 			material += (val[type] * valPositionB[square >>> 3]);
 		} // while
-		material = calculatePercentage(material, maxMat, percMat);
+//		material = calculatePercentage(material, maxMat, percMat);
+		material = calculatePercentage(material, maxMat);
 		return material;
 	}
 
@@ -196,21 +207,22 @@ public class BBEvaluator4 implements HeuristicInterface {
 			assert (type < 12);
 			material += (val[type] * valPositionR[square >>> 3]);
 		} // while
-		material = calculatePercentage(material, maxMat, percMat);
+//		material = calculatePercentage(material, maxMat, percMat);
+		material = calculatePercentage(material, maxMat);
 		return material;
 	}
 
 	public double calculatePercentage(double obtained, int total) {
 		if (obtained == 0)
 			return 0;
-		return obtained * 100 / total;
+		return obtained * 5000 / total;
 	}
 
-	public double calculatePercentage(double obtained, int total, int percentage) {
-		if (obtained == 0)
-			return 0;
-		return obtained * percentage / total;
-	}
+//	public double calculatePercentage(double obtained, int total, int percentage) {
+//		if (obtained == 0)
+//			return 0;
+//		return obtained * percentage / total;
+//	}
 
 	public void print() {
 		System.out.println("MatR = " + materialR + "   MatB = " + materialB + "\n MobR = " + mobilityR + "   MobB = "
