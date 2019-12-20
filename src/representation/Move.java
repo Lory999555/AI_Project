@@ -1,6 +1,8 @@
 package representation;
 
 public interface Move {
+	public long getFromSq();
+	public long getToSq();
 
 	public boolean validOn(Conf input);
 	
@@ -43,3 +45,4 @@ public interface Move {
 	@Override
 	public boolean equals(Object obj);
 	}
+

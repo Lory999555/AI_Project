@@ -127,8 +127,9 @@ public class ABWMAgent implements AlgorithmInterface {
 		} else if (conf.getStatus() == Status.BlackWon) {
 			evaluatednodes++;
 			return new MoveValue(move, -5000);
+		}
 
-		} else if (conf.getStatus() == Status.RedWon) {
+		else if (conf.getStatus() == Status.RedWon) {
 			evaluatednodes++;
 			return new MoveValue(move, 5000);
 		}

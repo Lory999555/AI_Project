@@ -74,6 +74,7 @@ public class Main {
 		hi2 = new BBEvaluator2();
 		hi3 = new BBEvaluator3();
 		hi4 = new BBEvaluator4();
+		BBEvaluator4NewVal hi4N = new BBEvaluator4NewVal();
 		hi5 = new BBEvaluator5();
 		
 

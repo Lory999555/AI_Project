@@ -175,64 +175,32 @@ public class ConverterMove implements ConverterSignal {
 		DipoleConf move = (DipoleConf) c;
 		packet = packet.toUpperCase();
 		String[] splitter = packet.split(",");
-		int fromSQ = Board.localStringToSquare(Character.toString(splitter[0].charAt(0)),
-				Character.toString(splitter[0].charAt(1)));
-		int toSQ = Board.localStringToSquare(Character.toString(splitter[1].charAt(0)),
-				Character.toString(splitter[1].charAt(1)));
-		int dist = Math.abs((fromSQ >>> 3) - (toSQ >>> 3));
-		if (dist == 0)
-			dist = Math.abs(fromSQ - toSQ);
 
-		splitter[0] = Board.SQUARE_NAMES[fromSQ];
-		splitter[1] = Board.SQUARE_NAMES[toSQ];
-
-		int char1 = (int) splitter[0].charAt(0);
-		int char2 = (int) splitter[0].charAt(1);
-
-		String direction;
-
-		if (splitter[0].charAt(0) > splitter[1].charAt(0)) {
-			if (splitter[0].charAt(1) > splitter[1].charAt(1)) {
-				direction = "NW";
-			} else {
-				if (splitter[0].charAt(1) < splitter[1].charAt(1)) {
-					direction = "NE";
-				} else {
-					direction = "N";
-				}
-			}
-		} else {
-			if (splitter[0].charAt(0) == splitter[1].charAt(0)) {
-				if (splitter[0].charAt(1) > splitter[1].charAt(1)) {
-					direction = "W";
-				} else {
-					direction = "E";
-				}
-			} else {
-				if (splitter[0].charAt(1) > splitter[1].charAt(1)) {
-					direction = "SW";
-				} else {
-					if (splitter[0].charAt(1) < splitter[1].charAt(1)) {
-						direction = "SE";
-					} else {
-						direction = "S";
-					}
-				}
-			}
-
-		}
-		long fromBit = Board.squareToBitboard(fromSQ);
-		long toBit = Board.squareToBitboard(toSQ);
-		int type = move.getType(fromBit);
-
-		if (((direction.equals("N") || direction.equals("NE") || direction.equals("NW")) && char1 - dist < 65)
-				|| ((direction.equals("S") || direction.equals("SE") || direction.equals("SW")) && char1 + dist > 72) ||
-
-				((direction.equals("E") || direction.equals("NE") || direction.equals("SE")) && char2 + dist > 56)
-				|| ((direction.equals("W") || direction.equals("NW") || direction.equals("SW")) && char2 - dist < 49)) {
-
+		if (splitter[0].equals("Z")) {
+			String ciccio = splitter[1];
+			String[] temp = splitter[1].split("-");
+			int fromSQ = Board.localStringToSquare(Character.toString(temp[0].charAt(0)),
+					Character.toString(temp[0].charAt(1)));
+			int dist = Integer.parseInt(temp[1]);
+			long fromBit = Board.squareToBitboard(fromSQ);
+			int type = move.getType(fromBit);
 			return new DipoleMove(fromBit, 0, type, !Main.blackPlayer, typeMove.DEATH, dist);
 		} else {
+
+			int fromSQ = Board.localStringToSquare(Character.toString(splitter[0].charAt(0)),
+					Character.toString(splitter[0].charAt(1)));
+			int toSQ = Board.localStringToSquare(Character.toString(splitter[1].charAt(0)),
+					Character.toString(splitter[1].charAt(1)));
+			int dist = Math.abs((fromSQ >>> 3) - (toSQ >>> 3));
+			if (dist == 0)
+				dist = Math.abs(fromSQ - toSQ);
+
+			splitter[0] = Board.SQUARE_NAMES[fromSQ];
+			splitter[1] = Board.SQUARE_NAMES[toSQ];
+
+			long fromBit = Board.squareToBitboard(fromSQ);
+			long toBit = Board.squareToBitboard(toSQ);
+			int type = move.getType(fromBit);
 
 			typeMove typeM;
 

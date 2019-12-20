@@ -33,7 +33,7 @@ public class BBEvaluator3 implements HeuristicInterface {
 	private int maxFA = 13;
 	private int maxBA = 13;
 
-	public int evaluate_R(Conf c) {	//viene solo portato tutto allo "stesso livello" su base 100
+	public int evaluate_R(Conf c) { // viene solo portato tutto allo "stesso livello" su base 100
 		DipoleConf dc = (DipoleConf) c;
 		pRed = dc.getpRed();
 		pBlack = dc.getpBlack();
@@ -63,11 +63,11 @@ public class BBEvaluator3 implements HeuristicInterface {
 		materialB = materialB(dc);
 		double eval;
 		if (c.isBlack()) {
-			eval = (materialB + mobilityB + frontAttackB * 1.5 + backAttackB * 2)
-					- (materialR + mobilityR + frontAttackR + backAttackR * 1.2);
-		} else {	
 			eval = (materialB + mobilityB + frontAttackB + backAttackB * 1.2)
 					- (materialR + mobilityR + frontAttackR * 1.5 + backAttackR * 2);
+		} else {
+			eval = (materialB + mobilityB + frontAttackB * 1.5 + backAttackB * 2)
+					- (materialR + mobilityR + frontAttackR + backAttackR * 1.2);
 		}
 //		System.out.println("evalB_____mobR="+mobilityR+" fronR= "+frontAttackR+" backR= "+ backAttackR+"\n"+"mobB="+mobilityB+" fronB= "+frontAttackB+" backB= "+ backAttackB+"\n");
 		return (int) Math.round(eval);
@@ -187,9 +187,11 @@ public class BBEvaluator3 implements HeuristicInterface {
 	}
 
 	public double calculatePercentage(double obtained, double total) {
-		if(obtained == 0)return 0;
-        return obtained * 5000 / total;
-    }
+		if (obtained == 0)
+			return 0;
+		return obtained * 5000 / total;
+	}
+
 	public void print() {
 		System.out.println("MatR = " + materialR + "   MatB = " + materialB + "\n MobR = " + mobilityR + "   MobB = "
 				+ mobilityB + "\n FatR = " + frontAttackR + "   FatB = " + frontAttackB + "\n BatR = " + backAttackR
