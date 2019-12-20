@@ -53,7 +53,7 @@ public class ConverterMove implements ConverterSignal {
 		}
 	}
 
-	public String generatePacket2(int a) {
+	public String generatePacketEnc(int a) {
 		DipoleMove move = new DipoleMove();
 		move.decodingMove(a);
 		int toSq = (int) move.getToSq();
@@ -63,7 +63,7 @@ public class ConverterMove implements ConverterSignal {
 		// String direction;
 		if (move.gettP() == typeMove.DEATH) {
 			if (move.isBlack())
-				return "MOVE " + fromSQ_String + "," + Board.deathNoteBDirection[toSq] + "," + move.getDist();
+				return "MOVE " + fromSQ_String + "," + Board.deathNoteBDirection[fromSq] + "," + move.getDist();
 			else
 				return "MOVE " + fromSQ_String + "," + Board.deathNoteRDirection[fromSq] + "," + move.getDist();
 		} else {
@@ -273,7 +273,7 @@ public class ConverterMove implements ConverterSignal {
 		}
 	}
 
-	public int unpacking2(String packet, Conf c) {
+	public int unpackingEnc(String packet, Conf c) {
 		DipoleConf move = (DipoleConf) c;
 		DipoleMove movement = new DipoleMove();
 		String[] splitter = packet.split(",");

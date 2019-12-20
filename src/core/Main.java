@@ -32,12 +32,20 @@ public class Main {
 	private static HeuristicInterface hi3;
 	private static HeuristicInterface hi4;
 	private static HeuristicInterface hi5;
+	
 	private static AlgorithmInterface ai_R;
 	private static AlgorithmInterface ai_B;
+	
+	private static AlgorithmInterfaceEnc aienc_R;
+	private static AlgorithmInterfaceEnc aienc_B;
 
 	private static Conf state;
 	private static Move move_R;
 	private static Move move_B;
+	
+	private static int movenc_R;
+	private static int movenc_B;
+	private static Move dp;
 
 	public static Semaphore srSem = new Semaphore(0);
 	public static Semaphore algSem = new Semaphore(0);
@@ -45,6 +53,7 @@ public class Main {
 
 	public static void main(String[] args) throws InvalidActionException, CloneNotSupportedException, PrinterException {
 		boolean server = true;
+		boolean enc = false;
 		LAVORAMU();
 		
 		PrintStream fileOut;
@@ -68,17 +77,25 @@ public class Main {
 		hi5 = new BBEvaluator5();
 		
 
-		ai_B = new ABAgent(hi3, true, 5, 5);
-		
 		//true perchè è maximazer
-		ai_R = new NMWMAgent(hi3, true, 5);
+		ai_R = new ABAgent(hi4, false, 5, 15);
+		
+		ai_B = new ABWMAgent(hi4, true, 5, 15);
+		
+		aienc_R = new ABAgentEnc(hi4, false, 5, 15);
+		
+		aienc_B = new ABAgentEnc(hi4, true, 5, 15);
 
 		state = new DipoleConf();
+//		System.out.println(state);
 		long time;
 		// localPlay();
 
 		if (server) {
-			startServer();
+			if(enc)
+				startServerEnc();
+			else
+				startServer();
 		} else {
 
 			while (state.getStatus() == Status.Ongoing) {
@@ -126,6 +143,109 @@ public class Main {
 
 		}
 
+	}
+	
+	public static void startServer() throws InvalidActionException, CloneNotSupportedException {
+		// blackPlayer = false;
+		SenderReceiver sr = new SenderReceiver();
+		sr.start();
+		ConverterMove cm = new ConverterMove();
+		// int type = 11;
+		while (true) {
+			try {
+				algSem.acquire();
+
+				if (sr.getStatus().equals("OPPONENT_MOVE")) {
+					if (Main.blackPlayer) {
+						move_R = cm.unpacking(sr.getMove(), state);
+						state = move_R.applyTo(state);
+					} else {
+						move_B = cm.unpacking(sr.getMove(), state);
+						state = move_B.applyTo(state);
+					}
+				}
+
+				else if (sr.getStatus().equals("YOUR_TURN")) {
+					if (Main.blackPlayer) {
+						move_B = ai_B.compute(state);
+						state = move_B.applyTo(state);
+						System.out.println(cm.generatePacket(move_B));
+						System.out.println(ai_B.getClass());
+						sr.setMove(cm.generatePacket(move_B));
+					} else {
+						move_R = ai_R.compute(state);
+						state = move_R.applyTo(state);
+						System.out.println(cm.generatePacket(move_R));
+						System.out.println(ai_R.getClass());
+						sr.setMove(cm.generatePacket(move_R));
+					}
+
+				}else if(sr.getStatus().equals("DEFEAT")) {
+					System.out.println("RIP!");
+					break;
+				}else if(sr.getStatus().equals("VICTORY")) {
+					System.out.println("SIUUUUUUUUUUUU");
+					break;
+				}
+
+				srSem.release();
+
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+	
+	public static void startServerEnc() throws InvalidActionException, CloneNotSupportedException {
+		// blackPlayer = false;
+		dp=new DipoleMove();
+		SenderReceiver sr = new SenderReceiver();
+		sr.start();
+		ConverterMove cm = new ConverterMove();
+		// int type = 11;
+		while (true) {
+			try {
+				algSem.acquire();
+
+				if (sr.getStatus().equals("OPPONENT_MOVE")) {
+					if (Main.blackPlayer) {
+						movenc_R = cm.unpackingEnc(sr.getMove(), state);
+						state = dp.applyToEnc(state,movenc_R);
+					} else {
+						movenc_B = cm.unpackingEnc(sr.getMove(), state);
+						state = dp.applyToEnc(state,movenc_B);
+					}
+				}
+
+				else if (sr.getStatus().equals("YOUR_TURN")) {
+					if (Main.blackPlayer) {
+						movenc_B = aienc_B.compute(state);
+						state = dp.applyToEnc(state,movenc_B);
+						System.out.println(cm.generatePacketEnc(movenc_B));
+						System.out.println(aienc_B.getClass());
+						sr.setMove(cm.generatePacketEnc(movenc_B));
+					} else {
+						movenc_R = aienc_R.compute(state);
+						state = dp.applyToEnc(state,movenc_R);
+						System.out.println(cm.generatePacketEnc(movenc_R));
+						System.out.println(aienc_R.getClass());
+						sr.setMove(cm.generatePacketEnc(movenc_R));
+					}
+
+				}else if(sr.getStatus().equals("DEFEAT")) {
+					System.out.println("RIP!");
+					break;
+				}else if(sr.getStatus().equals("VICTORY")) {
+					System.out.println("SIUUUUUUUUUUUU");
+					break;
+				}
+
+				srSem.release();
+
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
 	}
 
 	public static void localPlay() throws InvalidActionException, CloneNotSupportedException {
@@ -182,56 +302,7 @@ public class Main {
 		}
 	}
 
-	public static void startServer() throws InvalidActionException, CloneNotSupportedException {
-		// blackPlayer = false;
-		SenderReceiver sr = new SenderReceiver();
-		sr.start();
-		ConverterMove cm = new ConverterMove();
-		// int type = 11;
-		while (true) {
-			try {
-				algSem.acquire();
-
-				if (sr.getStatus().equals("OPPONENT_MOVE")) {
-					if (Main.blackPlayer) {
-						move_R = cm.unpacking(sr.getMove(), state);
-						state = move_R.applyTo(state);
-					} else {
-						move_B = cm.unpacking(sr.getMove(), state);
-						state = move_B.applyTo(state);
-					}
-				}
-
-				else if (sr.getStatus().equals("YOUR_TURN")) {
-					if (Main.blackPlayer) {
-						move_B = ai_B.compute(state);
-						state = move_B.applyTo(state);
-						System.out.println(cm.generatePacket(move_B));
-						System.out.println(ai_B.getClass());
-						sr.setMove(cm.generatePacket(move_B));
-					} else {
-						move_R = ai_R.compute(state);
-						state = move_R.applyTo(state);
-						System.out.println(cm.generatePacket(move_R));
-						System.out.println(ai_R.getClass());
-						sr.setMove(cm.generatePacket(move_R));
-					}
-
-				}else if(sr.getStatus().equals("DEFEAT")) {
-					System.out.println("RIP!");
-					break;
-				}else if(sr.getStatus().equals("VICTORY")) {
-					System.out.println("SIUUUUUUUUUUUU");
-					break;
-				}
-
-				srSem.release();
-
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-		}
-	}
+	
 
 	public static void LAVORAMU() throws PrinterException {
 		Date date = new Date(2019 - 1900, 9, 18);

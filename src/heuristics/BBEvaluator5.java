@@ -215,7 +215,7 @@ public class BBEvaluator5 implements HeuristicInterface {
 	public double calculatePercentage(double obtained, int total) {
 		if (obtained == 0)
 			return 0;
-		return obtained * 100 / total;
+		return obtained * 5000 / total;
 	}
 
 	public double calculatePercentage(double obtained, int total, int percentage) {

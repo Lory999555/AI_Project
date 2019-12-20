@@ -92,6 +92,7 @@ public class SenderReceiver extends Thread {
 		}
 
 		try {
+			status= serverInfo[0];
 			in.close();
 			out.close();
 			socket.close();

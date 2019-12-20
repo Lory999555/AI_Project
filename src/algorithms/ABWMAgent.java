@@ -1,6 +1,5 @@
 package algorithms;
 
-import java.util.HashMap;
 
 import java.util.Random;
 
@@ -17,6 +16,9 @@ import representation.Conf.Status;
  * OOP version for passing results
  */
 public class ABWMAgent implements AlgorithmInterface {
+	
+	public static double tot = 0;
+	public static double cont = 0;
 
 	static enum Ply {
 		MAX, MIN
@@ -36,8 +38,6 @@ public class ABWMAgent implements AlgorithmInterface {
 
 	private int searchednodes = 0;
 	private int evaluatednodes = 0;
-	private int searchednodesold;
-	private int evaluatednodesold;
 	private int maxDepth;
 	private int startDepth;
 
@@ -65,8 +65,9 @@ public class ABWMAgent implements AlgorithmInterface {
 			}
 		}
 
+		//Provare con i conf senza hash
 		// init transposition table
-		transTable = new TranspositionTable<Long, TransEntry>(20000);
+		transTable = new TranspositionTable<Long, TransEntry>(500000);
 	}
 
 	private long zobristHash(long[] pieces) {
@@ -241,7 +242,9 @@ public class ABWMAgent implements AlgorithmInterface {
 			evaluatednodes++;
 			return new MoveValue(move, -5000);
 		}
-
+		
+		
+		
 		// recursive
 		if (step == Ply.MAX) { // max step
 			value = Integer.MIN_VALUE;
@@ -309,8 +312,6 @@ public class ABWMAgent implements AlgorithmInterface {
 	public Move compute(Conf conf) {
 		this.evaluatednodes = 0;
 		this.searchednodes = 0;
-		this.evaluatednodesold = 0;
-		this.searchednodesold = 0;
 		this.ibreak = false;
 		int alpha = Integer.MIN_VALUE;
 		int beta = Integer.MAX_VALUE;
@@ -320,19 +321,12 @@ public class ABWMAgent implements AlgorithmInterface {
 
 		int d = startDepth;
 		while (!timeUp() && d <= maxDepth) {
-			evaluatednodes = 0;
-			searchednodes = 0;
 			oldBest = newBest;
 			if (!this.blackPlayer)
 				newBest = alphaBetaWithMemory_R(conf, null, alpha, beta, d, Ply.MAX);
 			else
 				newBest = alphaBetaWithMemory_B(conf, null, alpha, beta, d, Ply.MAX);
 			d++;
-
-			if (!this.ibreak) {
-				evaluatednodesold = evaluatednodes;
-				searchednodesold = searchednodes;
-			}
 
 		}
 
@@ -343,21 +337,25 @@ public class ABWMAgent implements AlgorithmInterface {
 		//vedere se è possibile tolgiere la maggior parte dei metodi timesUp andandoli
 		//a sostituire con il check di this.ibreak
 		if (this.ibreak) {
-			System.out.println("\nEvaluatedNodes: " + evaluatednodesold + "\nSearchedNodes :" + searchednodesold
-					+ "\ndepth :" + (d - 2));
+			tot += (d - 2);
+			cont++;
+			System.out.println("\nEvaluate: " + oldBest.value + "\nEvaluatedNodes: " + evaluatednodes
+					+ "\nSearchedNodes :" + searchednodes + "\ndepth :" + (d - 2) + "\ndepth avg :" + (tot / cont));
 			return oldBest.move;
 		} else {
-			System.out.println(
-					"\nEvaluatedNodes: " + evaluatednodes + "\nSearchedNodes :" + searchednodes + "\ndepth :" + (d--));
+			tot += d--;
+			cont++;
+			System.out.println("\nEvaluate: " + newBest.value + "\nEvaluatedNodes: " + evaluatednodes
+					+ "\nSearchedNodes :" + searchednodes + "\ndepth :" + (d--) + "\ndepth avg :" + (tot / cont));
 			return newBest.move;
 
 		}
 	}
 
 	private boolean timeUp() {
-//		if (java.lang.management.ManagementFactory.getRuntimeMXBean().getInputArguments().toString()
-//				.indexOf("-agentlib:jdwp") > 0)
-//			return false;
+		if (java.lang.management.ManagementFactory.getRuntimeMXBean().getInputArguments().toString()
+				.indexOf("-agentlib:jdwp") > 0)
+			return false;
 		return (System.currentTimeMillis() > searchCutoff - 30);
 	}
 

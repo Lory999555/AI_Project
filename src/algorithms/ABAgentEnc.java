@@ -13,8 +13,8 @@ import representation.DipoleMove;
  * 
  * OOP version for passing results
  */
-public class ABAgent implements AlgorithmInterface {
-
+public class ABAgentEnc implements AlgorithmInterfaceEnc {
+	
 	public static double tot = 0;
 	public static double cont = 0;
 
@@ -24,9 +24,6 @@ public class ABAgent implements AlgorithmInterface {
 	private int maxDepth;
 	private int startDepth;
 
-	private int alpha;
-	private int beta;
-
 	private HeuristicInterface hi;
 	private boolean blackPlayer;
 	private long searchCutoff;
@@ -34,22 +31,27 @@ public class ABAgent implements AlgorithmInterface {
 	private int searchednodesold;
 	private static long MAX_RUN_TIME = 1000; // maximum runtime in milliseconds
 
+	private DipoleMove dp;
+
 	static enum Ply {
 		MAX, MIN
 	};
 
-	public ABAgent(HeuristicInterface hi, boolean blackPlayer, int startDepth, int maxDepth) {
+	public ABAgentEnc(HeuristicInterface hi, boolean blackPlayer, int startDepth, int maxDepth) {
 		this.startDepth = startDepth;
 		this.maxDepth = maxDepth;
 		this.hi = hi;
 		this.blackPlayer = blackPlayer;
 
+		// to call encoding moves
+		dp = new DipoleMove();
+
 	}
 
-	private MoveValue alphaBeta_R(Conf conf, Move move, int alpha, int beta, int depth, Ply step) {
+	private MoveValueEnc alphaBeta_R(Conf conf, int move, int alpha, int beta, int depth, Ply step) {
 		searchednodes++;
-		Move bestMove = null;
-		MoveValue searchResult = null;
+		int bestMove = 0;
+		MoveValueEnc searchResult = null;
 		int value;
 		// base case
 		if (timeUp()) {
@@ -57,20 +59,20 @@ public class ABAgent implements AlgorithmInterface {
 			return null;
 		} else if ((depth == 0)) {
 			evaluatednodes++;
-			return new MoveValue(move, hi.evaluate_R(conf));
+			return new MoveValueEnc(move, hi.evaluate_R(conf));
 		} else if (conf.getStatus() == Status.BlackWon) {
 			evaluatednodes++;
-			return new MoveValue(move, -5000);
+			return new MoveValueEnc(move, -5000);
 		} else if (conf.getStatus() == Status.RedWon) {
 			evaluatednodes++;
-			return new MoveValue(move, 5000);
+			return new MoveValueEnc(move, 5000);
 		}
 		// recursive
 		if (step == Ply.MAX) { // max step
 			value = Integer.MIN_VALUE;
-			for (Move childmv : conf.getActions()) {
+			for (int childmv : conf.getEncodingActions(dp)) {
 
-				searchResult = alphaBeta_R(childmv.applyTo(conf), childmv, alpha, beta, depth - 1, Ply.MIN);
+				searchResult = alphaBeta_R(dp.applyToEnc(conf, childmv), childmv, alpha, beta, depth - 1, Ply.MIN);
 
 				if (searchResult == null)
 					return null;
@@ -85,8 +87,8 @@ public class ABAgent implements AlgorithmInterface {
 			}
 		} else { // min step
 			value = Integer.MAX_VALUE;
-			for (Move childmv : conf.getActions()) {
-				searchResult = alphaBeta_R(childmv.applyTo(conf), childmv, alpha, beta, depth - 1, Ply.MAX);
+			for (int childmv : conf.getEncodingActions(dp)) {
+				searchResult = alphaBeta_R(dp.applyToEnc(conf, childmv), childmv, alpha, beta, depth - 1, Ply.MAX);
 
 				if (searchResult == null)
 					return null;
@@ -101,14 +103,14 @@ public class ABAgent implements AlgorithmInterface {
 			}
 		}
 
-		return new MoveValue(bestMove, value);
+		return new MoveValueEnc(bestMove, value);
 	}
 
-	private MoveValue alphaBeta_B(Conf conf, Move move, int alpha, int beta, int depth, Ply step) {
+	private MoveValueEnc alphaBeta_B(Conf conf, int move, int alpha, int beta, int depth, Ply step) {
 
 		searchednodes++;
-		Move bestMove = null;
-		MoveValue searchResult = null;
+		int bestMove = 0;
+		MoveValueEnc searchResult = null;
 		int value;
 		// base case
 
@@ -118,20 +120,20 @@ public class ABAgent implements AlgorithmInterface {
 			return null;
 		} else if ((depth == 0)) {
 			evaluatednodes++;
-			return new MoveValue(move, hi.evaluate_B(conf));
+			return new MoveValueEnc(move, hi.evaluate_B(conf));
 		} else if (conf.getStatus() == Status.BlackWon) {
 			evaluatednodes++;
-			return new MoveValue(move, 5000);
+			return new MoveValueEnc(move, 5000);
 
 		} else if (conf.getStatus() == Status.RedWon) {
 			evaluatednodes++;
-			return new MoveValue(move, -5000);
+			return new MoveValueEnc(move, -5000);
 		}
 		// recursive
 		if (step == Ply.MAX) { // max step
 			value = Integer.MIN_VALUE;
-			for (Move childmv : conf.getActions()) {
-				searchResult = alphaBeta_B(childmv.applyTo(conf), childmv, alpha, beta, depth - 1, Ply.MIN);
+			for (int childmv : conf.getEncodingActions(dp)) {
+				searchResult = alphaBeta_B(dp.applyToEnc(conf, childmv), childmv, alpha, beta, depth - 1, Ply.MIN);
 
 				if (searchResult == null)
 					return null;
@@ -146,8 +148,8 @@ public class ABAgent implements AlgorithmInterface {
 			}
 		} else { // min step
 			value = Integer.MAX_VALUE;
-			for (Move childmv : conf.getActions()) {
-				searchResult = alphaBeta_B(childmv.applyTo(conf), childmv, alpha, beta, depth - 1, Ply.MAX);
+			for (int childmv : conf.getEncodingActions(dp)) {
+				searchResult = alphaBeta_B(dp.applyToEnc(conf, childmv), childmv, alpha, beta, depth - 1, Ply.MAX);
 
 				if (searchResult == null)
 					return null;
@@ -161,33 +163,34 @@ public class ABAgent implements AlgorithmInterface {
 					break;
 			}
 		}
-		return new MoveValue(bestMove, value);
+
+		return new MoveValueEnc(bestMove, value);
 	}
 
-	public Move compute(Conf conf) {
-		this.searchCutoff = System.currentTimeMillis() + MAX_RUN_TIME;
+	public int compute(Conf conf) {
 		this.ibreak = false;
 		evaluatednodes = 0;
 		searchednodes = 0;
-		alpha = Integer.MIN_VALUE;
-		beta = Integer.MAX_VALUE;
-		MoveValue newBest = null;
-		MoveValue oldBest = null;
+		int alpha = Integer.MIN_VALUE;
+		int beta = Integer.MAX_VALUE;
+		MoveValueEnc newBest = null;
+		MoveValueEnc oldBest = null;
+		this.searchCutoff = System.currentTimeMillis() + MAX_RUN_TIME;
 		int d = startDepth;
 		while (!timeUp() && d <= maxDepth) {
 			oldBest = newBest;
 			if (!this.blackPlayer)
-				newBest = alphaBeta_R(conf, null, alpha, beta, d, Ply.MAX);
+				newBest = alphaBeta_R(conf, 0, alpha, beta, d, Ply.MAX);
 			else
-				newBest = alphaBeta_B(conf, null, alpha, beta, d, Ply.MAX);
+				newBest = alphaBeta_B(conf, 0, alpha, beta, d, Ply.MAX);
 			d++;
+
 
 		}
 
 		// craft a specific moves
-		if (oldBest.move == null) {
-			System.out.println("Null movement");
-			return conf.nullMove();
+		if (oldBest == null) {
+			return conf.nullMoveEnc();
 		}
 
 		if (this.ibreak) {
