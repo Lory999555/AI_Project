@@ -67,6 +67,7 @@ public class Main {
 		hi4 = new BBEvaluator4();
 		BBEvaluator4NewVal hi4N = new BBEvaluator4NewVal();
 		hi5 = new BBEvaluator5();
+		BBEvaluator5N hi5N = new BBEvaluator5N();
 		
 //		DipoleConf c = new DipoleConf();
 //		System.out.println(c.toString());
@@ -74,7 +75,7 @@ public class Main {
 //		System.out.println("hi5R: "+hi5.evaluate_R(c));
 //		System.out.println("hi4B: "+ hi4.evaluate_B(c));
 //		System.out.println("hi5B: "+hi5.evaluate_B(c));
-		ai_B = new ABAgent(hi4N, true, 4, 15);
+		ai_B = new ABAgent(hi5, true, 4, 15);
 
 		//true perchè è maximazer
 		ai_R = new ABAgent(hi4, false, 4, 15);

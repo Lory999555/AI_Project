@@ -7,6 +7,13 @@ import representation.Conf;
 import representation.Conf.Status;
 import representation.DipoleConf;
 
+/**
+ * In questa versione inserisco i nuovi valori di valPosition testati con BBEvaluator4N
+ * e viene inoltre modificato il peso delle percentuali.
+ * L'attuale versione vince tutte le versioni precedenti (già fatti tutti i test)
+ * @author anton
+ *
+ */
 public class BBEvaluator5 implements HeuristicInterface {
 	private int val[] = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 }; // valore delle pedine
 //	private double valPositionR[] = { 2, 1.75, 1.50, 1.25, 1, 0.6, 0.4, 0.2 }; // valore della posizione in base alla riga
@@ -15,8 +22,11 @@ public class BBEvaluator5 implements HeuristicInterface {
 //	private double valPositionR[] = { 2, 2, 4, 5, 4, 2, 1, 0 }; // valore della posizione in base alla riga
 //	private double valPositionB[] = { 0, 1, 2, 4, 5, 4, 2, 2 };
 
-	private double valPositionR[] = { 2, 2, 3, 3.5, 2.5, 1.5, 1, 0 }; // valore della posizione in base alla riga
-	private double valPositionB[] = { 0, 1, 1.5, 2.5, 3.5, 3, 2, 2 };
+//	private double valPositionR[] = { 2, 2, 3, 3.5, 2.5, 1.5, 1, 0 }; // valore della posizione in base alla riga
+//	private double valPositionB[] = { 0, 1, 1.5, 2.5, 3.5, 3, 2, 2 };
+	
+	private double valPositionR[] = { 3.5, 3.5, 4, 3.5, 2.5, 1.5, 1, 0 }; // valore della posizione in base alla riga
+	private double valPositionB[] = { 0, 1, 1.5, 2.5, 3.5, 4, 3.5, 3.5 };
 
 	private double mobilityB;
 	private double backAttackB;
@@ -28,21 +38,22 @@ public class BBEvaluator5 implements HeuristicInterface {
 	private double materialB;
 	private long pRed;
 	private long pBlack;
-	private int maxMat = 35;
+//	private int maxMat = 35;
+	private int maxMat = 48;
 	private int maxMob = 30;
 	private int maxFA = 13;
 	private int maxBA = 13;
 
-	private double percNum = 1.35;
-	private double percMat = 1.20;
-	private double percMob = 1.12;
+	private double percNum = 3.5;		
+	private double percMat = 2.5;
+	private double percMob = 1.2;
 
-	private double percFa1 = 1.10;
-	private double percBa1 = 1.13;
+	private double percFa1 = 1;
+	private double percBa1 = 1.3;
 
-	private double percFa2 = 1.15;
-	private double percBa2 = 1.18;
-
+	private double percFa2 = 1.5;
+	private double percBa2 = 1.8;
+	
 	private double nB; // number of black pawn
 	private double nR; // number of red pawn
 
@@ -50,8 +61,8 @@ public class BBEvaluator5 implements HeuristicInterface {
 		DipoleConf dc = (DipoleConf) c;
 		pRed = dc.getpRed();
 		pBlack = dc.getpBlack();
-//		calculateValBlack(dc);
-//		calculateValRed(dc);
+		calculateValBlack(dc);
+		calculateValRed(dc);
 		materialR = materialR(dc);
 		materialB = materialB(dc);
 		nB = calculatePercentage(dc.pawnCount(pBlack), 12);
@@ -61,13 +72,9 @@ public class BBEvaluator5 implements HeuristicInterface {
 
 		double eval;
 		if (c.isBlack()) {
-			calculateValBlack(dc, percFa2, percBa2);
-			calculateValRed(dc, percFa1, percBa1);
 			eval = (nR*percNum + materialR*percMat + mobilityR*percMob + frontAttackR *percFa2+ backAttackR*percBa2)
 					- (nB*percNum + materialB*percMat + mobilityB*percMob + frontAttackB *percFa1+ backAttackB*percBa1);
 		} else {
-			calculateValBlack(dc, percFa1, percBa1);
-			calculateValRed(dc, percFa2, percBa2);
 			eval = (nR*percNum + materialR*percMat + mobilityR*percMob + frontAttackR*percFa1 + backAttackR*percBa1)
 					- (nB*percNum + materialB*percMat + mobilityB*percMob + frontAttackB*percFa2 + backAttackB*percBa2);
 		}
@@ -78,8 +85,8 @@ public class BBEvaluator5 implements HeuristicInterface {
 		DipoleConf dc = (DipoleConf) c;
 		pRed = dc.getpRed();
 		pBlack = dc.getpBlack();
-//		calculateValBlack(dc);
-//		calculateValRed(dc);
+		calculateValBlack(dc);
+		calculateValRed(dc);
 		materialR = materialR(dc);
 		materialB = materialB(dc);
 		nB = calculatePercentage(dc.pawnCount(pBlack), 12);
@@ -88,13 +95,9 @@ public class BBEvaluator5 implements HeuristicInterface {
 //		nR = calculatePercentage(dc.pawnCount(pRed), 12, percNum);
 		double eval;
 		if (c.isBlack()) {
-			calculateValBlack(dc, percFa2, percBa2);
-			calculateValRed(dc, percFa1, percBa1);
 			eval = (nB*percNum + materialB*percMat + mobilityB*percMob + frontAttackB*percFa1 + backAttackB*percBa1)
 					- (nR*percNum + materialR*percMat + mobilityR*percMob + frontAttackR*percFa2 + backAttackR*percBa2);
 		} else {
-			calculateValBlack(dc, percFa1, percBa1);
-			calculateValRed(dc, percFa2, percBa2);
 			eval = (nB*percNum + materialB*percMat + mobilityB*percMob + frontAttackB*percFa2 + backAttackB*percBa2)
 					- (nR*percNum + materialR*percMat + mobilityR*percMob + frontAttackR*percFa1 + backAttackR*percBa1);
 		}
@@ -125,7 +128,7 @@ public class BBEvaluator5 implements HeuristicInterface {
 //		return eval;
 //	}
 
-	private void calculateValRed(DipoleConf c, double percFa, double percBa) {
+	private void calculateValRed(DipoleConf c) {
 		long pB = pBlack;
 		long pR = pRed;
 		mobilityR = 0;
@@ -155,7 +158,7 @@ public class BBEvaluator5 implements HeuristicInterface {
 	 * @return number of mobility (quiet move), number of backAttack and number of
 	 *         frontAttack
 	 */
-	private void calculateValBlack(DipoleConf c, double percFa, double percBa) {
+	private void calculateValBlack(DipoleConf c) {
 		long pB = Board.flip180(pBlack);
 		long pR = Board.flip180(pRed);
 		mobilityB = 0;
@@ -235,6 +238,8 @@ public class BBEvaluator5 implements HeuristicInterface {
 //			return 0;
 //		return obtained * percentage / total;
 //	}3:15=x:100   
+	
+	
 
 	public void print() {
 		System.out.println("MatR = " + materialR + "   MatB = " + materialB + "\n MobR = " + mobilityR + "   MobB = "

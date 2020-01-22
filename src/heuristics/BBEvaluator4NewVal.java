@@ -7,6 +7,12 @@ import representation.Conf;
 import representation.Conf.Status;
 import representation.DipoleConf;
 
+/*
+ * Come BBEval4 ma cambia solo 
+ * per il valPosition
+ * */
+
+
 public class BBEvaluator4NewVal implements HeuristicInterface {
 	private int val[] = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 }; // valore delle pedine
 //	private double valPositionR[] = { 2, 1.75, 1.50, 1.25, 1, 0.6, 0.4, 0.2 }; // valore della posizione in base alla riga
@@ -15,11 +21,11 @@ public class BBEvaluator4NewVal implements HeuristicInterface {
 //	private double valPositionR[] = { 2, 2, 4, 5, 4, 2, 1, 0 }; // valore della posizione in base alla riga
 //	private double valPositionB[] = { 0, 1, 2, 4, 5, 4, 2, 2 };
 
-	private double valPositionR[] = { 2, 2, 3, 3.5, 2.5, 1.5, 1, 0 }; // valore della posizione in base alla riga
-	private double valPositionB[] = { 0, 1, 1.5, 2.5, 3.5, 3, 2, 2 };
+//	private double valPositionR[] = { 2, 2, 3, 3.5, 2.5, 1.5, 1, 0 }; // valore della posizione in base alla riga
+//	private double valPositionB[] = { 0, 1, 1.5, 2.5, 3.5, 3, 2, 2 };
 	
-//	private double valPositionR[] = { 2, 2, 4, 4, 4, 2, 1, 1 }; // valore della posizione in base alla riga
-//	private double valPositionB[] = { 1, 1, 2, 4, 4, 4, 2, 2 };
+	private double valPositionR[] = { 3.5, 3.5, 4, 3.5, 2.5, 1.5, 1, 0 }; // valore della posizione in base alla riga
+	private double valPositionB[] = { 0, 1, 1.5, 2.5, 3.5, 4, 3.5, 3.5 };
 	
 	private double mobilityB;
 	private double backAttackB;
@@ -31,16 +37,11 @@ public class BBEvaluator4NewVal implements HeuristicInterface {
 	private double materialB;
 	private long pRed;
 	private long pBlack;
-	private int maxMat = 35;
+//	private int maxMat = 35;
+	private int maxMat = 48;
 	private int maxMob = 30;
 	private int maxFA = 13;
 	private int maxBA = 13;
-
-	private int percNum = 35;
-	private int percMat = 20;
-	private int percMob = 12;
-	private int percFa = 15;
-	private int percBa = 18;
 
 	private double nB; // number of black pawn
 	private double nR; // number of red pawn

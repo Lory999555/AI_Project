@@ -50,10 +50,10 @@ public class ABAgent implements AlgorithmInterface {
 			return null;
 		} else if (conf.getStatus() == Status.BlackWon) {
 			evaluatednodes++;
-			return new MoveValue(move, -5000);
+			return new MoveValue(move, -50000);
 		} else if (conf.getStatus() == Status.RedWon) {
 			evaluatednodes++;
-			return new MoveValue(move, 5000);
+			return new MoveValue(move, 50000);
 		} else if ((depth == 0)) {
 			evaluatednodes++;
 			return new MoveValue(move, hi.evaluate_R(conf));
@@ -111,11 +111,11 @@ public class ABAgent implements AlgorithmInterface {
 			return null;
 		} else if (conf.getStatus() == Status.BlackWon) {
 			evaluatednodes++;
-			return new MoveValue(move, 5000);
+			return new MoveValue(move, 50000);
 
 		} else if (conf.getStatus() == Status.RedWon) {
 			evaluatednodes++;
-			return new MoveValue(move, -5000);
+			return new MoveValue(move, -50000);
 		} else if ((depth == 0)) {
 			evaluatednodes++;
 			return new MoveValue(move, hi.evaluate_B(conf));
