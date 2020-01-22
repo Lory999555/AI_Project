@@ -52,7 +52,7 @@ public class Main {
 	public static boolean blackPlayer;
 
 	public static void main(String[] args) throws InvalidActionException, CloneNotSupportedException, PrinterException {
-		boolean server = true;
+		boolean server = false;
 		boolean enc = false;
 		LAVORAMU();
 		
