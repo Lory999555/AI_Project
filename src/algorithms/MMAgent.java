@@ -166,4 +166,10 @@ public class MMAgent implements AlgorithmInterface {
 		return (System.currentTimeMillis() > searchCutoff - 30);
 	}
 
+	@Override
+	public void warmUp(long millisec) {
+		// TODO Auto-generated method stub
+		
+	}
+
 }

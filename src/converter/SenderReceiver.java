@@ -23,16 +23,22 @@ public class SenderReceiver extends Thread {
 	private String status;
 	private String move;
 	private Boolean end;
+	int port;
 
-	public SenderReceiver() {
+	public SenderReceiver(InetAddress ip, int port) {
+		this.port=port;
+		this.addr=ip;
 	}
 
 	@Override
 	public void run() {
 		try {
-			addr = InetAddress.getLocalHost();
+			
+			//addr = InetAddress.getLocalHost();
+			//port = 51111;
+			
 			// creazione socket
-			socket = new Socket(addr, 51111);
+			socket = new Socket(addr, port);
 			// creazione stream di input da socket
 			InputStreamReader isr = new InputStreamReader(socket.getInputStream());
 			in = new BufferedReader(isr);
@@ -64,7 +70,16 @@ public class SenderReceiver extends Thread {
 					else
 						Main.blackPlayer = false;
 				}
-				if (serverInfo[0].equals("OPPONENT_MOVE")) {
+				else if (serverInfo[0].equals("MESSAGE") && serverInfo[1].equals("All")) {
+					status="MESSAGE All players connected";
+					try {
+						core.Main.algSem.release();
+						core.Main.srSem.acquire();
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
+				}
+				else if (serverInfo[0].equals("OPPONENT_MOVE")) {
 					status = "OPPONENT_MOVE";
 					move = serverInfo[1];
 					try {
@@ -74,7 +89,7 @@ public class SenderReceiver extends Thread {
 						e.printStackTrace();
 					}
 				}
-				if (serverInfo[0].equals("YOUR_TURN")) {
+				else if (serverInfo[0].equals("YOUR_TURN")) {
 					status="YOUR_TURN";
 					try {
 						core.Main.algSem.release();

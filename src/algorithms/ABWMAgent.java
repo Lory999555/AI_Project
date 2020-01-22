@@ -138,12 +138,12 @@ public class ABWMAgent implements AlgorithmInterface {
 			return new MoveValue(move, hi.evaluate_R(conf));
 		} else if (conf.getStatus() == Status.BlackWon) {
 			evaluatednodes++;
-			return new MoveValue(move, -5000);
+			return new MoveValue(move, -50000);
 		}
 
 		else if (conf.getStatus() == Status.RedWon) {
 			evaluatednodes++;
-			return new MoveValue(move, 5000);
+			return new MoveValue(move, 50000);
 		}
 
 		// recursive
@@ -249,11 +249,11 @@ public class ABWMAgent implements AlgorithmInterface {
 			return new MoveValue(move, hi.evaluate_B(conf));
 		} else if (conf.getStatus() == Status.BlackWon) {
 			evaluatednodes++;
-			return new MoveValue(move, 5000);
+			return new MoveValue(move, 50000);
 
 		} else if (conf.getStatus() == Status.RedWon) {
 			evaluatednodes++;
-			return new MoveValue(move, -5000);
+			return new MoveValue(move, -50000);
 		}
 
 		// recursive
@@ -367,6 +367,11 @@ public class ABWMAgent implements AlgorithmInterface {
 				.indexOf("-agentlib:jdwp") > 0)
 			return false;
 		return (System.currentTimeMillis() > searchCutoff - 30);
+	}
+
+	@Override
+	public void warmUp(long millisec) {
+		System.out.println("ciao");
 	}
 
 //	private boolean strongTimeUp() {

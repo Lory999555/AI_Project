@@ -256,4 +256,10 @@ public class ABAgent implements AlgorithmInterface {
 			return false;
 		return (System.currentTimeMillis() > searchCutoff - 30);
 	}
+
+	@Override
+	public void warmUp(long millisec) {
+		System.out.println("ciao2");
+		
+	}
 }

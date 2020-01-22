@@ -135,4 +135,11 @@ public class NMWMAgent implements AlgorithmInterface {
 		return alpha;
 	}
 
+
+	@Override
+	public void warmUp(long millisec) {
+		// TODO Auto-generated method stub
+		
+	}
+
 }

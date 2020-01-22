@@ -550,4 +550,10 @@ public class MTDFAgent implements AlgorithmInterface {
 		return new MoveValue(bestMove, value);
 	}
 
+	@Override
+	public void warmUp(long millisec) {
+		// TODO Auto-generated method stub
+		
+	}
+
 }

@@ -3,6 +3,8 @@ package core;
 import java.awt.print.PrinterException;
 import java.io.FileNotFoundException;
 import java.io.PrintStream;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -52,11 +54,18 @@ public class Main {
 	public static boolean blackPlayer;
 
 	public static void main(String[] args) throws InvalidActionException, CloneNotSupportedException, PrinterException {
-		boolean server = false;
+		boolean server = true;
 		boolean enc = false;
 		LAVORAMU();
 		
 		PrintStream fileOut;
+		
+		InetAddress ip=null;
+		try {
+			ip = InetAddress.getByName(args[0]);
+		} catch (UnknownHostException e) {
+		}
+		int port = Integer.parseInt(args[1]);
 		
 		//serve per creare un log e non perdere nessuna info.
 		//il file deve già esistere senno probabilmente da errore!
@@ -80,9 +89,12 @@ public class Main {
 		
 
 		//true perchè è maximazer
-		ai_R = new ABAgent(hi4, false, 5, 15);
+		ai_R = new ABAgent(hi5, false, 5, 15);
 		
-		ai_B = new MTDFAgent(hi4, true, 5, 15);
+		ai_B = new ABWMAgent(hi5, true, 5, 15);
+		
+		
+		
 		
 		aienc_R = new ABAgentEnc(hi4, false, 5, 15);
 		
@@ -95,9 +107,9 @@ public class Main {
 
 		if (server) {
 			if(enc)
-				startServerEnc();
+				startServerEnc(ip,port);
 			else
-				startServer();
+				startServer(ip,port);
 		} else {
 
 			while (state.getStatus() == Status.Ongoing) {
@@ -147,17 +159,25 @@ public class Main {
 
 	}
 	
-	public static void startServer() throws InvalidActionException, CloneNotSupportedException {
+	public static void startServer(InetAddress ip,int port) throws InvalidActionException, CloneNotSupportedException {
 		// blackPlayer = false;
-		SenderReceiver sr = new SenderReceiver();
+		SenderReceiver sr = new SenderReceiver(ip,port);
 		sr.start();
 		ConverterMove cm = new ConverterMove();
 		// int type = 11;
 		while (true) {
 			try {
 				algSem.acquire();
-
-				if (sr.getStatus().equals("OPPONENT_MOVE")) {
+				
+				if (sr.getStatus().equals("MESSAGE All players connected")) {
+					if (Main.blackPlayer) {
+						System.out.println();
+						ai_B.warmUp(15000);
+					} else {
+						ai_R.warmUp(15000);	
+					}
+				}
+				else if (sr.getStatus().equals("OPPONENT_MOVE")) {
 					if (Main.blackPlayer) {
 						move_R = cm.unpacking(sr.getMove(), state);
 						state = move_R.applyTo(state);
@@ -166,7 +186,7 @@ public class Main {
 						state = move_B.applyTo(state);
 					}
 				}
-
+				
 				else if (sr.getStatus().equals("YOUR_TURN")) {
 					if (Main.blackPlayer) {
 						move_B = ai_B.compute(state);
@@ -198,18 +218,26 @@ public class Main {
 		}
 	}
 	
-	public static void startServerEnc() throws InvalidActionException, CloneNotSupportedException {
+	public static void startServerEnc(InetAddress ip,int port) throws InvalidActionException, CloneNotSupportedException {
 		// blackPlayer = false;
 		dp=new DipoleMove();
-		SenderReceiver sr = new SenderReceiver();
+		SenderReceiver sr = new SenderReceiver(ip,port);
 		sr.start();
 		ConverterMove cm = new ConverterMove();
 		// int type = 11;
 		while (true) {
 			try {
 				algSem.acquire();
+				
+				if (sr.getStatus().equals("MESSAGE All players connected")) {
+					if (Main.blackPlayer) {
+						ai_B.warmUp(15000);
+					} else {
+						ai_R.warmUp(15000);	
+					}
+				}
 
-				if (sr.getStatus().equals("OPPONENT_MOVE")) {
+				else if (sr.getStatus().equals("OPPONENT_MOVE")) {
 					if (Main.blackPlayer) {
 						movenc_R = cm.unpackingEnc(sr.getMove(), state);
 						state = dp.applyToEnc(state,movenc_R);
