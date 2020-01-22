@@ -13,17 +13,14 @@ import representation.DipoleMove;
  * 
  * OOP version for passing results
  */
-public class ABAgent implements AlgorithmInterface {
-
-	public static double tot = 0;
-	public static double cont = 0;
+public class ABAgentFix implements AlgorithmInterface {
 
 	private int searchednodes = 0;
 	private int evaluatednodes = 0;
 	private boolean ibreak;
 	private int maxDepth;
 	private int startDepth;
-
+	
 	private int alpha;
 	private int beta;
 
@@ -38,7 +35,7 @@ public class ABAgent implements AlgorithmInterface {
 		MAX, MIN
 	};
 
-	public ABAgent(HeuristicInterface hi, boolean blackPlayer, int startDepth, int maxDepth) {
+	public ABAgentFix(HeuristicInterface hi, boolean blackPlayer, int startDepth, int maxDepth) {
 		this.startDepth = startDepth;
 		this.maxDepth = maxDepth;
 		this.hi = hi;
@@ -60,10 +57,10 @@ public class ABAgent implements AlgorithmInterface {
 			return new MoveValue(move, hi.evaluate_R(conf));
 		} else if (conf.getStatus() == Status.BlackWon) {
 			evaluatednodes++;
-			return new MoveValue(move, -50000);
+			return new MoveValue(move, -5000);
 		} else if (conf.getStatus() == Status.RedWon) {
 			evaluatednodes++;
-			return new MoveValue(move, 50000);
+			return new MoveValue(move, 5000);
 		}
 		// recursive
 		if (step == Ply.MAX) { // max step
@@ -100,6 +97,9 @@ public class ABAgent implements AlgorithmInterface {
 					break;
 			}
 		}
+		
+		this.alpha=alpha;
+		this.beta=beta;
 
 		return new MoveValue(bestMove, value);
 	}
@@ -121,11 +121,11 @@ public class ABAgent implements AlgorithmInterface {
 			return new MoveValue(move, hi.evaluate_B(conf));
 		} else if (conf.getStatus() == Status.BlackWon) {
 			evaluatednodes++;
-			return new MoveValue(move, 50000);
+			return new MoveValue(move, 5000);
 
 		} else if (conf.getStatus() == Status.RedWon) {
 			evaluatednodes++;
-			return new MoveValue(move, -50000);
+			return new MoveValue(move, -5000);
 		}
 		// recursive
 		if (step == Ply.MAX) { // max step
@@ -161,6 +161,10 @@ public class ABAgent implements AlgorithmInterface {
 					break;
 			}
 		}
+		
+		this.alpha=alpha;
+		this.beta=beta;
+
 		return new MoveValue(bestMove, value);
 	}
 
@@ -169,82 +173,35 @@ public class ABAgent implements AlgorithmInterface {
 		this.ibreak = false;
 		evaluatednodes = 0;
 		searchednodes = 0;
-		alpha = Integer.MIN_VALUE;
-		beta = Integer.MAX_VALUE;
+		this.alpha = Integer.MIN_VALUE;
+		this.beta = Integer.MAX_VALUE;
 		MoveValue newBest = null;
 		MoveValue oldBest = null;
 		int d = startDepth;
 		while (!timeUp() && d <= maxDepth) {
 			oldBest = newBest;
 			if (!this.blackPlayer)
-				newBest = alphaBeta_R(conf, null, alpha, beta, d, Ply.MAX);
+				newBest = alphaBeta_R(conf, null, this.alpha, this.beta, d, Ply.MAX);
 			else
-				newBest = alphaBeta_B(conf, null, alpha, beta, d, Ply.MAX);
+				newBest = alphaBeta_B(conf, null, this.alpha, this.beta, d, Ply.MAX);
 			d++;
 
 		}
-
-		// craft a specific moves
-		if (oldBest.move == null) {
+		
+		//craft a specific moves
+		if(oldBest.move == null) {
 			System.out.println("Null movement");
 			return conf.nullMove();
 		}
 
 		if (this.ibreak) {
-			tot += (d - 2);
-			cont++;
 			System.out.println("\nEvaluate: " + oldBest.value + "\nEvaluatedNodes: " + evaluatednodes
-					+ "\nSearchedNodes :" + searchednodes + "\ndepth :" + (d - 2) + "\ndepth avg :" + (tot / cont));
+					+ "\nSearchedNodes :" + searchednodes + "\ndepth :" + (d - 2));
 			return oldBest.move;
 		} else {
-			tot += d--;
-			cont++;
 			System.out.println("\nEvaluate: " + newBest.value + "\nEvaluatedNodes: " + evaluatednodes
-					+ "\nSearchedNodes :" + searchednodes + "\ndepth :" + (d--) + "\ndepth avg :" + (tot / cont));
+					+ "\nSearchedNodes :" + searchednodes + "\ndepth :" + (d--));
 			return newBest.move;
-
-		}
-
-	}
-	
-	public MoveValue computeM(Conf conf) {
-		this.searchCutoff = System.currentTimeMillis() + MAX_RUN_TIME;
-		this.ibreak = false;
-		evaluatednodes = 0;
-		searchednodes = 0;
-		alpha = Integer.MIN_VALUE;
-		beta = Integer.MAX_VALUE;
-		MoveValue newBest = null;
-		MoveValue oldBest = null;
-		int d = startDepth;
-		while (!timeUp() && d <= maxDepth) {
-			
-			if (!this.blackPlayer)
-				newBest = alphaBeta_R(conf, null, alpha, beta, d, Ply.MAX);
-			else
-				newBest = alphaBeta_B(conf, null, alpha, beta, d, Ply.MAX);
-			d++;
-			oldBest = newBest;
-		}
-
-		// craft a specific moves
-		if (oldBest.move == null) {
-			System.out.println("Null movement");
-			return null;
-		}
-
-		if (this.ibreak) {
-			tot += (d - 2);
-			cont++;
-//			System.out.println("\nEvaluate: " + oldBest.value + "\nEvaluatedNodes: " + evaluatednodes
-//					+ "\nSearchedNodes :" + searchednodes + "\ndepth :" + (d - 2) + "\ndepth avg :" + (tot / cont));
-			return oldBest;
-		} else {
-			tot += d--;
-			cont++;
-//			System.out.println("\nEvaluate: " + newBest.value + "\nEvaluatedNodes: " + evaluatednodes
-//					+ "\nSearchedNodes :" + searchednodes + "\ndepth :" + (d--) + "\ndepth avg :" + (tot / cont));
-			return newBest;
 
 		}
 

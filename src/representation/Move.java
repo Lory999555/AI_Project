@@ -17,6 +17,8 @@ public interface Move {
 	 */
 	public Conf applyTo(Conf input);
 	
+	public Conf applyToEnc(Conf input,int code);
+	
 	/**
 	 * 
 	 * 

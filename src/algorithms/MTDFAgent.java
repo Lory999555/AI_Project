@@ -24,11 +24,13 @@ public class MTDFAgent implements AlgorithmInterface {
 		public int depth;
 		public int upperbound;
 		public int lowerbound;
-
+		public int value;
+		
 		public TransEntry() {
 			this.depth = 0;
 			this.upperbound = Integer.MAX_VALUE;
 			this.lowerbound = Integer.MIN_VALUE;
+			this.value = 0;
 		}
 	}
 
@@ -37,23 +39,31 @@ public class MTDFAgent implements AlgorithmInterface {
 	}
 
 	// for testing purpose
+	public static double tot = 0;
+	public static double cont = 0;
 	private int searchednodes = 0;
 	private int evaluatednodes = 0;
-	private int searchednodesold;
+	private int searchednodesold = 0;
 	private int evaluatednodesold;
 	private int maxDepth;
 	private int startDepth;
+	
+	private int guess= 0;
 
-	private static int MAX_RECORD = 20000;
+	private static int MAX_RECORD = 200000;
 	private static long MAX_RUN_TIME = 1000; // maximum runtime in milliseconds
 
 	// private HashMap<Long, TransEntry> transTable;
 	private Map<Long, TransEntry> transTable;
+	private Map<Long, TransEntry> transTablEvaluated;
 	private long searchCutoff;
 	private long[][] zobristTable;
 	private HeuristicInterface hi;
 	private boolean blackPlayer;
 	private boolean ibreak = false;
+	
+	private ABAgent ab_R;
+	private ABAgent ab_B;
 
 	public MTDFAgent(HeuristicInterface hi, boolean blackPlayer, int startDepth, int maxDepth) {
 		this.startDepth = startDepth;
@@ -70,7 +80,9 @@ public class MTDFAgent implements AlgorithmInterface {
 		}
 
 		transTable = new TranspositionTable<Long, TransEntry>(MAX_RECORD);
-
+		transTablEvaluated = new TranspositionTable<Long, TransEntry>(MAX_RECORD);
+		ab_R= new ABAgent(hi, false, startDepth,startDepth );
+		ab_B= new ABAgent(hi, true, startDepth,startDepth );
 	}
 
 	private boolean timeUp() {
@@ -105,19 +117,27 @@ public class MTDFAgent implements AlgorithmInterface {
 		this.searchednodesold = 0;
 		this.ibreak = false;
 		int depth = startDepth;
-		int guess = 0;
+//		int guess = Integer.MAX_VALUE;
 		MoveValue newBest = null;
 		MoveValue oldBest = null;
-
 		if (this.blackPlayer) {
 
 			this.searchCutoff = System.currentTimeMillis() + MAX_RUN_TIME;
+			newBest= ab_B.computeM(root);
+			guess=newBest.value;
+			depth++;
+//			guess= 0;
 			while (!timeUp() && (depth < maxDepth)) {
 				evaluatednodes = 0;
 				searchednodes = 0;
 				oldBest = newBest;
+//				System.out.println("guesssssssssssssssssssssssssssssssssssssssssssss: "+guess);
+//				System.out.println(newBest.move.toString());
+//				System.out.println("dddddddddddddddddddddddddddddddddddddddddddddddd: "+depth);
+//				System.out.println("wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww: "+searchednodesold);
 				newBest = MTDF_B(root, guess, depth);
-
+				transTablEvaluated.clear();
+				
 				if (!this.ibreak) {
 					evaluatednodesold = evaluatednodes;
 					searchednodesold = searchednodes;
@@ -130,23 +150,31 @@ public class MTDFAgent implements AlgorithmInterface {
 			}
 
 			if (this.ibreak) {
-				System.out.println("\nEvaluatedNodes: " + evaluatednodesold + "\nSearchedNodes :" + searchednodesold
-						+ "\ndepth :" + (depth - 2));
+				tot += (depth - 1);
+				cont++;
+				System.out.println("\nEvaluate: " + oldBest.value + "\nEvaluatedNodes: " + evaluatednodes
+						+ "\nSearchedNodes :" + searchednodes + "\ndepth :" + (depth - 1) + "\ndepth avg :" + (tot / cont));
 				return oldBest.move;
 			} else {
-				System.out.println("\nEvaluatedNodes: " + evaluatednodes + "\nSearchedNodes :" + searchednodes
-						+ "\ndepth :" + (depth--));
+				tot += depth-1;
+				cont++;
+				System.out.println("\nEvaluate: " + newBest.value + "\nEvaluatedNodes: " + evaluatednodes
+						+ "\nSearchedNodes :" + searchednodes + "\ndepth :" + (depth-1) + "\ndepth avg :" + (tot / cont));
 				return newBest.move;
 
 			}
 
 		} else {
-
+			
 			this.searchCutoff = System.currentTimeMillis() + MAX_RUN_TIME;
+			newBest= ab_R.computeM(root);
+			guess=newBest.value;
+			depth++;
 			while (!timeUp() && (depth < maxDepth)) {
 				evaluatednodes = 0;
 				searchednodes = 0;
 				oldBest = newBest;
+				System.out.println("guesssssssssssssssssssssssssssssssssssssssssssss: "+guess);
 				newBest = MTDF_R(root, guess, depth);
 
 				if (!this.ibreak) {
@@ -161,12 +189,16 @@ public class MTDFAgent implements AlgorithmInterface {
 			}
 
 			if (this.ibreak) {
-				System.out.println("\nEvaluatedNodes: " + evaluatednodesold + "\nSearchedNodes :" + searchednodesold
-						+ "\ndepth :" + (depth - 2));
+				tot += (depth - 1);
+				cont++;
+				System.out.println("\nEvaluate: " + oldBest.value + "\nEvaluatedNodes: " + evaluatednodes
+						+ "\nSearchedNodes :" + searchednodes + "\ndepth :" + (depth-1) + "\ndepth avg :" + (tot / cont));
 				return oldBest.move;
 			} else {
-				System.out.println("\nEvaluatedNodes: " + evaluatednodes + "\nSearchedNodes :" + searchednodes
-						+ "\ndepth :" + (depth--));
+				tot += depth;
+				cont++;
+				System.out.println("\nEvaluate: " + newBest.value + "\nEvaluatedNodes: " + evaluatednodes
+						+ "\nSearchedNodes :" + searchednodes + "\ndepth :" + (depth) + "\ndepth avg :" + (tot / cont));
 				return newBest.move;
 
 			}
@@ -188,16 +220,25 @@ public class MTDFAgent implements AlgorithmInterface {
 		value = f;
 		upperbound = Integer.MAX_VALUE;
 		lowerbound = Integer.MIN_VALUE;
-		beta = Math.max(value, lowerbound + 1);
+		if(value==lowerbound) {
+			beta = value +1;
+		}else {
+			beta = value; 
+		}
 		mv = alphaBetaWithMemory_R(state, null, beta - 1, beta, depth, Ply.MAX);
 		while ((lowerbound < upperbound) && !this.ibreak) {
-			beta = Math.max(value, lowerbound + 1);
+			if(value==lowerbound) {
+				beta = value +1;
+			}else {
+				beta = value; 
+			}
 			mv = alphaBetaWithMemory_R(state, mv.move, beta - 1, beta, depth, Ply.MAX);
 
 			if (mv == null)
 				return null;
 
 			value = mv.value;
+			
 			if (value < beta) {
 				upperbound = value;
 			} else {
@@ -216,10 +257,20 @@ public class MTDFAgent implements AlgorithmInterface {
 		value = f;
 		upperbound = Integer.MAX_VALUE;
 		lowerbound = Integer.MIN_VALUE;
-		beta = Math.max(value, lowerbound + 1);
+		
+		if(value==lowerbound) {
+			beta = value +1;
+		}else {
+			beta = value; 
+		}
 		mv = alphaBetaWithMemory_B(state, null, beta - 1, beta, depth, Ply.MAX);
+		
 		while ((lowerbound < upperbound) && !this.ibreak) {
-			beta = Math.max(value, lowerbound + 1);
+			if(value==lowerbound) {
+				beta = value +1;
+			}else {
+				beta = value; 
+			}
 			mv = alphaBetaWithMemory_B(state, mv.move, beta - 1, beta, depth, Ply.MAX);
 
 			if (mv == null)
@@ -250,12 +301,12 @@ public class MTDFAgent implements AlgorithmInterface {
 	 */
 	private MoveValue alphaBetaWithMemory_R(Conf conf, Move move, int alpha, int beta, int depth, Ply step) {
 		searchednodes++;
-
+		
 		if (timeUp()) {
 			this.ibreak = true;
 			return null;
 		}
-
+		
 		TransEntry trans;
 		long hash = zobristHash(conf.getForHash());
 
@@ -280,15 +331,25 @@ public class MTDFAgent implements AlgorithmInterface {
 
 		// base case
 		if ((depth == 0)) {
-			evaluatednodes++;
-			return new MoveValue(move, hi.evaluate_R(conf));
+			
+			if(transTablEvaluated.containsKey(hash)) {
+				trans = transTablEvaluated.get(hash);
+				return new MoveValue(move,trans.value);
+			}else {
+				evaluatednodes++;
+				int val = hi.evaluate_R(conf);
+				trans = transTablEvaluated.getOrDefault(hash, new TransEntry());
+				trans.value=val;
+				transTablEvaluated.put(hash, trans);
+				return new MoveValue(move,val);	
+			}
 		} else if (conf.getStatus() == Status.BlackWon) {
 			evaluatednodes++;
-			return new MoveValue(move, -5000);
+			return new MoveValue(move, -15000);
 
 		} else if (conf.getStatus() == Status.RedWon) {
 			evaluatednodes++;
-			return new MoveValue(move, 5000);
+			return new MoveValue(move, 15000);
 		}
 
 		// recursive
@@ -311,7 +372,7 @@ public class MTDFAgent implements AlgorithmInterface {
 					bestMove = childmv;
 				}
 				a = Math.max(a, value);
-				if (alpha >= beta)
+				if (value >= beta)
 					break; // prune
 			}
 
@@ -330,7 +391,7 @@ public class MTDFAgent implements AlgorithmInterface {
 					bestMove = childmv;
 				}
 				b = Math.min(b, value);
-				if (alpha >= beta)
+				if (value <=alpha)
 					break; // prune
 			}
 //			tmpList = null;
@@ -393,15 +454,30 @@ public class MTDFAgent implements AlgorithmInterface {
 
 		// base case
 		if ((depth == 0)) {
-			evaluatednodes++;
-			return new MoveValue(move, hi.evaluate_B(conf));
+			if(transTablEvaluated.containsKey(hash)) {
+				trans = transTablEvaluated.get(hash);
+				return new MoveValue(move,trans.value);
+			}else {
+				evaluatednodes++;
+				int val = hi.evaluate_B(conf);
+				if(val > 0) {
+					searchednodesold++;
+				}
+//				if(val == -595) {
+//					System.out.println(conf.toString()+ "\n");
+//				}
+				trans = transTablEvaluated.getOrDefault(hash, new TransEntry());
+				trans.value=val;
+				transTablEvaluated.put(hash, trans);
+				return new MoveValue(move,val);	
+			}
 		} else if (conf.getStatus() == Status.BlackWon) {
 			evaluatednodes++;
-			return new MoveValue(move, 5000);
+			return new MoveValue(move, 15000);
 
 		} else if (conf.getStatus() == Status.RedWon) {
 			evaluatednodes++;
-			return new MoveValue(move, -5000);
+			return new MoveValue(move, -15000);
 		}
 
 		// recursive
@@ -424,7 +500,7 @@ public class MTDFAgent implements AlgorithmInterface {
 					bestMove = childmv;
 				}
 				a = Math.max(a, value);
-				if (alpha >= beta)
+				if (value >= beta)
 					break; // prune
 			}
 
@@ -443,7 +519,7 @@ public class MTDFAgent implements AlgorithmInterface {
 					bestMove = childmv;
 				}
 				b = Math.min(b, value);
-				if (alpha >= beta)
+				if (value <= alpha)
 					break; // prune
 			}
 //			tmpList = null;

@@ -26,6 +26,12 @@ public interface Conf {
 	 */
 	@SuppressWarnings("rawtypes")
 	public List<Move> getActions();
+	
+	public List<Integer> getEncodingActions(Move m);
+	
+	public Move nullMove();
+	
+	public int nullMoveEnc();
 
 	/**
 	 * The estimated value of this State. Higher is better for the first player;
@@ -34,5 +40,6 @@ public interface Conf {
 	 * @return The estimated value of this State.
 	 */
 	public Status getStatus();
+
 
 }

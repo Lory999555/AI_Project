@@ -1,7 +1,5 @@
 package algorithms;
 
-import java.util.HashMap;
-
 import java.util.Random;
 
 import heuristics.HeuristicInterface;
@@ -17,6 +15,9 @@ import representation.Conf.Status;
  * OOP version for passing results
  */
 public class ABWMAgent implements AlgorithmInterface {
+
+	public static double tot = 0;
+	public static double cont = 0;
 
 	static enum Ply {
 		MAX, MIN
@@ -36,8 +37,6 @@ public class ABWMAgent implements AlgorithmInterface {
 
 	private int searchednodes = 0;
 	private int evaluatednodes = 0;
-	private int searchednodesold;
-	private int evaluatednodesold;
 	private int maxDepth;
 	private int startDepth;
 
@@ -49,7 +48,6 @@ public class ABWMAgent implements AlgorithmInterface {
 	private TranspositionTable<Long, TransEntry> transTable;
 	private long[][] zobristTable;
 	private boolean ibreak = false;
-	
 
 	public ABWMAgent(HeuristicInterface hi, boolean blackPlayer, int startDepth, int maxDepth) {
 		// init zobrist table
@@ -59,14 +57,16 @@ public class ABWMAgent implements AlgorithmInterface {
 		this.blackPlayer = blackPlayer;
 		Random prng = new Random();
 		zobristTable = new long[64][12];
+
 		for (int i = 0; i < 64; i++) {
 			for (int j = 0; j < 12; j++) {
 				zobristTable[i][j] = prng.nextLong();
 			}
 		}
 
+		// Provare con i conf senza hash
 		// init transposition table
-		transTable = new TranspositionTable<Long, TransEntry>(20000);
+		transTable = new TranspositionTable<Long, TransEntry>(500000);
 	}
 
 	private long zobristHash(long[] pieces) {
@@ -81,10 +81,23 @@ public class ABWMAgent implements AlgorithmInterface {
 				tmp ^= bit;
 				key ^= zobristTable[Board.getSquare(bit)][i];
 			}
-
 			i++;
 		}
 		return key;
+	}
+
+	private long zobristHash_2(long redP, long blackP) {
+		long key = 0;
+		int i = 0;
+		long tmp, bit;
+		tmp = redP ^ blackP;
+		while (tmp != 0) {
+			bit = tmp & -tmp;
+			tmp ^= bit;
+			key ^= zobristTable[Board.getSquare(bit)][0];
+		}
+		return key;
+
 	}
 
 	private MoveValue alphaBetaWithMemory_R(Conf conf, Move move, int alpha, int beta, int depth, Ply step) {
@@ -310,8 +323,6 @@ public class ABWMAgent implements AlgorithmInterface {
 	public Move compute(Conf conf) {
 		this.evaluatednodes = 0;
 		this.searchednodes = 0;
-		this.evaluatednodesold = 0;
-		this.searchednodesold = 0;
 		this.ibreak = false;
 		int alpha = Integer.MIN_VALUE;
 		int beta = Integer.MAX_VALUE;
@@ -321,8 +332,6 @@ public class ABWMAgent implements AlgorithmInterface {
 
 		int d = startDepth;
 		while (!timeUp() && d <= maxDepth) {
-			evaluatednodes = 0;
-			searchednodes = 0;
 			oldBest = newBest;
 			if (!this.blackPlayer)
 				newBest = alphaBetaWithMemory_R(conf, null, alpha, beta, d, Ply.MAX);
@@ -330,35 +339,33 @@ public class ABWMAgent implements AlgorithmInterface {
 				newBest = alphaBetaWithMemory_B(conf, null, alpha, beta, d, Ply.MAX);
 			d++;
 
-			if (!this.ibreak) {
-				evaluatednodesold = evaluatednodes;
-				searchednodesold = searchednodes;
-			}
-
 		}
 
-		
-		//controllare se è possibile togliere le cose per le versioni non old perchè
-		//forse non vengono mai usate in realtà!
-		
-		//vedere se è possibile tolgiere la maggior parte dei metodi timesUp andandoli
-		//a sostituire con il check di this.ibreak
+		// controllare se è possibile togliere le cose per le versioni non old perchè
+		// forse non vengono mai usate in realtà!
+
+		// vedere se è possibile tolgiere la maggior parte dei metodi timesUp andandoli
+		// a sostituire con il check di this.ibreak
 		if (this.ibreak) {
-			System.out.println("\nEvaluatedNodes: " + evaluatednodesold + "\nSearchedNodes :" + searchednodesold
-					+ "\ndepth :" + (d - 2));
+			tot += (d - 2);
+			cont++;
+			System.out.println("\nEvaluate: " + oldBest.value + "\nEvaluatedNodes: " + evaluatednodes
+					+ "\nSearchedNodes :" + searchednodes + "\ndepth :" + (d - 2) + "\ndepth avg :" + (tot / cont));
 			return oldBest.move;
 		} else {
-			System.out.println(
-					"\nEvaluatedNodes: " + evaluatednodes + "\nSearchedNodes :" + searchednodes + "\ndepth :" + (d--));
+			tot += d--;
+			cont++;
+			System.out.println("\nEvaluate: " + newBest.value + "\nEvaluatedNodes: " + evaluatednodes
+					+ "\nSearchedNodes :" + searchednodes + "\ndepth :" + (d--) + "\ndepth avg :" + (tot / cont));
 			return newBest.move;
 
 		}
 	}
 
 	private boolean timeUp() {
-//		if (java.lang.management.ManagementFactory.getRuntimeMXBean().getInputArguments().toString()
-//				.indexOf("-agentlib:jdwp") > 0)
-//			return false;
+		if (java.lang.management.ManagementFactory.getRuntimeMXBean().getInputArguments().toString()
+				.indexOf("-agentlib:jdwp") > 0)
+			return false;
 		return (System.currentTimeMillis() > searchCutoff - 30);
 	}
 

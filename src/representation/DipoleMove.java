@@ -12,7 +12,6 @@ public class DipoleMove implements Move {
 	private boolean black;
 	private typeMove tP;
 	private int dist;
-	
 
 	public DipoleMove(long fromSq, long toSq, int type, boolean black, typeMove tp, int dist) {
 		this.fromSq = fromSq;
@@ -25,8 +24,8 @@ public class DipoleMove implements Move {
 	}
 
 	public DipoleMove() {
-	}
-	
+	};
+
 	/**
 	 * encoding move in 23 bit: 6 fromSq + 6 toSq + 3 distance + 4 type + 1 color +
 	 * 3 move type
@@ -35,12 +34,12 @@ public class DipoleMove implements Move {
 	 * @param toSq
 	 * @param type
 	 * @param black
-	 * @param tp 0 backAttack; 1 frontattack; 2 quietmove; 3 merge; 4 death;
+	 * @param tp     0 backAttack; 1 frontattack; 2 quietmove; 3 merge; 4 death;
 	 * @return int
 	 */
 	public int encodingMove(int fromSq, int toSq, int type, boolean black, typeMove tp) {
-		System.out.println("f " + fromSq + ", to " + toSq + " = "
-				+ (Math.abs((fromSq >> 3) - (toSq >> 3)) + " -> " + (Math.abs((fromSq >> 3) - (toSq >> 3)) << 8)));
+//		System.out.println("f " + fromSq + ", to " + toSq + " = "
+//				+ (Math.abs((fromSq >> 3) - (toSq >> 3)) + " -> " + (Math.abs((fromSq >> 3) - (toSq >> 3)) << 8)));
 		return (fromSq << 17) | (toSq << 11) | (Math.abs((fromSq >> 3) - (toSq >> 3)) << 8) | (type << 4)
 				| ((black ? 1 : 0) << 3) | (tp.ordinal());
 
@@ -49,13 +48,14 @@ public class DipoleMove implements Move {
 	// distanza utilizzata dalle mosse death e dalle mosse back attack in quanto la
 	// distapnza gliela passiamo da parametri
 	public int encodingMove(int fromSq, int toSq, int dist, int type, boolean black, typeMove tp) {
-		System.out.println("f " + fromSq + ", to " + toSq + " = "
-				+ (Math.abs((fromSq >> 3) - (toSq >> 3)) + " -> " + (Math.abs((fromSq >> 3) - (toSq >> 3)) << 8)));
+//		System.out.println("f " + fromSq + ", to " + toSq + " = "
+//				+ (Math.abs((fromSq >> 3) - (toSq >> 3)) + " -> " + (Math.abs((fromSq >> 3) - (toSq >> 3)) << 8)));
 		return (fromSq << 17) | (toSq << 11) | (dist << 8) | (type << 4) | ((black ? 1 : 0) << 3) | (tp.ordinal());
 
 	}
 
-	//nella decodifica il toSQ/fromSQ corrisponde all'indice della casella e non ad una bitboard. 
+	// nella decodifica il toSQ/fromSQ corrisponde all'indice della casella e non ad
+	// una bitboard.
 	public void decodingMove(int code) {
 		tP = typeMove.values()[code & 0x7];
 		black = (((code & 0x8) >>> 3) == 1 ? true : false);
@@ -67,8 +67,8 @@ public class DipoleMove implements Move {
 
 	@Override
 	public String toString() {
-		return tP.name() + " from: " + Board.getSquare(fromSq) + " to " + Board.getSquare(toSq) + " type: " + type + " BLACK: " + black + " dist: "
-				+ dist;
+		return tP.name() + " from: " + Board.getSquare(fromSq) + " to " + Board.getSquare(toSq) + " type: " + type
+				+ " BLACK: " + black + " dist: " + dist;
 //		return "0";
 	}
 
@@ -80,10 +80,10 @@ public class DipoleMove implements Move {
 
 	@Override
 
-	public Conf applyTo(Conf input){
-		assert(input != null);
+	public Conf applyTo(Conf input) {
+		assert (input != null);
 		DipoleConf tmp = (DipoleConf) input;
-		DipoleConf res=null;
+		DipoleConf res = null;
 		try {
 			res = tmp.clone();
 		} catch (CloneNotSupportedException e) {
@@ -91,8 +91,10 @@ public class DipoleMove implements Move {
 			e.printStackTrace();
 		}
 		res.setBlack(!input.isBlack());
+		if(this.dist==0)
+			return res;
 		int cont;
-		assert(type < 12);
+		assert (type < 12);
 
 		// Mi indica se si va a muovere tutto lo stack oppure solo una minima parte
 		boolean allStack = (type - dist) == -1;
@@ -101,12 +103,16 @@ public class DipoleMove implements Move {
 
 		switch (this.tP) {
 		case QUIETMOVE:
-			
-			// elimina la pedina from dalla bitBoard che ne insica il tipo. Es se noi spostiamo
+
+			// elimina la pedina from dalla bitBoard che ne insica il tipo. Es se noi
+			// spostiamo
 			// una pedina da 6 andiamo ad elimniare questa pedina dal tipo 6
 			res.setBoard(type, res.getBoard(type) ^ fromSq);
-			//inseriamo nella casella di destinazione il numero di pedine spostate che corrisponde alla distanza meno 1
+			
+			// inseriamo nella casella di destinazione il numero di pedine spostate che
+			// corrisponde alla distanza meno 1
 			res.setBoard(dist - 1, res.getBoard(dist - 1) ^ toSq);
+			
 			if (tmp.isBlack()) {
 				if (allStack)
 					// se spostiamo tutto lo stack
@@ -153,8 +159,6 @@ public class DipoleMove implements Move {
 				}
 			}
 			break;
-			
-
 
 		case FRONTATTACK:
 			res.setBoard(type, res.getBoard(type) ^ fromSq);
@@ -236,17 +240,26 @@ public class DipoleMove implements Move {
 		return res;
 
 	}
-	
 
-	public Conf applyTo2(Conf input, int code) throws InvalidActionException, CloneNotSupportedException {
-		int cont = 0;
+	public Conf applyToEnc(Conf input, int code){
 		DipoleConf tmp = (DipoleConf) input;
-		DipoleConf res = tmp.clone();
+		DipoleConf res=null;
+		try {
+			res = tmp.clone();
+		} catch (CloneNotSupportedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		res.setBlack(!input.isBlack());
 		decodingMove(code);
-		fromSq= Board.squareToBitboard((int)fromSq);
-		toSq= Board.squareToBitboard((int)toSq);
+		fromSq = Board.squareToBitboard((int) fromSq);
+		toSq = Board.squareToBitboard((int) toSq);
+		
+		if(this.dist==0)
+			return res;
+		int cont;
 
+		assert(dist > 0);
 		boolean allStack = (type - dist) == -1;
 
 		long fromtoSq = fromSq ^ toSq;
@@ -288,8 +301,8 @@ public class DipoleMove implements Move {
 				} else {
 					res.setBoard(type - dist, res.getBoard(type - dist) ^ fromSq);
 				}
-			}else {
-				
+			} else {
+
 				if (allStack)
 					res.setpRed(tmp.getpRed() ^ fromSq);
 				else {
@@ -310,8 +323,7 @@ public class DipoleMove implements Move {
 			if (tmp.isBlack()) {
 				if (allStack) {
 					res.setpBlack(res.getpBlack() ^ fromtoSq);
-				}
-				else {
+				} else {
 					res.setBoard(type - dist, res.getBoard(type - dist) ^ fromSq);
 					res.setpBlack(res.getpBlack() | fromtoSq);
 				}
