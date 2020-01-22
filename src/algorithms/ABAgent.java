@@ -60,10 +60,10 @@ public class ABAgent implements AlgorithmInterface {
 			return new MoveValue(move, hi.evaluate_R(conf));
 		} else if (conf.getStatus() == Status.BlackWon) {
 			evaluatednodes++;
-			return new MoveValue(move, -5000);
+			return new MoveValue(move, -15000);
 		} else if (conf.getStatus() == Status.RedWon) {
 			evaluatednodes++;
-			return new MoveValue(move, 5000);
+			return new MoveValue(move, 15000);
 		}
 		// recursive
 		if (step == Ply.MAX) { // max step
@@ -121,11 +121,11 @@ public class ABAgent implements AlgorithmInterface {
 			return new MoveValue(move, hi.evaluate_B(conf));
 		} else if (conf.getStatus() == Status.BlackWon) {
 			evaluatednodes++;
-			return new MoveValue(move, 5000);
+			return new MoveValue(move, 15000);
 
 		} else if (conf.getStatus() == Status.RedWon) {
 			evaluatednodes++;
-			return new MoveValue(move, -5000);
+			return new MoveValue(move, -15000);
 		}
 		// recursive
 		if (step == Ply.MAX) { // max step
@@ -202,6 +202,49 @@ public class ABAgent implements AlgorithmInterface {
 			System.out.println("\nEvaluate: " + newBest.value + "\nEvaluatedNodes: " + evaluatednodes
 					+ "\nSearchedNodes :" + searchednodes + "\ndepth :" + (d--) + "\ndepth avg :" + (tot / cont));
 			return newBest.move;
+
+		}
+
+	}
+	
+	public MoveValue computeM(Conf conf) {
+		this.searchCutoff = System.currentTimeMillis() + MAX_RUN_TIME;
+		this.ibreak = false;
+		evaluatednodes = 0;
+		searchednodes = 0;
+		alpha = Integer.MIN_VALUE;
+		beta = Integer.MAX_VALUE;
+		MoveValue newBest = null;
+		MoveValue oldBest = null;
+		int d = startDepth;
+		while (!timeUp() && d <= maxDepth) {
+			
+			if (!this.blackPlayer)
+				newBest = alphaBeta_R(conf, null, alpha, beta, d, Ply.MAX);
+			else
+				newBest = alphaBeta_B(conf, null, alpha, beta, d, Ply.MAX);
+			d++;
+			oldBest = newBest;
+		}
+
+		// craft a specific moves
+		if (oldBest.move == null) {
+			System.out.println("Null movement");
+			return null;
+		}
+
+		if (this.ibreak) {
+			tot += (d - 2);
+			cont++;
+//			System.out.println("\nEvaluate: " + oldBest.value + "\nEvaluatedNodes: " + evaluatednodes
+//					+ "\nSearchedNodes :" + searchednodes + "\ndepth :" + (d - 2) + "\ndepth avg :" + (tot / cont));
+			return oldBest;
+		} else {
+			tot += d--;
+			cont++;
+//			System.out.println("\nEvaluate: " + newBest.value + "\nEvaluatedNodes: " + evaluatednodes
+//					+ "\nSearchedNodes :" + searchednodes + "\ndepth :" + (d--) + "\ndepth avg :" + (tot / cont));
+			return newBest;
 
 		}
 

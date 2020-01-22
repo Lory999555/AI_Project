@@ -81,7 +81,7 @@ public class Main {
 		//true perchè è maximazer
 		ai_R = new ABAgent(hi4, false, 5, 15);
 		
-		ai_B = new ABWMAgent(hi4, true, 5, 15);
+		ai_B = new MTDFAgent(hi4, true, 5, 15);
 		
 		aienc_R = new ABAgentEnc(hi4, false, 5, 15);
 		
