@@ -1,6 +1,5 @@
 package algorithms;
 
-
 import java.util.Random;
 
 import heuristics.HeuristicInterface;
@@ -16,7 +15,7 @@ import representation.Conf.Status;
  * OOP version for passing results
  */
 public class ABWMAgent implements AlgorithmInterface {
-	
+
 	public static double tot = 0;
 	public static double cont = 0;
 
@@ -49,7 +48,6 @@ public class ABWMAgent implements AlgorithmInterface {
 	private TranspositionTable<Long, TransEntry> transTable;
 	private long[][] zobristTable;
 	private boolean ibreak = false;
-	
 
 	public ABWMAgent(HeuristicInterface hi, boolean blackPlayer, int startDepth, int maxDepth) {
 		// init zobrist table
@@ -59,13 +57,14 @@ public class ABWMAgent implements AlgorithmInterface {
 		this.blackPlayer = blackPlayer;
 		Random prng = new Random();
 		zobristTable = new long[64][12];
+
 		for (int i = 0; i < 64; i++) {
 			for (int j = 0; j < 12; j++) {
 				zobristTable[i][j] = prng.nextLong();
 			}
 		}
 
-		//Provare con i conf senza hash
+		// Provare con i conf senza hash
 		// init transposition table
 		transTable = new TranspositionTable<Long, TransEntry>(500000);
 	}
@@ -82,10 +81,23 @@ public class ABWMAgent implements AlgorithmInterface {
 				tmp ^= bit;
 				key ^= zobristTable[Board.getSquare(bit)][i];
 			}
-
 			i++;
 		}
 		return key;
+	}
+
+	private long zobristHash_2(long redP, long blackP) {
+		long key = 0;
+		int i = 0;
+		long tmp, bit;
+		tmp = redP ^ blackP;
+		while (tmp != 0) {
+			bit = tmp & -tmp;
+			tmp ^= bit;
+			key ^= zobristTable[Board.getSquare(bit)][0];
+		}
+		return key;
+
 	}
 
 	private MoveValue alphaBetaWithMemory_R(Conf conf, Move move, int alpha, int beta, int depth, Ply step) {
@@ -243,9 +255,7 @@ public class ABWMAgent implements AlgorithmInterface {
 			evaluatednodes++;
 			return new MoveValue(move, -5000);
 		}
-		
-		
-		
+
 		// recursive
 		if (step == Ply.MAX) { // max step
 			value = Integer.MIN_VALUE;
@@ -331,12 +341,11 @@ public class ABWMAgent implements AlgorithmInterface {
 
 		}
 
-		
-		//controllare se è possibile togliere le cose per le versioni non old perchè
-		//forse non vengono mai usate in realtà!
-		
-		//vedere se è possibile tolgiere la maggior parte dei metodi timesUp andandoli
-		//a sostituire con il check di this.ibreak
+		// controllare se è possibile togliere le cose per le versioni non old perchè
+		// forse non vengono mai usate in realtà!
+
+		// vedere se è possibile tolgiere la maggior parte dei metodi timesUp andandoli
+		// a sostituire con il check di this.ibreak
 		if (this.ibreak) {
 			tot += (d - 2);
 			cont++;
