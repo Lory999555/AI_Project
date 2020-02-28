@@ -91,10 +91,20 @@ public class Board {
 													"NE","","NE", "","NW","","NW", "",
 													};
 	
-	public static final String[] deathNoteBDirection = {"","SE","", "SE","","SE","", "SE",
-													"SE","","S", "","S","","S", "",
+//	public static final String[] deathNoteBDirection = {"","SE","", "SE","","SE","", "SE",
+//													"SE","","S", "","S","","S", "",
+//													"","SE","", "SE","","SW","", "SW", 
+//													"SE","","SE", "","SE","","SW", "",
+//													"","SE","", "SE","","SW","", "SW",
+//													"SE","","SE", "","SW","","SW", "",
+//													"","SE","","SE","","SW","","SW",
+//													"SE","","SE", "","SW","","SW", "",
+//													};
+	
+	public static final String[] deathNoteBDirection = {"","SE","", "SE","","SW","", "SW",
+													"SE","","SE", "","SW","","SW", "",
 													"","SE","", "SE","","SW","", "SW", 
-													"SE","","SE", "","SE","","SW", "",
+													"SE","","SE", "","SW","","SW", "",
 													"","SE","", "SE","","SW","", "SW",
 													"SE","","SE", "","SW","","SW", "",
 													"","SE","","SE","","SW","","SW",

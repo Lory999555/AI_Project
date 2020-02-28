@@ -1,19 +1,11 @@
 package representation;
 
-import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
 import representation.DipoleMove.typeMove;
 
 public class DipoleConf implements Conf, Cloneable {
-
-	/*
-	 * private long p1=0; private long p2=0; private long p3=0; private long p4=0;
-	 * private long p5=0; private long p6=0; private long p7=0; private long p8=0;
-	 * private long p9=0; private long p10=0; private long p11=0; private long
-	 * p12=0;
-	 */
 
 	private long moves;
 
@@ -35,15 +27,8 @@ public class DipoleConf implements Conf, Cloneable {
 		this.pRed = 0x8L;
 		this.pBlack = 0x1000000000000000L;
 		this.black = false;
-//		this.pieces[1] = 0x1080000L;
-//		this.pieces[2] = 0x2000000008L;
-//		this.pieces[5] = 0x1000000000000000L;
-//		this.pRed = 0x2001000008L;
-//		this.pBlack = 0x1000000000080000L;
-//		this.black = true;
 
 	}
-
 
 	// ritorna una fila verticale di bit in corrispondenza dello square passato
 	private long rankMask(int sq) {
@@ -71,57 +56,6 @@ public class DipoleConf implements Conf, Cloneable {
 		int nort = -diag & (diag >> 31);
 		int sout = diag & (-diag >> 31);
 		return (maindia >>> sout) << nort;
-	}
-
-	// ritorna la rosa completa della pedina oresa in considerazione senza rimuovere
-	// le mosse impossibili
-	// e limitare i movimenti
-	private long getRose2(int sq) {
-		return rankMask(sq) | fileMask(sq) | diagonalMask(sq) | antiDiagMask(sq);
-	}
-
-	// rimuove le mosse impossibili attraverso l'ultilizzo di scanner. Utilizzato in
-	// combinazione con getRose2
-	private long removeImpossibleMove(long rose, int sq, long opponent, long mine, int type, long[] pieces) {
-		long notFree = opponent;
-		long ovest = fileMask(sq);
-		long est = ovest;
-		long sud = rankMask(sq);
-		long nord = sud;
-		long tmp = 0;
-		int cont = 0;
-		while (cont < type) {
-			ovest ^= ovest & Board.b_l;
-			est ^= est & Board.b_r;
-			sud ^= sud & Board.b_d;
-			nord ^= nord & Board.b_u;
-			ovest <<= 1;
-			est >>>= 1;
-			sud >>>= 8;
-			nord <<= 8;
-			notFree ^= pieces[cont] & (~mine);
-			tmp |= notFree & ovest;
-			tmp |= notFree & est;
-			tmp |= notFree & sud;
-			tmp |= notFree & nord;
-			cont++;
-		}
-		while (cont < 8) {
-			ovest ^= ovest & Board.b_l;
-			est ^= est & Board.b_r;
-			sud ^= sud & Board.b_d;
-			nord ^= nord & Board.b_u;
-			ovest <<= 1;
-			est >>>= 1;
-			sud >>>= 8;
-			nord <<= 8;
-			tmp |= rose & ovest;
-			tmp |= rose & est;
-			tmp |= rose & sud;
-			tmp |= rose & nord;
-			cont++;
-		}
-		return rose ^ (rose & tmp);
 	}
 
 	// seconda implementazione di removeImpossibleMove dovuta all'aggiunta della
@@ -160,24 +94,6 @@ public class DipoleConf implements Conf, Cloneable {
 
 	// ritorna tutte le mosse possibili che può effettuare la pedina. Queste mosse
 	// si hanno popolando le
-	// variabili backAttack, frontAttack, QuietMove. Questa implementazione fa
-	// utilizzo di getRose e removeImpossibleMove
-	private void allMoves(long x, long opponent, long mines, int type, long[] pieces) {
-		int sq = Board.getSquare(x);
-		long rose = getRose2(sq);
-		rose = removeImpossibleMove(rose & blackSquare ^ x, sq, opponent, mines, type, pieces);
-		long backMask = x ^ (x - 1);
-		backMask |= rankMask(sq);
-		backMask = backMask & rose;
-		backAttack = backMask & opponent;
-		long frontMask = backMask ^ rose;
-		frontAttack = frontMask & opponent;
-		quietMove = frontMask ^ frontAttack;
-		moves = backAttack | frontAttack | quietMove;
-	}
-
-	// ritorna tutte le mosse possibili che può effettuare la pedina. Queste mosse
-	// si hanno popolando le
 	// variabili backAttack, frontAttack, QuietMove e merge. Utilizza la struttura
 	// dati creata in Board.
 	// Da essa prende la rosa della pedina presa in considerazione, applica
@@ -201,70 +117,6 @@ public class DipoleConf implements Conf, Cloneable {
 		quietMove = frontMask ^ frontAttack ^ merge;
 		moves = backAttack | frontAttack | quietMove | merge; // forse non serve
 	}
-
-//	// precalcolo rosa dell'intera scacchiera
-//	public long[][] precalculations() {
-//		long rose[][]= new long [7][64];
-//		long tmp;
-//		long square = blackSquare;
-//		/*
-//		for (int i = 0; i < 7; i++) {
-//			for (int j = 1; j < 64; j += 1) {
-//				 tmp= getRose2(j);
-//			}
-//		}int 
-//		*/
-//		long lsb;
-//		int sq;
-//		long aaa[] = {0,0,0,0,0,0,0,0,0,0,0,0};
-//		while(square!=0) {
-//			lsb = square & -square;
-//			square ^= lsb;
-//			sq = getSquare(lsb);
-//			tmp = getRose2(sq);
-//			tmp &= blackSquare;
-//			rose[6][sq] = tmp;
-//			rose[5][sq] = removeImpossibleMove(tmp, sq, 0, lsb, 6, aaa);
-//			rose[4][sq] = removeImpossibleMove(tmp, sq, 0, lsb, 5, aaa);
-//			rose[3][sq] = removeImpossibleMove(tmp, sq, 0, lsb, 4, aaa);
-//			rose[2][sq] = removeImpossibleMove(tmp, sq, 0, lsb, 3, aaa);
-//			rose[1][sq] = removeImpossibleMove(tmp, sq, 0, lsb, 2, aaa);
-//			rose[0][sq] = removeImpossibleMove(tmp, sq, 0, lsb, 1, aaa);	
-//		}
-//		System.out.println("{");
-//		for(int i=0; i<7; i++) {
-//			System.out.print("{");
-//			for(int j=0; j<64; j++){
-//				System.out.print(rose[i][j]+"L,");
-//			}
-//			System.out.print("}\n");
-//		}
-//		System.out.println("}");
-//		
-//		return rose;
-//	}// precalculations
-
-//	 // Ritorna la rosa di azione della pedina presa in considerazione private
-//	 long getRose(long square, int type, long mine, long opponent) {
-//	 
-//	 return checkSquareMoves(square, -9, Board.b_r | Board.b_d, 1, mine, opponent,
-//	 type) | checkSquareMoves(square, -16, Board.b2_d, 2, mine, opponent, type) |
-//	 checkSquareMoves(square, -7, Board.b_l | Board.b_d, 1, mine, opponent, type)
-//	 | checkSquareMoves(square, -2, Board.b2_r, 2, mine, opponent, type) |
-//	 checkSquareMoves(square, 2, Board.b2_l, 2, mine, opponent, type) |
-//	 checkSquareMoves(square, 7, Board.b_r | Board.b_u, 1, mine, opponent, type) |
-//	 checkSquareMoves(square, 16, Board.b2_u, 2, mine, opponent, type) |
-//	 checkSquareMoves(square, 9, Board.b_l | Board.b_u, 1, mine, opponent, type);
-//	 }
-//	 
-//	 // Ritorna il movimento di una pedina in una sola direzione (ES
-//	 N,NO,NE,S,SO...) private long checkSquareMoves(long square, int shift, long
-//	 border, int addMove, long mine, long opponent, int type) { long notFreeSquare
-//	 = opponent; long ret = 0; long tmp =0; int cont = addMove - 1; while ((square
-//	 & border) == 0 && cont < type) { if (shift > 0) { square <<= shift; } else {
-//	 square >>>= -shift; } notFreeSquare ^= pieces[cont] & (~mine); cont +=
-//	 addMove; tmp =square^(square & notFreeSquare); ret |= tmp; } ret ^= (ret &
-//	 notFreeSquare); return ret; }
 
 	// Conta il numero di 1 presenti all'interno di una bitboard
 	public int popCount(long x) {
@@ -318,27 +170,15 @@ public class DipoleConf implements Conf, Cloneable {
 		}
 		return material;
 	}
-	
+
 	public Move nullMove() {
 		long pawn;
-		if(!black) {
+		if (!black) {
 			pawn = pRed & -pRed;
 			return new DipoleMove(pawn, pawn, 0, false, typeMove.QUIETMOVE, 0);
-		}else {
+		} else {
 			pawn = pBlack & -pBlack;
 			return new DipoleMove(pawn, pawn, 0, true, typeMove.QUIETMOVE, 0);
-		}
-	}
-	
-	@Override
-	public int nullMoveEnc() {
-		long pawn;
-		if(!black) {
-			pawn = pRed & -pRed;
-			return new DipoleMove().encodingMove(Board.getSquare(pawn), Board.getSquare(pawn), 0, 0, false, typeMove.QUIETMOVE);
-		}else {
-			pawn = pBlack & -pBlack;
-			return new DipoleMove().encodingMove(Board.getSquare(pawn), Board.getSquare(pawn), 0, 0, true, typeMove.QUIETMOVE);
 		}
 	}
 
@@ -365,9 +205,7 @@ public class DipoleConf implements Conf, Cloneable {
 				}
 
 				// ritorniamo il tipo della pedina
-				// selectType = getType(pawn);
 				allMoves2(pawn, pBlack, pRed, selectType, pieces, Board.movingBook);
-				// allMoves(pawn, pBlack, pRed, selectType, pieces);
 
 				long temp;
 				while (backAttack != 0) {
@@ -405,14 +243,6 @@ public class DipoleConf implements Conf, Cloneable {
 
 				}
 				death = Board.deathNoteRed[Board.getSquare(pawn)];
-//				if (death <= selectType + 1) {
-//					for (int i = death; i <= selectType + 1; i++) {
-//						// generiamo una mossa per ogni morte che abbiamo. Es se la morte minima è 3 e
-//						// la mia pedina è di tipo 6
-//						// vado a creare la mossa morte 3,4,5,6.
-//						actions.add(new DipoleMove(pawn, 0, selectType, black, typeMove.DEATH, i));
-//					}
-//				}
 				if (death < selectType + 1) {
 					actions.add(new DipoleMove(pawn, 0, selectType, black, typeMove.DEATH, death));
 					actions.add(new DipoleMove(pawn, 0, selectType, black, typeMove.DEATH, selectType + 1));
@@ -448,9 +278,7 @@ public class DipoleConf implements Conf, Cloneable {
 					selectType++;
 				}
 
-				// selectType = getType180(pawn);
 				allMoves2(pawn, pRed180, pBlack180, selectType, pieces180, Board.movingBook);
-				// allMoves(pawn, pRed, pBlack, selectType, pieces);
 				backAttack = Board.flip180(backAttack);
 				frontAttack = Board.flip180(frontAttack);
 				quietMove = Board.flip180(quietMove);
@@ -487,14 +315,6 @@ public class DipoleConf implements Conf, Cloneable {
 							Math.abs((Board.getSquare(pawn) >>> 3) - (Board.getSquare(temp) >>> 3))));
 				}
 				death = Board.deathNoteBlack[Board.getSquare(pawn)];
-//				if (death <= selectType + 1) {
-//					for (int i = death; i <= selectType + 1; i++) {
-//						// generiamo una mossa per ogni morte che abbiamo. Es se la morte minima è 3 e
-//						// la mia pedina è di tipo 6
-//						// vado a creare la mossa morte 3,4,5,6.
-//						actions.add(new DipoleMove(pawn, 0, selectType, black, typeMove.DEATH, i));
-//					}
-//				}
 
 				if (death < selectType + 1) {
 					actions.add(new DipoleMove(pawn, 0, selectType, black, typeMove.DEATH, death));
@@ -502,168 +322,6 @@ public class DipoleConf implements Conf, Cloneable {
 				} else if (death == selectType + 1) {
 					actions.add(new DipoleMove(pawn, 0, selectType, black, typeMove.DEATH, death));
 
-				}
-			}
-			return actions;
-		}
-	}
-
-	@Override
-	public List<Integer> getEncodingActions(Move move) {
-		long pawn;
-		int sqPawn;
-		long mines;
-		int dist;
-		
-		DipoleMove Dmove = (DipoleMove) move;
-
-		List<Integer> actions = new ArrayList<Integer>();
-		if (!black) {
-			mines = pRed;
-			while (mines != 0) {
-				// prende l'ultimo bit della bitBoard dei rossi
-				pawn = mines & -mines;
-				// toglie la pedina presa talla bitboard
-				mines ^= pawn;
-				int selectType = 0;
-				int death = 0;
-
-				while (selectType < 12) {
-					if ((pawn & pieces[selectType]) != 0) {
-						break;
-					}
-					selectType++;
-				}
-
-				// ritorniamo il tipo della pedina
-				// selectType = getType(pawn);
-				allMoves2(pawn, pBlack, pRed, selectType, pieces, Board.movingBook);
-				sqPawn = Board.getSquare(pawn);
-				// allMoves(pawn, pBlack, pRed, selectType, pieces);
-				long temp;
-				while (backAttack != 0) {
-					temp = backAttack & -backAttack;
-					backAttack ^= temp;
-					int sqTemp = Board.getSquare(temp);
-					dist = (Math.abs((sqPawn >>> 3) - (sqTemp >>> 3)));
-
-					// se la distanza è uguale a zero vuol dire che le pedine si trovano sulla
-					// stessa riga pertanto la distanza sarà data dalla differenza dell'indice delle
-					// due caselle
-					
-					if (dist == 0)
-						dist = Math.abs(sqPawn - sqTemp);
-					
-					actions.add(Dmove.encodingMove(sqPawn, sqTemp, dist, selectType, black, typeMove.BACKATTACK));
-				}
-				while (frontAttack != 0) {
-					temp = frontAttack & -frontAttack;
-					frontAttack ^= temp;
-					actions.add(
-							Dmove.encodingMove(sqPawn, Board.getSquare(temp), selectType, black, typeMove.FRONTATTACK));
-				}
-				while (quietMove != 0) {
-					temp = quietMove & -quietMove;
-					quietMove ^= temp;
-					actions.add(
-							Dmove.encodingMove(sqPawn, Board.getSquare(temp), selectType, black, typeMove.QUIETMOVE));
-				}
-				while (merge != 0) {
-					temp = merge & -merge;
-					merge ^= temp;
-					actions.add(Dmove.encodingMove(sqPawn, Board.getSquare(temp), selectType, black, typeMove.MERGE));
-				}
-				// Per la gestione della morte utilizziamo una struttura precalcolata dove
-				// inseriamo la minima morte che si
-				// ha prendendo in considerazione quella casella
-				death = Board.deathNoteRed[sqPawn];
-				if (death <= selectType + 1) {
-					for (int i = death; i <= selectType + 1; i++) {
-						// generiamo una mossa per ogni morte che abbiamo. Es se la morte minima è 3 e
-						// la mia pedina è di tipo 6
-						// vado a creare la mossa morte 3,4,5,6.
-						actions.add(Dmove.encodingMove(sqPawn, 0, i, selectType, black, typeMove.DEATH));
-					}
-				}
-			}
-			return actions;
-		} else {
-			long[] pieces180 = new long[12];
-			long pBlack180;
-			long pRed180;
-			int cont = 0;
-
-			// flippiamo tutte le bitBoard in modo da calcolare la mossa per le pedine nere
-			while (cont < 12) {
-				pieces180[cont] = Board.flip180(pieces[cont]);
-				cont++;
-			}
-			pBlack180 = Board.flip180(pBlack);
-			pRed180 = Board.flip180(pRed);
-			mines = pBlack180;
-
-			while (mines != 0) {
-				// prende l'ultimo bit della bitBoard dei rossi
-				pawn = mines & -mines;
-				// toglie la pedina presa talla bitboard
-				mines ^= pawn;
-				int selectType = 0;
-				int death = 0;
-				// ritorniamo il tipo della pedina
-
-				while (selectType < 12) {
-					if ((pawn & pieces180[selectType]) != 0) {
-						break;
-					}
-					selectType++;
-				}
-				allMoves2(pawn, pRed180, pBlack180, selectType, pieces180, Board.movingBook);
-				// allMoves(pawn, pRed, pBlack, selectType, pieces);
-
-				// una volta calcolate le mosse possiamo riportare le pedine nella stessa
-				// posizione di prima
-				// riflippando tutto di nuovo di 180 gradi
-				backAttack = Board.flip180(backAttack);
-				frontAttack = Board.flip180(frontAttack);
-				quietMove = Board.flip180(quietMove);
-				merge = Board.flip180(merge);
-				pawn = Board.flip180(pawn);
-
-				sqPawn = Board.getSquare(pawn);
-				long temp;
-				while (backAttack != 0) {
-					temp = backAttack & -backAttack;
-					backAttack ^= temp;
-					int sqTemp = Board.getSquare(temp);
-					dist = (Math.abs((sqPawn >>> 3) - (sqTemp >>> 3)));
-					if (dist == 0)
-						dist = Math.abs(sqPawn - sqTemp);
-					actions.add(Dmove.encodingMove(sqPawn, Board.getSquare(temp), dist, selectType, black,
-							typeMove.BACKATTACK));
-				}
-				while (frontAttack != 0) {
-					temp = frontAttack & -frontAttack;
-					frontAttack ^= temp;
-					actions.add(
-							Dmove.encodingMove(sqPawn, Board.getSquare(temp), selectType, black, typeMove.FRONTATTACK));
-				}
-				while (quietMove != 0) {
-					temp = quietMove & -quietMove;
-					quietMove ^= temp;
-					actions.add(Dmove.encodingMove(Board.getSquare(pawn), Board.getSquare(temp), selectType, black,
-							typeMove.QUIETMOVE));
-				}
-				while (merge != 0) {
-					temp = merge & -merge;
-					merge ^= temp;
-					actions.add(Dmove.encodingMove(Board.getSquare(pawn), Board.getSquare(temp), selectType, black,
-							typeMove.MERGE));
-				}
-				death = Board.deathNoteBlack[sqPawn];
-				if (death <= selectType + 1) {
-					for (int i = death; i <= selectType + 1; i++) {
-						actions.add(Dmove.encodingMove(sqPawn, 0, i, selectType, black, typeMove.DEATH));
-					}
 				}
 			}
 			return actions;
@@ -785,38 +443,10 @@ public class DipoleConf implements Conf, Cloneable {
 		DipoleConf.blackSquare = blackSquare;
 	}
 
-	/**
-	 * da testare per vedere se il tutto viene copiato bene e se non intralcia
-	 * qualche meccanismo
-	 * 
-	 * 
-	 */
 	public DipoleConf clone() throws CloneNotSupportedException {
 		DipoleConf tmp = (DipoleConf) super.clone();
 		this.pieces = tmp.pieces.clone();
 		return tmp;
-
-	}
-
-	public String toStringOld() {
-		String tmp = Long.toBinaryString(pRed | pBlack);
-		StringBuilder sb = new StringBuilder();
-		int c = tmp.length() - 1;
-		for (int i = 0; i < 8; i++) {
-			sb.append('\n');
-			for (int j = 0; j < 8; j++) {
-				if (c >= 0) {
-					sb.append(tmp.charAt(c));
-					sb.append(' ');
-					c--;
-				} else {
-					sb.append('0');
-					sb.append(' ');
-					c--;
-				}
-			}
-		}
-		return sb.reverse().toString();
 
 	}
 
@@ -977,11 +607,8 @@ public class DipoleConf implements Conf, Cloneable {
 			pawn = fa & -fa;
 			fa ^= pawn;
 			val += (getType(pawn) + 1);
-//			System.out.println("front di "+pawn+"\n");
-		}
 
-//		if(val != 0)
-//			System.out.println("val = "+val);
+		}
 
 		return val;
 	}
@@ -994,11 +621,7 @@ public class DipoleConf implements Conf, Cloneable {
 			pawn = ba & -ba;
 			ba ^= pawn;
 			val += (getType(pawn) + 1);
-//			System.out.println("Back di "+pawn+" = "+ba+"\n");
 		}
-
-//		if(val != 0)
-//			System.out.println("val = "+val);
 
 		return val;
 	}
@@ -1019,21 +642,5 @@ public class DipoleConf implements Conf, Cloneable {
 		}
 		return c;
 	}
-
-
-	
-
-
-
-//	public int pawnCount180(long x) {
-//		long y;
-//		int c = 0;
-//		while (x != 0) {
-//			y = x & (-x);
-//			c+=(getType180(y)+1);
-//			x &= x - 1; // reset LS1B
-//		}
-//		return c;
-//	}
 
 }
