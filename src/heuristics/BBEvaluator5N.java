@@ -14,7 +14,7 @@ import representation.DipoleConf;
  * @author anton
  *
  */
-public class BBEvaluator5 implements HeuristicInterface {
+public class BBEvaluator5N implements HeuristicInterface {
 	private int val[] = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 }; // valore delle pedine
 //	private double valPositionR[] = { 2, 1.75, 1.50, 1.25, 1, 0.6, 0.4, 0.2 }; // valore della posizione in base alla riga
 //	private double valPositionB[] = { 0.2, 0.4, 0.6, 1, 1.25, 1.50, 1.75, 2 };
@@ -44,8 +44,8 @@ public class BBEvaluator5 implements HeuristicInterface {
 	private int maxFA = 13;
 	private int maxBA = 13;
 
-	private double percNum = 3.5;		
-	private double percMat = 2.5;
+	private double percNum = 4;		//Vince sempre 
+	private double percMat = 3;
 	private double percMob = 1.2;
 
 	private double percFa1 = 1;
@@ -53,10 +53,10 @@ public class BBEvaluator5 implements HeuristicInterface {
 
 	private double percFa2 = 1.5;
 	private double percBa2 = 1.8;
+
 	
 	private double nB; // number of black pawn
 	private double nR; // number of red pawn
-	private int result;
 
 	public int evaluate_R(Conf c) {
 		DipoleConf dc = (DipoleConf) c;
@@ -79,8 +79,6 @@ public class BBEvaluator5 implements HeuristicInterface {
 			eval = (nR*percNum + materialR*percMat + mobilityR*percMob + frontAttackR*percFa1 + backAttackR*percBa1)
 					- (nB*percNum + materialB*percMat + mobilityB*percMob + frontAttackB*percFa2 + backAttackB*percBa2);
 		}
-		
-		
 		return (int) Math.round(eval);
 	}
 
@@ -104,10 +102,6 @@ public class BBEvaluator5 implements HeuristicInterface {
 			eval = (nB*percNum + materialB*percMat + mobilityB*percMob + frontAttackB*percFa2 + backAttackB*percBa2)
 					- (nR*percNum + materialR*percMat + mobilityR*percMob + frontAttackR*percFa1 + backAttackR*percBa1);
 		}
-		
-		
-		
-		
 		return (int) Math.round(eval);
 	}
 

@@ -34,6 +34,8 @@ public class SenderReceiver extends Thread {
 	public void run() {
 		try {
 			
+			//addr = InetAddress.getLocalHost();
+			//port = 51111;
 			
 			// creazione socket
 			socket = new Socket(addr, port);
@@ -58,6 +60,7 @@ public class SenderReceiver extends Thread {
 				&& !userInput.equals("DEFEAT")) {
 			try {
 				userInput = in.readLine();
+				System.out.println(userInput);
 				serverInfo = userInput.split(" ");
 				
 				if (serverInfo[0].equals("WELCOME")) {

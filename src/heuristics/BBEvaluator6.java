@@ -8,13 +8,10 @@ import representation.Conf.Status;
 import representation.DipoleConf;
 
 /**
- * In questa versione inserisco i nuovi valori di valPosition testati con BBEvaluator4N
- * e viene inoltre modificato il peso delle percentuali.
- * L'attuale versione vince tutte le versioni precedenti (già fatti tutti i test)
- * @author anton
- *
+ * In questa versione NON ci sono i while ridondanti ed è stato cacciato il getType ridondante
+ * Sono stati reingeriti i valPosition di BBEvaluator4
  */
-public class BBEvaluator5 implements HeuristicInterface {
+public class BBEvaluator6 implements HeuristicInterface {
 	private int val[] = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 }; // valore delle pedine
 //	private double valPositionR[] = { 2, 1.75, 1.50, 1.25, 1, 0.6, 0.4, 0.2 }; // valore della posizione in base alla riga
 //	private double valPositionB[] = { 0.2, 0.4, 0.6, 1, 1.25, 1.50, 1.75, 2 };
@@ -25,8 +22,8 @@ public class BBEvaluator5 implements HeuristicInterface {
 //	private double valPositionR[] = { 2, 2, 3, 3.5, 2.5, 1.5, 1, 0 }; // valore della posizione in base alla riga
 //	private double valPositionB[] = { 0, 1, 1.5, 2.5, 3.5, 3, 2, 2 };
 	
-	private double valPositionR[] = { 3.5, 3.5, 4, 3.5, 2.5, 1.5, 1, 0 }; // valore della posizione in base alla riga
-	private double valPositionB[] = { 0, 1, 1.5, 2.5, 3.5, 4, 3.5, 3.5 };
+	private double valPositionR[] = { 3, 3, 3.5, 3.5, 2.5, 1.5, 1, 0 }; // valore della posizione in base alla riga
+//	private double valPositionB[] = { 0, 1, 1.5, 2.5, 3.5, 4, 3.5, 3.5 };
 
 	private double mobilityB;
 	private double backAttackB;
@@ -56,7 +53,6 @@ public class BBEvaluator5 implements HeuristicInterface {
 	
 	private double nB; // number of black pawn
 	private double nR; // number of red pawn
-	private int result;
 
 	public int evaluate_R(Conf c) {
 		DipoleConf dc = (DipoleConf) c;
@@ -64,8 +60,9 @@ public class BBEvaluator5 implements HeuristicInterface {
 		pBlack = dc.getpBlack();
 		calculateValBlack(dc);
 		calculateValRed(dc);
-		materialR = materialR(dc);
-		materialB = materialB(dc);
+//		materialR = materialR(dc);
+//		double materialBO = materialB(dc);
+//		System.out.println("\n ------ \n"+materialB + "\n"+materialBO+"\n ------ \n");
 		nB = calculatePercentage(dc.pawnCount(pBlack), 12);
 		nR = calculatePercentage(dc.pawnCount(pRed), 12);
 //		nB = calculatePercentage(dc.pawnCount(pBlack), 12, percNum);
@@ -79,8 +76,6 @@ public class BBEvaluator5 implements HeuristicInterface {
 			eval = (nR*percNum + materialR*percMat + mobilityR*percMob + frontAttackR*percFa1 + backAttackR*percBa1)
 					- (nB*percNum + materialB*percMat + mobilityB*percMob + frontAttackB*percFa2 + backAttackB*percBa2);
 		}
-		
-		
 		return (int) Math.round(eval);
 	}
 
@@ -90,8 +85,10 @@ public class BBEvaluator5 implements HeuristicInterface {
 		pBlack = dc.getpBlack();
 		calculateValBlack(dc);
 		calculateValRed(dc);
-		materialR = materialR(dc);
-		materialB = materialB(dc);
+//		materialB = materialB(dc);
+//		materialB = materialB(dc);
+//		double materialBO = materialB(dc);
+//		System.out.println("\n ------ \n"+materialB + "\n"+materialBO+"\n ------ \n");
 		nB = calculatePercentage(dc.pawnCount(pBlack), 12);
 		nR = calculatePercentage(dc.pawnCount(pRed), 12);
 //		nB = calculatePercentage(dc.pawnCount(pBlack), 12, percNum);
@@ -104,10 +101,6 @@ public class BBEvaluator5 implements HeuristicInterface {
 			eval = (nB*percNum + materialB*percMat + mobilityB*percMob + frontAttackB*percFa2 + backAttackB*percBa2)
 					- (nR*percNum + materialR*percMat + mobilityR*percMob + frontAttackR*percFa1 + backAttackR*percBa1);
 		}
-		
-		
-		
-		
 		return (int) Math.round(eval);
 	}
 
@@ -138,18 +131,26 @@ public class BBEvaluator5 implements HeuristicInterface {
 	private void calculateValRed(DipoleConf c) {
 		long pB = pBlack;
 		long pR = pRed;
+		materialR = 0;
 		mobilityR = 0;
 		backAttackR = 0;
 		frontAttackR = 0;
+		int square;
+		int type;
 		long pawn;
 		while (pR != 0) {
 			pawn = pR & -pR;
 			pR ^= pawn;
-			c.allMoves2(pawn, pB, pR, c.getType(pawn), c.getPieces(), Board.movingBook);
+			square = Board.getSquare(pawn);
+			type = c.getType(pawn);
+			assert (type < 12);
+			materialR += (val[type] * valPositionR[square >>> 3]);
+			c.allMoves2(pawn, pB, pR, type, c.getPieces(), Board.movingBook);
 			mobilityR += c.popCount(c.getQuietMove() | c.getMerge());
 			frontAttackR += c.evalFA();
 			backAttackR += c.evalBA();
 		}
+		materialR = calculatePercentage(materialR, maxMat);
 		mobilityR = calculatePercentage(mobilityR, maxMob);
 		frontAttackR = calculatePercentage(frontAttackR, maxFA);
 		backAttackR = calculatePercentage(backAttackR, maxBA);
@@ -168,20 +169,28 @@ public class BBEvaluator5 implements HeuristicInterface {
 	private void calculateValBlack(DipoleConf c) {
 		long pB = Board.flip180(pBlack);
 		long pR = Board.flip180(pRed);
+		materialB = 0;
 		mobilityB = 0;
 		backAttackB = 0;
 		frontAttackB = 0;
+		int square;
+		int type;
 		long pawn;
 		while (pB != 0) {
 			pawn = pB & -pB;
 			pB ^= pawn;
-			c.allMoves2(pawn, pR, pB, c.getType180(pawn), c.getPieces180(), Board.movingBook);
+			square = Board.getSquare(pawn); 
+			type = c.getType180(pawn);
+			assert (type < 12);
+			materialB += (val[type] * valPositionR[square >>> 3]);
+			c.allMoves2(pawn, pR, pB, type, c.getPieces180(), Board.movingBook);
 			mobilityB += c.popCount(c.getQuietMove() | c.getMerge());
 			c.setBackAttack(Board.flip180(c.getBackAttack()));
 			c.setFrontAttack(Board.flip180(c.getFrontAttack()));
 			frontAttackB += c.evalFA();
 			backAttackB += c.evalBA();
 		}
+		materialB = calculatePercentage(materialB, maxMat);
 		mobilityB = calculatePercentage(mobilityB, maxMob);
 		frontAttackB = calculatePercentage(frontAttackB, maxFA);
 		backAttackB = calculatePercentage(backAttackB, maxBA);
@@ -194,45 +203,45 @@ public class BBEvaluator5 implements HeuristicInterface {
 	 * @param DipoleConf
 	 * @return returns the value of the pieces in relation to their position
 	 */
-	private double materialB(DipoleConf c) { // N.B. se l'euristica rimane così, posso richiamare il calculateVal
-		// direttamente nel while presente in questa classe
-		double material = 0;
-		long pieces = pBlack;
-		long pawn;
-		int square;
-		int type;
-		while (pieces != 0) {
-			pawn = pieces & -pieces;
-			pieces ^= pawn;
-			square = Board.getSquare(pawn);
-			type = c.getType(pawn);
-			assert (type < 12);
-			material += (val[type] * valPositionB[square >>> 3]);
-		} // while
-//		material = calculatePercentage(material, maxMat, percMat);
-		material = calculatePercentage(material, maxMat);
-		return material;
-	}
+//	private double materialB(DipoleConf c) { // N.B. se l'euristica rimane così, posso richiamare il calculateVal
+//		// direttamente nel while presente in questa classe
+//		double material = 0;
+//		long pieces = pBlack;
+//		long pawn;
+//		int square;
+//		int type;
+//		while (pieces != 0) {
+//			pawn = pieces & -pieces;
+//			pieces ^= pawn;
+//			square = Board.getSquare(pawn);
+//			type = c.getType(pawn);
+//			assert (type < 12);
+//			material += (val[type] * valPositionB[square >>> 3]);
+//		} // while
+////		material = calculatePercentage(material, maxMat, percMat);
+//		material = calculatePercentage(material, maxMat);
+//		return material;
+//	}
 
-	private double materialR(DipoleConf c) { // N.B. se l'euristica rimane così, posso richiamare il numberMove
-		// direttamente nel while presente in questa classe
-		double material = 0;
-		long pieces = pRed;
-		long pawn;
-		int square;
-		int type;
-		while (pieces != 0) {
-			pawn = pieces & -pieces;
-			pieces ^= pawn;
-			square = Board.getSquare(pawn);
-			type = c.getType(pawn);
-			assert (type < 12);
-			material += (val[type] * valPositionR[square >>> 3]);
-		} // while
-//		material = calculatePercentage(material, maxMat, percMat);
-		material = calculatePercentage(material, maxMat);
-		return material;
-	}
+//	private double materialR(DipoleConf c) { // N.B. se l'euristica rimane così, posso richiamare il numberMove
+//		// direttamente nel while presente in questa classe
+//		double material = 0;
+//		long pieces = pRed;
+//		long pawn;
+//		int square;
+//		int type;
+//		while (pieces != 0) {
+//			pawn = pieces & -pieces;
+//			pieces ^= pawn;
+//			square = Board.getSquare(pawn);
+//			type = c.getType(pawn);
+//			assert (type < 12);
+//			material += (val[type] * valPositionR[square >>> 3]);
+//		} // while
+////		material = calculatePercentage(material, maxMat, percMat);
+//		material = calculatePercentage(material, maxMat);
+//		return material;
+//	}
 
 	public double calculatePercentage(double obtained, int total) {////////////////////////////double total
 		if (obtained == 0)
